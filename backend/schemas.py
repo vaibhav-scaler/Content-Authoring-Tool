@@ -353,6 +353,8 @@ class UserOut(BaseModel):
     program_names: List[str] = []
     track_ids: List[int] = []
     track_names: List[str] = []
+    status: str = "active"
+    requested_role: Optional[str] = None
 
     class Config:
         from_attributes = True

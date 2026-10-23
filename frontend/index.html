@@ -14,7 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <!-- Marked.js for Markdown Rendering -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <link rel="stylesheet" href="styles.css?v=40.7">
+  <link rel="stylesheet" href="styles.css?v=40.9">
   <style>
     .studio-subnav-btn {
       display: inline-flex !important;
@@ -126,6 +126,11 @@
           <h2 id="hpSignInTitle">Sign in</h2>
           <p class="hp-card-note">Use your Scaler email to open your programs.</p>
 
+          <div id="hpGoogleBox" class="hidden">
+            <div id="googleBtn" class="hp-google-btn"></div>
+            <div id="hpGoogleError" class="hp-error hidden" role="alert"></div>
+          </div>
+
           <form id="scalerCompanyLoginForm" onsubmit="event.preventDefault(); submitScalerCompanyLogin();" novalidate>
             <label for="companyMailInput">Scaler email</label>
             <div class="hp-field">
@@ -140,6 +145,38 @@
             <button type="submit" id="companyMailSubmitBtn" class="hp-button">Continue</button>
           </form>
           <p class="hp-secure"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Only Scaler email addresses can sign in.</p>
+          </div>
+          <div id="hpAccessState" class="hidden">
+            <div id="hpRoleStep" class="hidden">
+              <h2>Choose your role</h2>
+              <p class="hp-card-note" id="hpAccessWho"></p>
+              <form id="hpRoleForm" onsubmit="event.preventDefault(); submitAccessRequest();" novalidate>
+                <div class="hp-roles-pick" role="radiogroup" aria-label="Your role">
+                  <label class="hp-role-opt"><input type="radio" name="hpRole" value="sme" checked><span><strong>Author</strong><small>Write and manage scripts</small></span></label>
+                  <label class="hp-role-opt"><input type="radio" name="hpRole" value="mo"><span><strong>Module Owner</strong><small>Keep modules current and approve scripts</small></span></label>
+                  <label class="hp-role-opt"><input type="radio" name="hpRole" value="pm"><span><strong>Program Manager</strong><small>See progress across programs</small></span></label>
+                </div>
+                <div id="hpProgramsBox">
+                  <label class="hp-pick-label">Programs you work on</label>
+                  <div id="hpProgramList" class="hp-program-list">Loading programs...</div>
+                </div>
+                <div id="hpAccessError" class="hp-error hidden" role="alert"></div>
+                <button type="submit" id="hpAccessSubmit" class="hp-button">Send request</button>
+                <button type="button" class="hp-button hp-button-quiet" onclick="leaveAccessState()">Sign out</button>
+              </form>
+            </div>
+            <div id="hpWaitingStep" class="hidden">
+              <h2>Request sent</h2>
+              <p class="hp-card-note" id="hpWaitingNote">An administrator will check it. You will get in once it is approved.</p>
+              <button type="button" class="hp-button" onclick="checkAccessNow()">Check again</button>
+              <button type="button" class="hp-button hp-button-quiet" onclick="leaveAccessState()">Sign out</button>
+            </div>
+            <div id="hpRejectedStep" class="hidden">
+              <h2>Request not approved</h2>
+              <p class="hp-card-note" id="hpRejectedNote"></p>
+              <button type="button" class="hp-button" onclick="askAccessAgain()">Ask again</button>
+              <button type="button" class="hp-button hp-button-quiet" onclick="leaveAccessState()">Sign out</button>
+            </div>
           </div>
           <div id="hpSignedInState" class="hidden">
             <h2>You are signed in</h2>
@@ -818,6 +855,11 @@
 
       <!-- Tab 1: Users, Roles & SME Program Enrollment -->
       <div id="adminTabUsers" class="admin-tab-panel">
+        <div id="adminAccessRequests" class="panel-section hidden" style="background: var(--bg-card); padding: 20px; border-radius: 8px; border: 1px solid var(--border-subtle); margin-bottom: 24px;">
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px;">Access requests <span id="adminAccessCount" class="count-pill"></span></h2>
+          <p style="margin: 0 0 14px; color: var(--text-secondary);">People who signed in with Google and asked for a role. Check each one is right for it, change the role if needed, then approve.</p>
+          <div id="adminAccessList"></div>
+        </div>
         <div class="panel-section"
           style="background: var(--bg-card); padding: 20px; border-radius: 8px; border: 1px solid var(--border-subtle); margin-bottom: 24px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -1745,7 +1787,7 @@
   </div>
 
   <script src="code_trace.js?v=2.0"></script>
-  <script src="app.js?v=67.9"></script>
+  <script src="app.js?v=68.1"></script>
 </body>
 
 </html>

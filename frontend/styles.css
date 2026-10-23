@@ -5021,3 +5021,26 @@ body.dark-theme .logo-badge .app-logo, body.dark-theme .hp-logo { background: #f
 #homeDashboardView .hp-intro { position: relative; padding-top: clamp(64px, 11vh, 110px); }
 #homeDashboardView .hp-brand { position: absolute; top: clamp(18px, 3vh, 32px); left: clamp(28px, 4.6vw, 96px); margin: 0; }
 #homeDashboardView .hp-brand { left: clamp(18px, 2vw, 32px); }
+
+/* Sign-in with Google, the role request and the administrator's list of requests */
+.hp-google-btn { min-height: 44px; display: flex; justify-content: flex-start; margin: 6px 0 14px; }
+.hp-roles-pick { display: grid; gap: 10px; margin: 6px 0 16px; }
+.hp-role-opt { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--bg-card); cursor: pointer; }
+.hp-role-opt:has(input:checked) { border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, .15); }
+.hp-role-opt strong { display: block; font-size: 1.02rem; color: var(--text-primary); }
+.hp-role-opt small { display: block; color: var(--text-secondary); font-size: .88rem; }
+.hp-pick-label { display: block; margin: 4px 0 8px; font-weight: 600; color: var(--text-primary); }
+.hp-program-list { display: grid; gap: 6px; max-height: 190px; overflow: auto; margin-bottom: 14px; padding: 4px 2px; }
+.hp-prog-opt { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 10px; background: var(--bg-card); cursor: pointer; }
+.hp-prog-opt:has(input:checked) { border-color: #0284c7; background: rgba(2, 132, 199, .06); }
+#hpAccessState .hp-button { margin-top: 10px; }
+
+.count-pill:not(:empty) { display: inline-block; min-width: 22px; padding: 1px 8px; margin-left: 6px; border-radius: 999px; background: #0284c7; color: #fff; font-size: .8rem; font-weight: 700; text-align: center; vertical-align: middle; }
+.ar-row { display: grid; grid-template-columns: minmax(180px, 1.2fr) minmax(140px, 1fr) 170px auto auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--border-subtle); }
+.ar-row:first-child { border-top: 0; }
+.ar-who strong { display: block; color: var(--text-primary); }
+.ar-who span, .ar-progs { color: var(--text-secondary); font-size: .92rem; overflow-wrap: anywhere; }
+@media (max-width: 900px) { .ar-row { grid-template-columns: 1fr 1fr; } }
+.hp-google-signin { display: inline-flex; align-items: center; justify-content: center; gap: 12px; width: 100%; background: #fff; color: #1f2937; border: 1px solid #cbd5e1; box-shadow: 0 1px 2px rgba(15, 23, 42, .06); }
+.hp-google-signin:hover:not(:disabled) { background: #f8fafc; }
+body.dark-theme .hp-google-signin { background: #fff; color: #1f2937; }

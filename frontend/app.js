@@ -207,6 +207,7 @@ liveHub.on(async (arrived) => {
     if (open("moPane-turnaround")) renderTatPanel("tatMo", true);
   }
   if (currentUser.role === "admin" && open("adminDashboardView")) {
+    if (hit(/^Access /i)) loadAccessRequests();
     if (open("adminTabUsers") && hit(/^(User|Program|Track|Module|Class)/i)) renderAdminUsersTable();
     if (open("adminTabCurriculum") && hit(CURRICULUM)) loadAdminCurriculumArchitecture(true);
   }
@@ -531,6 +532,8 @@ function signOutCurrentUser() {
   localStorage.removeItem("scaler_last_seen");
   localStorage.removeItem("scaler_active_user_id");
   try { sessionStorage.removeItem("sme_generator_draft"); localStorage.removeItem("admin_dashboard_tab"); } catch (e) { /* nothing stored */ }
+  if (authConfig.mode === "google") { fetch(`${API_BASE}/auth/logout`, { method: "POST" }).catch(() => {}); if (firebaseParts) firebaseParts.lib.signOut(firebaseParts.auth).catch(() => {}); }     // the signed cookie is cleared by the server
+  accessUser = null;
   currentUser = null;
   currentScriptId = null;
   currentShareableUuid = null;
@@ -548,7 +551,9 @@ window.signOutCurrentUser = signOutCurrentUser;
 const ROLE_NAMES = { admin: "Admin", mo: "Module Owner", pm: "Program Manager", sme: "Author" };
 function syncHomeAuthState() {
   const signedIn = !!currentUser;
-  document.getElementById("hpSignInState")?.classList.toggle("hidden", signedIn);
+  const waiting = !signedIn && !!accessUser;                      // signed in with Google, no access yet: the role / waiting screens show instead of the sign-in
+  document.getElementById("hpSignInState")?.classList.toggle("hidden", signedIn || waiting);
+  document.getElementById("hpAccessState")?.classList.toggle("hidden", !waiting);
   document.getElementById("hpSignedInState")?.classList.toggle("hidden", !signedIn);
   const who = document.getElementById("hpWho");
   if (who) who.textContent = signedIn ? `${currentUser.name || currentUser.email} \u00b7 ${ROLE_NAMES[currentUser.role] || currentUser.role}` : "";
@@ -661,7 +666,220 @@ function quickFillScalerLogin(email) {
 
 window.quickFillScalerLogin = quickFillScalerLogin;
 
+// ---- sign-in with Google (when the server has AUTH_MODE=google). The server keeps the signed session in a cookie; the page never decides who someone is.
+let authConfig = { mode: "demo" }, accessUser = null, sessionEnding = false;
+
+async function loadAuthConfig() {
+  try { const r = await fetch(`${API_BASE}/auth/config`); if (r.ok) authConfig = await r.json(); } catch (e) { /* older server: keep the email sign-in */ }
+  if (authConfig.mode === "google") {
+    const plainFetch = window.fetch.bind(window);                  // a session that ended (8 hours, or the server restarted) sends the person back to sign in
+    window.fetch = async (...args) => {
+      const res = await plainFetch(...args);
+      const url = String(args[0] && args[0].url ? args[0].url : args[0]);
+      if (res.status === 401 && url.startsWith(API_BASE) && !url.includes("/auth/") && currentUser && !sessionEnding) endSession();
+      return res;
+    };
+  }
+  return authConfig;
+}
+
+function endSession() {
+  sessionEnding = true;
+  currentUser = null; accessUser = null;
+  try { localStorage.removeItem("scaler_active_user_id"); } catch (e) { /* nothing stored */ }
+  showNotice("Your session ended. Sign in again.");
+  showHomeDashboard();
+  setTimeout(() => { sessionEnding = false; }, 1500);
+}
+
+function showGoogleError(msg) {
+  const box = document.getElementById("hpGoogleError");
+  if (box) { box.textContent = msg || ""; box.classList.toggle("hidden", !msg); }
+}
+
+// Firebase's web library is loaded when it is needed (the page has no build step). It signs the person in with Google and hands back an ID token,
+// which only the server checks; nothing the page holds decides who someone is.
+const FIREBASE_VERSION = "10.14.1";
+let firebaseParts = null;
+
+async function firebaseAuth() {
+  if (firebaseParts) return firebaseParts;
+  const base = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}`;
+  const [{ initializeApp }, authLib] = await Promise.all([import(`${base}/firebase-app.js`), import(`${base}/firebase-auth.js`)]);
+  const app = initializeApp(authConfig.firebase);
+  firebaseParts = { auth: authLib.getAuth(app), lib: authLib };
+  return firebaseParts;
+}
+
+function setupGoogleSignIn() {
+  document.getElementById("hpGoogleBox")?.classList.remove("hidden");
+  document.getElementById("scalerCompanyLoginForm")?.classList.add("hidden");
+  const note = document.querySelector("#hpSignInState .hp-card-note");
+  if (note) note.textContent = `Sign in with your @${authConfig.domain || "scaler.com"} Google account.`;
+  document.querySelector("#hpSignInState .hp-secure")?.classList.add("hidden");
+  const box = document.getElementById("googleBtn");
+  if (box && !box.querySelector("button")) {
+    box.innerHTML = '<button type="button" class="hp-button hp-google-signin" id="googleSignInBtn"><svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.5-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg><span>Sign in with Google</span></button>';
+    document.getElementById("googleSignInBtn").onclick = startGoogleSignIn;
+  }
+  if (!authConfig.firebase || !authConfig.firebase.apiKey) showGoogleError("Sign-in is not set up on the server yet (the Firebase settings are missing).");
+}
+
+async function startGoogleSignIn() {
+  showGoogleError("");
+  const btn = document.getElementById("googleSignInBtn");
+  if (btn) btn.disabled = true;
+  try {
+    const { auth, lib } = await firebaseAuth();
+    const provider = new lib.GoogleAuthProvider();
+    provider.setCustomParameters({ hd: authConfig.domain || "scaler.com", prompt: "select_account" });
+    const result = await lib.signInWithPopup(auth, provider);
+    await onGoogleCredential({ credential: await result.user.getIdToken() });
+  } catch (e) {
+    const code = String(e && e.code || "");
+    if (code.includes("popup-closed") || code.includes("cancelled-popup")) showGoogleError("");
+    else if (code.includes("popup-blocked")) showGoogleError("Your browser blocked the sign-in window. Allow pop-ups for this page and try again.");
+    else if (code.includes("unauthorized-domain")) showGoogleError("This website address is not allowed in Firebase yet. Ask the administrator to add it under Authentication, Settings, Authorized domains.");
+    else showGoogleError("Sign-in did not work. Try again.");
+  } finally { if (btn) btn.disabled = false; }
+}
+
+async function onGoogleCredential(resp) {
+  showGoogleError("");
+  try {
+    showLoader("Signing in...");
+    const res = await fetch(`${API_BASE}/auth/google`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ credential: resp.credential }) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { showGoogleError(data.detail || `The server answered ${res.status}.`); return; }
+    await handleGoogleUser(data.user);
+    if (data.user.status === "active") recordClientActivity("User Sign-In", `Signed into ${data.user.role.toUpperCase()} portal`);
+  } catch (e) {
+    showGoogleError("We could not reach the server. Check your connection and try again.");
+  } finally { hideLoader(); }
+}
+
+async function handleGoogleUser(user) {
+  if (user.status === "active") { accessUser = null; await openWorkspaceFor(user); return; }
+  accessUser = user;
+  showAccessStep(user.status === "pending" ? "waiting" : user.status === "rejected" ? "rejected" : "role");
+  showHomeDashboard();
+}
+
+async function openWorkspaceFor(user) {
+  allUsers = [user];
+  currentUser = user;
+  try { localStorage.setItem("scaler_active_user_id", user.id); localStorage.setItem("scaler_last_seen", String(Date.now())); } catch (e) { /* storage may be off */ }
+  try { const pr = await fetch(`${API_BASE}/programs`); if (pr.ok) allSystemPrograms = await pr.json(); } catch (e) { /* the screens load their own lists */ }
+  const homeView = document.getElementById("homeDashboardView");
+  if (homeView) { homeView.classList.add("hidden"); homeView.classList.remove("active"); }
+  await switchActiveUser(user.id, true);
+  if (pendingHash) { const wanted = pendingHash; pendingHash = ""; await restoreScreenAfterReload(wanted); }
+  routeBootDone();
+}
+
+function showAccessStep(step) {
+  ["role", "waiting", "rejected"].forEach(k => document.getElementById(`hp${k[0].toUpperCase()}${k.slice(1)}Step`)?.classList.toggle("hidden", k !== step));
+  const who = accessUser ? `${accessUser.name || ""} \u00b7 ${accessUser.email}` : "";
+  const w = document.getElementById("hpAccessWho"); if (w) w.textContent = who;
+  if (step === "rejected") { const n = document.getElementById("hpRejectedNote"); if (n) n.textContent = "An administrator did not approve this request. You can ask again with a different role or program."; }
+  if (step === "role") loadProgramsForRequest();
+}
+
+async function loadProgramsForRequest() {
+  const box = document.getElementById("hpProgramList");
+  if (!box) return;
+  try {
+    const res = await fetch(`${API_BASE}/auth/programs`);
+    const list = res.ok ? await res.json() : [];
+    box.innerHTML = list.map(p => `<label class="hp-prog-opt"><input type="checkbox" name="hpProg" value="${p.id}"><span>${escapeHtml(p.name)}</span></label>`).join("") || "No programs yet.";
+  } catch (e) { box.textContent = "Could not load the programs. Reload the page."; }
+  document.querySelectorAll('input[name="hpRole"]').forEach(r => { r.onchange = () => { const pm = document.querySelector('input[name="hpRole"]:checked')?.value === "pm"; document.getElementById("hpProgramsBox")?.classList.toggle("hidden", pm); }; });
+}
+
+async function submitAccessRequest() {
+  const err = document.getElementById("hpAccessError"), btn = document.getElementById("hpAccessSubmit");
+  const role = document.querySelector('input[name="hpRole"]:checked')?.value;
+  const program_ids = role === "pm" ? [] : [...document.querySelectorAll('input[name="hpProg"]:checked')].map(c => Number(c.value));
+  const fail = (m) => { if (err) { err.textContent = m; err.classList.remove("hidden"); } };
+  err?.classList.add("hidden");
+  if (role !== "pm" && !program_ids.length) { fail("Choose at least one program."); return; }
+  if (btn) { btn.disabled = true; btn.textContent = "Sending..."; }
+  try {
+    const res = await fetch(`${API_BASE}/auth/request-access`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role, program_ids }) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { fail(data.detail || `The server answered ${res.status}.`); return; }
+    accessUser = data.user; showAccessStep("waiting");
+  } catch (e) { fail("We could not reach the server. Try again."); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = "Send request"; } }
+}
+
+async function checkAccessNow() {                                    // after an administrator approves, one click opens the workspace
+  try {
+    const res = await fetch(`${API_BASE}/auth/me`);
+    if (!res.ok) { leaveAccessState(); return; }
+    await handleGoogleUser((await res.json()).user);
+    if (accessUser) showNotice("Still waiting for approval.");
+  } catch (e) { showNotice("Could not reach the server."); }
+}
+
+function askAccessAgain() { showAccessStep("role"); }
+
+function leaveAccessState() {
+  fetch(`${API_BASE}/auth/logout`, { method: "POST" }).catch(() => {});
+  if (firebaseParts) firebaseParts.lib.signOut(firebaseParts.auth).catch(() => {});
+  accessUser = null;
+  showHomeDashboard();
+}
+window.submitAccessRequest = submitAccessRequest; window.checkAccessNow = checkAccessNow; window.askAccessAgain = askAccessAgain; window.leaveAccessState = leaveAccessState;
+
+async function initGoogleSession() {
+  setupGoogleSignIn();
+  try {
+    const res = await fetch(`${API_BASE}/auth/me`);
+    if (res.ok) { await handleGoogleUser((await res.json()).user); routeBootDone(); return; }
+  } catch (e) { /* not signed in */ }
+  routeBootDone();
+  showHomeDashboard();
+}
+
+// ---- the administrator's list of people waiting for a role
+async function loadAccessRequests() {
+  const panel = document.getElementById("adminAccessRequests");
+  if (!panel || authConfig.mode !== "google" || !currentUser || currentUser.role !== "admin") return;
+  try {
+    const res = await fetch(`${API_BASE}/auth/access-requests`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    panel.classList.toggle("hidden", rows.length === 0);
+    document.getElementById("adminAccessCount").textContent = rows.length ? String(rows.length) : "";
+    const role = (v, sel) => `<option value="${v}"${v === sel ? " selected" : ""}>${ROLE_NAMES[v]}</option>`;
+    document.getElementById("adminAccessList").innerHTML = rows.map(r => `
+      <div class="ar-row" data-id="${r.id}">
+        <div class="ar-who"><strong>${escapeHtml(r.name)}</strong><span>${escapeHtml(r.email)}</span></div>
+        <div class="ar-progs">${r.program_names.length ? r.program_names.map(escapeHtml).join(", ") : "All programs"}</div>
+        <select class="form-control ar-role" aria-label="Role for ${escapeHtml(r.name)}">${role("sme", r.requested_role)}${role("mo", r.requested_role)}${role("pm", r.requested_role)}</select>
+        <button class="btn btn-primary" onclick="decideAccess(${r.id}, true)">Approve</button>
+        <button class="btn btn-secondary" onclick="decideAccess(${r.id}, false)">Reject</button>
+      </div>`).join("");
+  } catch (e) { /* the list is refreshed on the next visit */ }
+}
+
+window.decideAccess = async function (userId, approve) {
+  const row = document.querySelector(`#adminAccessList .ar-row[data-id="${userId}"]`);
+  const body = approve ? { role: row?.querySelector(".ar-role")?.value } : { reason: (prompt("Reason for not approving (optional)") || "") };
+  if (!approve && body.reason === null) return;
+  try {
+    const res = await fetch(`${API_BASE}/auth/access-requests/${userId}/${approve ? "approve" : "reject"}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (!res.ok) { const d = await res.json().catch(() => ({})); showNotice(d.detail || "Could not save that decision."); return; }
+    showNotice(approve ? "Approved." : "Request rejected.");
+    loadAccessRequests();
+    if (approve) renderAdminUsersTable();
+  } catch (e) { showNotice("Could not reach the server."); }
+};
+
 async function initUsersAndRoles() {
+  await loadAuthConfig();
+  if (authConfig.mode === "google") { await initGoogleSession(); return; }
   try {
     const pRes = await fetch(`${API_BASE}/programs`);
     allSystemPrograms = await pRes.json();
@@ -7700,6 +7918,7 @@ async function loadAdminDashboardData() {
 
     // 2. Load User Governance Directory
     await renderAdminUsersTable();
+    loadAccessRequests();
 
   } catch (err) {
     console.error("Error loading Admin dashboard:", err);

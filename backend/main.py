@@ -91,6 +91,11 @@ def _migrate_module_columns():
         class_cols = {row[1] for row in conn.execute(text("PRAGMA table_info(classes)"))}
         if "junction_number" not in class_cols:
             conn.execute(text("ALTER TABLE classes ADD COLUMN junction_number INTEGER"))
+        user_cols = {row[1] for row in conn.execute(text("PRAGMA table_info(users)"))}
+        for col, ddl in (("status", "VARCHAR(20) NOT NULL DEFAULT 'active'"), ("requested_role", "VARCHAR(50)"), ("requested_program_ids", "TEXT"),
+                         ("requested_at", "DATETIME"), ("decided_by", "VARCHAR(255)"), ("decided_at", "DATETIME"), ("reject_reason", "VARCHAR(300)")):
+            if col not in user_cols:
+                conn.execute(text(f"ALTER TABLE users ADD COLUMN {col} {ddl}"))      # everyone already in the system stays active
 
 _migrate_module_columns()
 
@@ -117,10 +122,10 @@ app = FastAPI(
 async def llm_unavailable_handler(request, exc):
     return JSONResponse(status_code=503, content={"detail": str(exc)})
 
-# CORS configuration
+# CORS configuration. CORS_ORIGINS (comma separated) limits which websites may call the API; the page is served from the same address, so it is not needed for it
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()] or ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -357,6 +362,9 @@ def list_users(role: Optional[str] = None, actor_id: Optional[int] = None, db: S
 @app.post("/api/auth/login", response_model=UserOut)
 def login_by_email(payload: LoginRequest, db: Session = Depends(get_db)):
     """Looks up one account by company email, so the browser never has to download the user directory."""
+    import auth
+    if auth.enforced():
+        raise HTTPException(status_code=403, detail="Sign in with your Google account.")
     email = (payload.email or "").strip().lower()
     u = db.query(User).filter(func.lower(User.email) == email).first() if email else None
     if not u and email:
@@ -565,9 +573,11 @@ def get_user_activities(limit: int = 200, since_id: Optional[int] = None, types:
 @app.post("/api/activities", response_model=UserActivityOut)
 def record_user_activity(payload: ActivityLogCreate, db: Session = Depends(get_db)):
     """Allows front-end clients to log notable user actions directly."""
+    import auth
+    who = db.query(User).filter(User.id == auth.current_user_id.get()).first() if auth.enforced() else None      # signed in with Google: the name and role are the account's, not the browser's
     act = UserActivity(
-        user_name=payload.user_name,
-        user_role=payload.user_role,
+        user_name=who.name if who else payload.user_name,
+        user_role=who.role if who else payload.user_role,
         action_type=payload.action_type,
         description=payload.description,
         details=payload.details
@@ -584,7 +594,8 @@ CLIENT_ACTIVITY_TYPES = ("Click", "Filter Changed", "Search")      # what the br
 def record_activity_batch(payload: ActivityBatch, db: Session = Depends(get_db)):
     """The clicks, filter changes and searches a signed-in person makes on the screens, sent a few at a time.
     The name and role come from the user's account, not from the browser."""
-    actor = db.query(User).filter(User.id == payload.actor_id).first()
+    import auth
+    actor = db.query(User).filter(User.id == (auth.current_user_id.get() or payload.actor_id)).first()      # with Google sign-in on, the signed-in person, not what the browser says
     if actor is None:
         raise HTTPException(status_code=401, detail="Sign in required: no such user.")
     written = 0
@@ -1191,6 +1202,7 @@ def _user_out(u: User) -> UserOut:
         program_ids=[p.id for p in u.programs], program_names=[p.name for p in u.programs],
         track_ids=[t.id for t in u.tracks],
         track_names=[f"{t.program.name} / {t.name}" for t in u.tracks],
+        status=u.status or "active", requested_role=u.requested_role,
     )
 
 def _apply_memberships(db: Session, user: User, program_ids: List[int], track_ids: List[int]):
@@ -5958,6 +5970,12 @@ def view_public_script(shareable_uuid: str, db: Session = Depends(get_db)):
     detail = _build_script_detail(script.id, db)
     return HTMLResponse(content=_render_shared_script_html(detail))
 
+
+# Sign-in with Google and access requests (see auth.py). The gate is added last so it runs first, before the activity tracker reads who is asking.
+import auth as _auth
+from starlette.middleware.base import BaseHTTPMiddleware
+app.include_router(_auth.router)
+app.add_middleware(BaseHTTPMiddleware, dispatch=_auth.auth_gate)
 
 # Mount Frontend UI at root (Must be after all API routes)
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")

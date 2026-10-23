@@ -8,6 +8,8 @@ CATALOG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 
 def seed_default_users(session):
     """Ensure standard demo and admin users exist for login."""
+    if os.getenv("AUTH_MODE", "").strip().lower() == "google":
+        return                                       # real sign-in: no made-up accounts; ADMIN_EMAILS makes the first administrator, everyone else asks for a role
     users_data = [
         {"name": "Ankit Sharma", "email": "ankit.sme@scaler.com", "role": "sme", "program_slugs": ["scaler-academy", "scaler-dsml", "scaler-ai-fde"]},
         {"name": "Ruchira Mukherjee", "email": "ruchira.sme@scaler.com", "role": "sme", "program_slugs": ["scaler-devops-cloud", "scaler-ai-fde", "scaler-aiml-agentic-ai"]},

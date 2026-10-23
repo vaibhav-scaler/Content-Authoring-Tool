@@ -30,6 +30,14 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False)
     role = Column(String(50), nullable=False)  # "sme", "mo", "pm", "admin"
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    # sign-in with Google: a person seen for the first time is "new", asks for a role ("pending"), and an administrator makes them "active" or "rejected"
+    status = Column(String(20), nullable=False, default="active", server_default="active")
+    requested_role = Column(String(50), nullable=True)
+    requested_program_ids = Column(Text, nullable=True)
+    requested_at = Column(DateTime, nullable=True)
+    decided_by = Column(String(255), nullable=True)
+    decided_at = Column(DateTime, nullable=True)
+    reject_reason = Column(String(300), nullable=True)
 
     programs = relationship("Program", secondary=user_programs, back_populates="users")
     tracks = relationship("Track", secondary=user_tracks, back_populates="users")
