@@ -1,0 +1,34 @@
+{
+  "program": "Data Science & Machine Learning (DSML)",
+  "track": "Intermediate Track",
+  "status": "DISABLED until the Module Owner confirms which Lecture 1 is correct. Extracted from the Google Doc 'Python Refresher and Data Foundations' by the authoring assistant. The Module Owner must verify it. NOTE: the source is Lecture 1 of the module 'Advanced Analytics with Python, Pandas & AI Workflows' and says the module has nine lectures; the curriculum mapping lists 10 classes and starts with 'Time & Space Complexity'. If this class is not that lecture, use only the module facts and style.",
+  "source": "https://docs.google.com/document/d/1rcXH89fw63yM681ebwQvEZ_paqoApEJXijFPW4krMS8",
+  "facts": {
+    "module_opener_shape": "Lecture 1 doubles as the module opener. It starts with an ice-breaker, then module importance, module overview, what learners will be able to do, assessments and PSP, post-lecture content, and module test, then the lecture itself.",
+    "ice_breaker": "Every data team has that one person who gets handed the messy CSV and comes back an hour later with an answer, and nobody else knows how. That person is not magical: they know Python and pandas well enough to make the data talk. This module turns you into that person. Warm-up questions in chat: have you opened a CSV in Excel and seen it freeze or show ##### (why?); what is the largest dataset you have worked with (hundreds, thousands, millions of rows); how would you find the top 5 cities by sales in a 1 lakh row file today (Excel, SQL or code).",
+    "module_importance": "Why Flipkart, Swiggy, Zomato, Paytm, Amazon and B2B SaaS teams insist on pandas: answer questions from a 10 lakh row file in seconds (vectorised operations, no loops); clean messy exports from 15 sources (missing values, duplicates, type conversions); combine order, customer and product data (joins, merges, group-bys in 1 or 2 lines); ship an analysis anyone can re-run tomorrow (your code is the audit trail); pair with AI tools from plain English to working code (clean, predictable syntax LLMs understand).",
+    "module_overview": "Nine lectures in three arcs: Foundations L1 to L2 (read, clean, filter and transform one table at a time); Analysis L3 to L5 (group, aggregate, join, make analysis fast on large data); Real-world and visual L6 to L9 (messy data, array maths with NumPy, charts). One dataset for the whole module: a Flipkart-style e-commerce dataset, 6 tables, about 1 lakh orders, real Indian cities and states, prices in INR.",
+    "module_outcomes": "Load any CSV, Excel or JSON file into pandas and inspect shape, types and gaps in under a minute; filter, slice and group multi-lakh-row tables without explicit loops; join tables and reason about one-to-many relationships; clean nulls, duplicates, date-parsing failures and inconsistent strings; use NumPy where vectorised maths is needed; pair with Gemini and Claude in Colab, writing English prompts and reading the code back critically; write a short summary a product manager can read in 2 minutes.",
+    "assessments_and_psp": "Three channels: in-lecture quizzes at the end of each concept (attendance and engagement only); post-lecture practice after every lecture (counts toward PSP, Problem Solving Performance); the module test at the end (counts toward placement eligibility). Rule of thumb: finish every post-lecture set within 48 hours.",
+    "post_lecture_content": "A curated 8 to 10 minute video recap; 10 practice problems per lecture (3 easy, 5 medium, 2 hard); a worked-solution notebook for every problem, opened only after attempting; a Gemini prompt practice sheet against the same dataset.",
+    "module_test": "A 90 minute timed test at the end: 10 MCQs and 3 coding problems on a held-out slice of the Flipkart dataset. Pass bar 70%. Placement eligibility: module test plus PSP combined must clear the threshold published on the dashboard.",
+    "lecture_1_agenda": "Lecture 1, Python Refresher and Data Foundations, 102 minutes: 1 Python refresher, data structures in analytics contexts (10); 2 comprehensions (10); 3 lambda, map, filter (10); 4 string manipulation for cleaning text columns (8); 5 pandas introduction, Series vs DataFrame (12); 6 reading data with read_csv, read_excel, read_json and json_normalize (12); 7 initial exploration with head, tail, shape, dtypes, info, describe (10); 8 selection and indexing with column selection, .loc, .iloc (12); 9 boolean masking (10); 10 basic operations on rows and columns (8).",
+    "running_example": "Meet Thanu, who has just joined Flipkart as a junior data analyst. Her manager Meera, a senior analyst, sends a Slack message on day one: she uploaded flipkart_orders.csv, about 1 lakh rows of orders from the last two years, and Thanu should spend the day getting comfortable with the file (shape, columns, what looks clean, what looks messy) and ping her if anything feels weird. Thanu needs her Python reflexes back (lists, dicts, comprehensions, lambdas, string cleanup) before pandas. The lecture is her Day 1. Dataset: https://drive.google.com/file/d/1Zji3-hAUdp0rmNVTNUdTwmeA0rrFFsAK/view?usp=sharing",
+    "concept_pattern": "Each concept: a short Thanu scenario, the code, one or more Watch Out callouts (for example describe() ignores text columns unless you pass include='object' or 'all'; check dtypes because dates load as strings unless you pass parse_dates), an SQL Reference callout mapping the pandas idea to SQL (head is SELECT * LIMIT 5, shape is SELECT COUNT(*), boolean masking is the pandas WHERE clause), and a Gemini in Colab prompt callout. A visual per major idea.",
+    "reflex_sequence": "Run on every new DataFrame, in order: shape (how big), head(3) (what rows look like), dtypes (what types), info() (where the gaps are), describe(include='all') (quick statistics), then isnull().sum().sort_values(ascending=False) (nulls per column).",
+    "closing": "A lecture summary table of the ten concepts with when Thanu uses each, then 15 practice problems on flipkart_orders.csv in a fresh Colab notebook: easy (Python refresher), medium (pandas foundations), hard (combining the toolkit); solutions are in the post-lecture content.",
+    "interaction_note": "Questions go to learners in chat (rule E3)."
+  },
+  "existing_animations": [],
+  "onboarding_cards": [
+    "Ice-breaker",
+    "Module importance",
+    "Module overview and outcomes",
+    "Assessments and PSP",
+    "Post-lecture content and module test",
+    "Meet Thanu and the agenda",
+    "Concepts, each with Watch Out, SQL Reference and Gemini prompt callouts",
+    "Lecture summary and practice questions"
+  ],
+  "enabled": false
+}

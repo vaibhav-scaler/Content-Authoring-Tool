@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scaler AI Script Studio | Production Authoring Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&family=Fira+Code:wght@400;500&display=swap"
+    rel="stylesheet">
+  <!-- Mermaid.js for Client-Side Diagram Rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <!-- Marked.js for Markdown Rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="styles.css?v=40.7">
+  <style>
+    .studio-subnav-btn {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      padding: 8px 18px !important;
+      border-radius: 8px !important;
+      font-size: 0.86rem !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      background: #ffffff !important;
+      color: #1e293b !important;
+      border: 1px solid #cbd5e1 !important;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+      transition: all 0.2s ease !important;
+      font-family: inherit !important;
+    }
+
+    .studio-subnav-btn:hover {
+      background: #f8fafc !important;
+      border-color: #0284c7 !important;
+      color: #0284c7 !important;
+    }
+
+    .studio-subnav-btn.active {
+      background: #0284c7 !important;
+      color: #ffffff !important;
+      border-color: #0284c7 !important;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25) !important;
+    }
+
+    .subnav-badge {
+      font-size: 0.74rem !important;
+      font-weight: 700 !important;
+      padding: 2px 8px !important;
+      border-radius: 12px !important;
+      background: rgba(2, 132, 199, 0.12) !important;
+      color: #0284c7 !important;
+    }
+
+    .studio-subnav-btn.active .subnav-badge {
+      background: rgba(255, 255, 255, 0.25) !important;
+      color: #ffffff !important;
+    }
+  </style>
+</head>
+
+<body class="light-theme">
+  <!-- Universal Loading Overlay (PRD NFR) -->
+  <div id="universalLoader" class="loader-overlay hidden">
+    <div class="loader-spinner"></div>
+    <div id="loaderMessage" class="loader-text">AI Agents Collaborating...</div>
+  </div>
+
+  <!-- Top Navigation Bar (Production Ready) -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-badge" onclick="showHomeDashboard()" style="cursor: pointer;" title="Go to Home Page Dashboard">
+        <img class="app-logo" src="assets/scaler-logo.png" alt="Scaler"><span class="logo-text app-logo-name">Script Studio</span>
+      </div>
+    </div>
+
+    <!-- Hidden compatibility controls for existing event hooks -->
+    <div class="hidden">
+      <select id="activeUserSelector"></select>
+      <select id="activeRoleSelector"></select>
+      <div id="userScopeBadge"></div>
+      <div id="activeScriptBadge"></div>
+      <button id="emailLoginBtn" onclick="openEmailLoginModal()"></button>
+    </div>
+
+    <div class="header-right">
+      <button id="apiUsageBtn" class="btn btn-secondary" onclick="openApiUsageModal()" title="View AI API usage and cost" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
+        <span style="font-size: 0.9rem;">⚡</span>
+        <span>API Usage</span>
+        <span id="apiUsageBadge" style="background: rgba(14, 165, 233, 0.15); color: #0284c7; padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">$0.00</span>
+      </button>
+      <button id="signOutBtn" class="btn btn-secondary hidden" onclick="signOutCurrentUser()" title="Sign Out">Sign
+        Out</button>
+      <button id="themeToggleBtn" class="btn btn-secondary theme-toggle-btn" title="Switch Theme">Switch to
+        Dark</button>
+      <button id="moGtgBtn" class="btn btn-success hidden">Official MO GTG Sign-Off</button>
+    </div>
+  </header>
+
+  <!-- 0. HOME PAGE: what the tool is for, and sign in -->
+  <div id="homeDashboardView" class="dashboard-view active">
+    <main class="hp">
+      <section class="hp-intro" aria-labelledby="hpTitle">
+        <div class="hp-brand"><img class="hp-logo" src="assets/scaler-logo.png" alt="Scaler"><span class="hp-brand-name">Script Studio</span></div>
+        <h1 id="hpTitle" class="hp-title">Agenda in. <span>Approved script out.</span></h1>
+        <p class="hp-lead">Write class scripts faster. Build a lecture script for any class, in any module of any program, from its agenda and learning outcomes, then get it reviewed and approved.</p>
+
+        <div class="fl-panel" aria-label="How a script is generated">
+          <div class="fl-head">How a script is generated</div>
+          <ol class="fl-list">
+          <li><span class="fl-n">1</span><div><strong>Pick the class</strong><span>Choose a program, module and class.</span></div></li>
+          <li><span class="fl-n">2</span><div><strong>Approve the outline</strong><span>Cards and timings come from the class agenda and learning outcomes.</span></div></li>
+          <li><span class="fl-n">3</span><div><strong>Script is written card by card</strong><span>Each card gets its code, quiz, diagram or animation.</span></div></li>
+          <li><span class="fl-n">4</span><div><strong>Review and fix</strong><span>The script is checked against the rulebook and issues are fixed.</span></div></li>
+          <li><span class="fl-n">5</span><div><strong>Approve and export</strong><span>The module owner approves. Download as Word, PDF or HTML.</span></div></li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="hp-signin" aria-labelledby="hpSignInTitle">
+        <div class="hp-card">
+          <div id="hpSignInState">
+          <h2 id="hpSignInTitle">Sign in</h2>
+          <p class="hp-card-note">Use your Scaler email to open your programs.</p>
+
+          <form id="scalerCompanyLoginForm" onsubmit="event.preventDefault(); submitScalerCompanyLogin();" novalidate>
+            <label for="companyMailInput">Scaler email</label>
+            <div class="hp-field">
+              <svg class="hp-field-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg>
+              <input type="email" id="companyMailInput" class="hp-input" placeholder="name@scaler.com"
+                autocomplete="email" autofocus aria-describedby="companyMailError companyMailHint"
+                oninput="document.getElementById('companyMailError').classList.add('hidden')">
+            </div>
+            <div id="companyMailHint" class="hp-hint">Your @scaler.com address.</div>
+            <div id="companyMailError" class="hp-error hidden" role="alert">Enter your Scaler email address.</div>
+
+            <button type="submit" id="companyMailSubmitBtn" class="hp-button">Continue</button>
+          </form>
+          <p class="hp-secure"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Only Scaler email addresses can sign in.</p>
+          </div>
+          <div id="hpSignedInState" class="hidden">
+            <h2>You are signed in</h2>
+            <p class="hp-card-note" id="hpWho"></p>
+            <button type="button" class="hp-button" onclick="returnToActiveWorkspace()">Open my workspace</button>
+            <button type="button" class="hp-button hp-button-quiet" onclick="signOutCurrentUser()">Sign out</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 1. SME / AUTHOR DASHBOARD (PRD ROLE 1) -->
+  <div id="smeDashboardView" class="dashboard-view hidden">
+
+    <!-- FIRST SCREEN AFTER LOGIN: Enrolled Programs Cards View -->
+    <div id="smeProgramsLandingView" class="sme-landing-container">
+      <div class="sme-landing-header">
+        <h1 class="sme-landing-title">My Enrolled Programs</h1>
+        <p class="sme-landing-subtitle">Choose a program to write and manage the scripts for its classes.</p>
+      </div>
+      <div class="pm-stats" id="smeSummary"></div>
+      <div id="smeEnrolledProgramsGrid" class="sme-programs-grid">
+        <div style="color: var(--text-secondary); padding: 20px;">Loading your enrolled programs...</div>
+      </div>
+
+    </div>
+
+    <!-- SECOND SCREEN: Script Authoring Studio Layout (Opened after clicking a program card) -->
+    <div id="smeAuthoringStudioLayout" class="hidden">
+      <!-- One navigation bar for the whole author workspace: where you are, where you can go, and how far the script has come -->
+      <div class="studio-top-bar sme-nav" id="smeNav">
+        <div class="sme-nav-row">
+          <button type="button" id="smeBackBtn" class="sme-back" onclick="smeGoBack()"><span aria-hidden="true">&larr;</span> <span id="smeBackLabel">Back</span></button>
+          <nav class="sme-crumbs" aria-label="Breadcrumb">
+            <a href="javascript:void(0)" onclick="showSmeLandingView()">My Programs</a>
+            <span class="sme-crumb-sep">/</span>
+            <a href="javascript:void(0)" id="smeSelectedProgramBreadcrumb" onclick="switchSmeStudioView('scripts')"></a>
+            <span class="sme-crumb-sep">/</span>
+            <span id="smeCrumbPage" class="sme-crumb-page"></span>
+          </nav>
+          <div class="sme-tabs" role="tablist">
+            <button id="smeTabCreateBtn" class="sme-tab" role="tab" onclick="switchSmeStudioView('generator')">Create script</button>
+            <button id="smeTabScriptsBtn" class="sme-tab" role="tab" onclick="switchSmeStudioView('scripts')">Scripts <span id="smeProgramScriptsNavBadge" class="subnav-badge">0</span></button>
+            <button id="smeTabCurriculumBtn" class="sme-tab" role="tab" onclick="switchSmeStudioView('curriculum')">Curriculum</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="smeSteps" class="sme-steps hidden" aria-label="Script progress">
+          <div class="sme-steps-bar"><span id="smeStepsFill"></span></div>
+          <ol class="sme-steps-list">
+            <li data-step="1"><span class="sme-step-dot">1</span><span class="sme-step-label">Class details</span></li>
+            <li data-step="2"><span class="sme-step-dot">2</span><span class="sme-step-label">Outline review</span></li>
+            <li data-step="3"><span class="sme-step-dot">3</span><span class="sme-step-label">Script draft</span></li>
+            <li data-step="4"><span class="sme-step-dot">4</span><span class="sme-step-label">AI and SME review</span></li>
+            <li data-step="5"><span class="sme-step-dot">5</span><span class="sme-step-label">Module Owner review</span></li>
+            <li data-step="6"><span class="sme-step-dot">6</span><span class="sme-step-label">Approved</span></li>
+          </ol>
+        </div>
+
+      <!-- DEDICATED FULL-SCREEN SCRIPTS VIEW: ONLY SHOWS SCRIPTS -->
+      <div id="smeScriptsDedicatedView" class="hidden sc-page">
+        <div class="pm-stats" id="scStats"></div>
+        <div class="sa-wrap sc-wrap">
+          <div class="sa-head">
+            <div>
+              <h2 id="smeProgramScriptsTitle" class="sa-title">Scripts</h2>
+              <div id="smeProgramScriptsSubtitle" class="sa-sub" style="margin-top:4px;">All scripts for this program.</div>
+              <span id="smeProgramScriptsCountBadge" style="display:none;"></span>
+              <span id="smeStudioTabScriptsBadge" style="display:none;">0</span>
+              <span id="headerScriptsBadge" style="display:none;">0</span>
+              <span id="emptyStateScriptsBadge" style="display:none;">0</span>
+            </div>
+          </div>
+          <div class="sa-filters">
+            <input type="text" id="scSearch" class="form-control sa-search" placeholder="Search class, module or author" oninput="renderSmeScripts()">
+            <select id="scStatus" class="form-control sa-select" onchange="renderSmeScripts()">
+              <option value="">All statuses</option>
+              <option value="changes">Changes requested</option>
+              <option value="draft">Draft</option>
+              <option value="pending">Pending review</option>
+              <option value="approved">Approved</option>
+            </select>
+            <select id="scTrack" class="form-control sa-select" style="width:190px;" onchange="renderSmeScripts()"><option value="">All tracks</option></select>
+            <select id="scAuthor" class="form-control sa-select" onchange="renderSmeScripts()">
+              <option value="">All authors</option>
+              <option value="mine">My scripts</option>
+            </select>
+            <select id="scSort" class="form-control sa-select" style="width:190px;" onchange="renderSmeScripts()">
+              <option value="attention">Needs attention first</option>
+              <option value="recent">Recently updated</option>
+              <option value="name">Class name</option>
+            </select>
+            <button class="btn btn-ghost sa-clear" onclick="clearSmeScriptFilters()">Clear</button>
+          </div>
+          <div class="sa-table">
+            <div class="sc-row sa-cols"><div>Class</div><div>Author</div><div>Status</div><div>Cards</div><div>Updated</div><div></div></div>
+            <div id="smeProgramScriptsTableBody"><div class="sa-empty">Loading scripts...</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROGRAM CURRICULUM VIEW: tracks > modules > classes of the selected program, with class types -->
+      <div id="smeCurriculumDedicatedView" class="hidden sc-page">
+        <div class="sa-wrap">
+          <div class="sa-head">
+            <div>
+              <h2 id="smeCurriculumTitle" class="sa-title">Curriculum</h2>
+              <div id="smeCurriculumSubtitle" class="sa-sub" style="margin-top:4px;">Tracks, modules and classes of this program, in teaching order.</div>
+            </div>
+            <div class="sa-tools">
+              <input id="smeCurSearch" class="form-control sa-search" type="search" style="width: 250px;" placeholder="Search modules or classes" aria-label="Search modules or classes">
+              <select id="smeCurTypeSelect" class="form-control sa-select" style="width: 190px;" aria-label="Filter by class type"><option value="All">All class types</option></select>
+            </div>
+          </div>
+          <div class="mo-cur-body">
+            <div id="smeCurTracks" class="track-subtabs-nav" role="tablist" aria-label="Tracks"></div>
+            <div id="smeCurriculumBody"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. FULL-SCREEN SCRIPT GENERATOR INPUTS VIEW -->
+      <div id="smeInputsView" class="sme-fullscreen-inputs">
+        <div id="smeInputsContainer" class="sme-input-card gen-card">
+          <div class="sme-card-header">
+            <h2 class="sme-card-title">Create a class script</h2>
+            <p class="sme-card-desc">Choose the class, say what it should cover, and set how the script is written. You review an outline before any script is generated.</p>
+          </div>
+
+          <!-- Revising a script the Module Owner sent back: the same inputs, ready to adjust -->
+          <div id="smeReviseBox" class="rev-banner hidden">
+            <div class="rev-banner-title">Revising: <span id="smeReviseTitle"></span></div>
+            <div id="smeReviseMeta" class="rev-banner-meta"></div>
+            <div id="smeReviseNote" class="rev-banner-note"></div>
+            <div class="rev-banner-hint">These are the inputs the script was made from. Adjust anything the changes call for, then regenerate the outline. The Module Owner's note is passed to the writer. The current script stays until you approve the new outline.</div>
+            <button type="button" class="btn btn-secondary" style="margin-top:10px;" onclick="smeCancelRevision()">Cancel revision</button>
+          </div>
+
+          <!-- Compatibility hidden fields -->
+          <div style="display: none;">
+            <select id="programSelect">
+              <option value="">Select Program...</option>
+            </select>
+          </div>
+
+          <section class="gen-sec">
+            <div class="gen-sec-head"><span class="gen-n">1</span><div><h3>Class</h3><p>Pick the class you are writing the script for.</p></div></div>
+            <div class="sme-form-row">
+              <div class="form-group">
+                <label for="trackSelect">Track <span class="req">*</span></label>
+                <select id="trackSelect" class="form-control" required>
+                  <option value="">Choose a track</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="moduleSelect">Module <span class="req">*</span></label>
+                <select id="moduleSelect" class="form-control" disabled required>
+                  <option value="">Choose a module</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="classSelect">Class <span class="req">*</span></label>
+                <select id="classSelect" class="form-control" disabled required>
+                  <option value="">Choose a class</option>
+                </select>
+                <input type="hidden" id="classTitleInput">
+                <div id="classTypeHint" class="class-type-hint hidden" aria-live="polite"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="gen-sec">
+            <div class="gen-sec-head"><span class="gen-n">2</span><div><h3>Content</h3><p>What the class teaches and what learners should be able to do afterwards.</p></div></div>
+            <div class="form-group">
+              <label for="classAgendasInput">Agenda items <span class="req">*</span> <span class="gen-hint">One per line</span></label>
+              <textarea id="classAgendasInput" class="form-control" rows="4"
+                placeholder="For example:&#10;What a primary key is&#10;Joining two tables&#10;Common mistakes with NULL" required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="learningOutcomesInput">Learning outcomes <span class="gen-hint">Optional. Filled in from the Module Owner's outcomes when they exist</span></label>
+              <textarea id="learningOutcomesInput" class="form-control" rows="3"
+                placeholder="Optional. For example: Learners can explain event-driven architecture and build a simple async message queue."></textarea>
+            </div>
+          </section>
+
+          <section class="gen-sec">
+            <div class="gen-sec-head"><span class="gen-n">3</span><div><h3>Script settings</h3><p>How long the class runs and how the script is balanced.</p></div></div>
+            <div class="sme-form-row two">
+              <div class="form-group">
+                <div class="slider-header">
+                  <label for="durationSelect">Class duration <span class="req">*</span></label>
+                  <span id="durationVal" class="slider-val">Select duration</span>
+                </div>
+                <select id="durationSelect" class="form-control" required>
+                <option value="" selected>Choose a duration</option>
+                <option value="30">30 Minutes</option>
+                <option value="40">40 Minutes</option>
+                <option value="50">50 Minutes</option>
+                <option value="60">60 Minutes</option>
+                <option value="70">70 Minutes</option>
+                <option value="80">80 Minutes</option>
+                <option value="90">90 Minutes (Standard)</option>
+                <option value="100">100 Minutes</option>
+                <option value="110">110 Minutes</option>
+                <option value="120">120 Minutes</option>
+                <option value="130">130 Minutes</option>
+                <option value="140">140 Minutes</option>
+                <option value="150">150 Minutes</option>
+                <option value="160">160 Minutes</option>
+                <option value="170">170 Minutes</option>
+                <option value="180">180 Minutes</option>
+              </select>
+                <input type="hidden" id="customDurationInput" value="">
+              </div>
+              <div class="form-group">
+                <label for="prevScriptFileInput">Previous class script <span class="gen-hint">Optional. A text or Markdown file. If the Module Owner attached one to this class it is used when you add none.</span></label>
+                <input type="file" id="prevScriptFileInput" accept=".txt,.md,.markdown" class="form-control">
+                <textarea id="prevScriptUpload" style="display: none;"></textarea>
+              </div>
+            </div>
+            <div class="sme-form-row two">
+              <div class="form-group">
+                <div class="slider-header">
+                  <label for="mixSlider">Difficulty mix <span class="req">*</span></label>
+                  <span id="mixVal" class="slider-val">Not set</span>
+                </div>
+                <input type="range" id="mixSlider" min="10" max="90" value="70" class="range-slider gen-unset" required>
+                <div class="gen-scale"><span>More beginner</span><span>More advanced</span></div>
+                <div id="mixError" class="rev-error hidden">Set the difficulty mix: move the slider to choose how much of the class is beginner.</div>
+              </div>
+              <div class="form-group">
+                <div class="slider-header">
+                  <label for="codeRatioSlider">Code share <span class="req">*</span></label>
+                  <span id="codeRatioVal" class="slider-val">Not set</span>
+                </div>
+                <input type="range" id="codeRatioSlider" min="0" max="60" value="20" class="range-slider gen-unset" required>
+                <div class="gen-scale"><span>Less code</span><span>More code</span></div>
+                <div id="codeError" class="rev-error hidden">Set the code share: move the slider to choose how many cards include code.</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="gen-sec">
+            <div class="gen-sec-head"><span class="gen-n">4</span><div><h3>Reference material</h3><p>Optional. Links, API documentation or notes the script should draw on.</p></div></div>
+            <div class="form-group">
+              <textarea id="referenceUrls" class="form-control" rows="3" aria-label="Reference material"
+                placeholder="Paste links, API documentation or notes here."></textarea>
+              <input type="hidden" id="apiDocs">
+              <textarea id="additionalDirectives" style="display: none;"></textarea>
+            </div>
+          </section>
+
+          <div class="gen-foot">
+            <span class="gen-foot-note">Next: you review the lesson outline, then the script is written.</span>
+            <button id="initScriptBtn" class="btn btn-primary btn-generate">Generate Lesson Outline</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. FULL-SCREEN OUTLINE REVIEW GATE -->
+      <div id="outlineGate" class="gate-container hidden"
+        style="max-width: 1400px; margin: 24px auto 60px auto; padding: 0 20px;">
+        <div class="gate-header">
+          <div>
+            <h2 class="gate-title">Outline review</h2>
+          </div>
+          <div class="gate-actions">
+            <button id="outlineRethinkBtn" class="btn btn-warning">Regenerate outline</button>
+            <button id="outlineGtgBtn" class="btn btn-success">Approve outline & write script</button>
+          </div>
+        </div>
+
+        <div id="outlineCardsList" class="outline-deck-grid"></div>
+      </div>
+
+      <!-- Live Script Studio & Teleprompter Delivery View -->
+      <div id="studioView" class="studio-container hidden">
+
+        <!-- Module Owner asked for changes -->
+        <div id="smeRevisionBanner" class="rev-banner hidden">
+          <div class="rev-banner-title">Changes requested by the Module Owner</div>
+          <div id="smeRevisionMeta" class="rev-banner-meta"></div>
+          <div id="smeRevisionNote" class="rev-banner-note"></div>
+          <div class="rev-banner-hint">Update the script, then use Submit to MO to send it for review again.</div>
+          <button type="button" id="smeReviseBtn" class="btn btn-primary hidden" style="margin-top:10px;" onclick="smeReviseScript(currentScriptId)">Revise and regenerate</button>
+        </div>
+
+        <!-- Approved: one quiet line -->
+        <div id="smeGtgApprovedBanner" class="sv-banner-ok hidden">
+          <span class="sv-ok-dot"></span>
+          <span><b>Approved</b> <span id="smeGtgApprovedText">by the Module Owner. This is the final version.</span></span>
+        </div>
+
+        <!-- Script header: what it is, where it stands, and what you can do with it -->
+        <div class="studio-header sv-head">
+          <div class="studio-title-block sv-title-block">
+            <div class="sv-title-row">
+              <h2 id="studioClassTitle" class="studio-title">Class</h2>
+              <span id="svStatus" class="sv-pill">Draft</span>
+            </div>
+            <div id="svMeta" class="sv-meta"></div>
+            <!-- Hidden compatibility hooks for progress -->
+            <span id="studioCardProgress" style="display: none;"></span>
+            <span id="studioScorePill" style="display: none;"></span>
+            <span id="smeActiveScriptStatusPill" style="display: none;"></span>
+          </div>
+          <div class="studio-controls sv-actions">
+            <button id="submitToMoBtn" class="btn btn-primary sv-primary" onclick="submitScriptToMo()"
+              title="Send the finished script to the Module Owner for review">
+              <span>Submit to MO</span>
+            </button>
+            <button id="moGtgBtn" class="btn btn-primary sv-primary hidden" onclick="approveScriptDirectly(currentScriptId)"
+              title="Approve this script (Module Owner)">
+              <span>Approve</span>
+            </button>
+
+            <div class="download-dropdown-wrap" id="scriptDownloadDropdownWrap">
+              <button id="downloadDropdownBtn" class="btn btn-secondary" onclick="toggleDownloadDropdown(event)" title="Download the script">
+                <span>Download</span> <span class="dropdown-caret">&#9662;</span>
+              </button>
+              <div id="downloadDropdownMenu" class="download-dropdown-menu hidden">
+                <!-- Populated dynamically based on Program / Track / Subject -->
+              </div>
+            </div>
+
+            <button id="shareLinkBtn" class="btn btn-secondary" onclick="onShareLink()" title="Copy the link to this script">Share link</button>
+
+            <!-- Hidden compatibility hooks -->
+            <button id="copyScriptBtn" style="display: none;"></button>
+            <button id="assignmentsBtn" style="display: none;"></button>
+            <button id="draftAllBtn" style="display: none;"></button>
+            <button id="exportMdBtn" style="display: none;"></button>
+            <button id="runReviewBtn" style="display: none;"></button>
+          </div>
+        </div>
+
+        <!-- AI review: who reviewed, what they found, and what the AI fixed -->
+        <section id="aiReviewPanel" class="air hidden">
+          <div class="air-head">
+            <div>
+              <h3 class="air-title">AI review <span id="airState" class="air-state"></span></h3>
+              <div id="airSub" class="air-sub"></div>
+            </div>
+            <span class="air-btns"><button type="button" id="airApplyBtn" class="btn btn-primary hidden" onclick="applyAiFixes()">Apply AI fixes</button>
+            <button type="button" id="airRunBtn" class="btn btn-primary" onclick="runAiReview()">Run AI review</button></span>
+          </div>
+          <div id="airProgress" class="air-progress hidden"></div>
+          <div id="airBody"></div>
+        </section>
+
+        <!-- Multi-Agent Review Scorecard (Hidden by default, available if audited) -->
+        <div id="reviewScorecard" class="scorecard-container hidden">
+          <h3 class="scorecard-title">Multi-Agent Review Lenses (Gemini Flash + Moderator Auto-Repair)</h3>
+          <div id="reviewCardsGrid" class="review-grid"></div>
+        </div>
+
+        <!-- DEFINED SCRIPT DOCUMENT CANVAS (CLEAN CONTINUOUS DOCUMENT VIEW) -->
+        <div class="script-reader-wrapper">
+          <div id="scriptDocumentArea" class="script-document-canvas">
+            <!-- Document Header -->
+            <div class="script-doc-header">
+              <h1 id="scriptDocClassTitle" class="script-doc-title">Class Title</h1>
+              <div id="scriptDocHierarchy" class="script-doc-hierarchy">
+                <span id="scriptDocMetaDetails">Target Duration: 90 Mins</span>
+              </div>
+              <div class="script-doc-divider"></div>
+            </div>
+
+            <!-- Structured Flow of Sections -->
+            <div id="classTimelinePanel"></div>
+            <div id="classSetupPanel"></div>
+            <div id="cardsStream" class="script-sections-flow"></div>
+
+            <!-- Interactive Section Progress & Gate Controls -->
+            <div id="sectionGateContainer" class="hidden"
+              style="margin: 28px 0; padding: 20px 24px; background: var(--bg-card); border: 1.5px dashed var(--primary-color); border-radius: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+              <div>
+                <h4 id="sectionGateTitle"
+                  style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Section 1
+                  Drafted</h4>
+                <p id="sectionGateSubtitle" style="font-size: 0.86rem; color: var(--text-secondary); margin: 0;">Review
+                  section above. Click GTG to draft next, or Prompt Assist to tweak.</p>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button id="sectionChatAssistBtn" class="btn btn-secondary" onclick="promptCurrentSectionAssist()"
+                  style="padding: 7px 16px; font-size: 0.84rem; font-weight: 600;">Prompt Assist</button>
+                <button id="sectionRethinkBtn" class="btn btn-secondary" onclick="rethinkCurrentSection()"
+                  style="padding: 7px 16px; font-size: 0.84rem; font-weight: 600;">ReThink</button>
+                <button id="sectionGtgBtn" class="btn btn-primary" onclick="advanceNextSection()"
+                  style="padding: 7px 20px; font-size: 0.84rem; font-weight: 700; background: var(--success-color); border-color: var(--success-color);">[GTG
+                  Section] & Draft Next</button>
+              </div>
+            </div>
+
+            <!-- Document Footer -->
+            <div class="script-doc-footer">
+              <span class="script-doc-footer-label">&mdash; End of Masterclass Lecture Script &mdash;</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Compatibility Hooks -->
+      <div id="emptyState" class="hidden"></div>
+      <div id="studioLeftPanel" class="hidden"></div>
+      <div id="studioRightPanel" class="hidden"></div>
+      <div id="smeGeneratorSplitLayout" class="hidden"></div>
+    </div> <!-- Close smeAuthoringStudioLayout -->
+  </div> <!-- Close smeDashboardView -->
+
+  <!-- 2. MODULE OWNER (MO) DASHBOARD (PRD ROLE 2) -->
+  <div id="moDashboardView" class="dashboard-view hidden">
+    <div class="dashboard-page-container">
+      <div class="pm-head">
+        <div>
+          <h1 class="pm-title">Module Owner Dashboard</h1>
+          <p class="pm-sub">Review submitted scripts, grant approvals, and maintain the curriculum for your assigned programs.</p>
+        </div>
+      </div>
+
+      <div class="pm-stats" id="moStats">
+        <div><span id="moToReviewCount" class="pm-stat-brand">-</span><label>Pending review</label></div>
+        <div><span id="moApprovedByMeCount">-</span><label>Approved by me</label></div>
+        <div><span id="moScriptsCount">-</span><label>Total scripts</label></div>
+        <div><span id="moDraftsCount">-</span><label>Drafts in progress</label></div>
+        <div><span id="moProgramsCount">-</span><label>Assigned programs</label></div>
+      </div>
+
+      <div class="pm-tabs" id="moTabs">
+        <button type="button" class="cur-tab active" data-pane="review" onclick="showMoPane('review')">Review queue <span class="cur-tab-count" id="moReviewBadge"></span></button>
+        <button type="button" class="cur-tab" data-pane="scripts" onclick="showMoPane('scripts')">Scripts</button>
+        <button type="button" class="cur-tab" data-pane="curriculum" onclick="showMoPane('curriculum')">Curriculum</button>
+        <button type="button" class="cur-tab" data-pane="turnaround" onclick="showMoPane('turnaround')">Turnaround</button>
+        <button type="button" class="cur-tab" data-pane="activity" onclick="showMoPane('activity')">Activity</button>
+      </div>
+
+      <div class="sa-wrap pm-panel pm-pane" id="moPane-review">
+        <div class="sa-head">
+          <div>
+            <h2 class="sa-title">Review queue</h2>
+            <div class="sa-sub" style="margin-top:4px;">Scripts submitted for your approval, oldest first</div>
+          </div>
+        </div>
+        <div id="moBulkBar" class="mo-bulk hidden">
+          <label class="mo-bulk-all"><input type="checkbox" id="moSelectAll" onchange="moToggleAll(this.checked)"> <span id="moSelectAllText">Select all</span></label>
+          <span id="moSelectedCount" class="sa-sub"></span>
+          <button type="button" id="moApproveSelectedBtn" class="btn btn-primary" onclick="moApproveSelected()" disabled>Approve selected</button>
+        </div>
+        <div class="sa-table">
+          <div class="mr-row sa-cols"><div>Class</div><div>Author</div><div>Pending for</div><div>Cards</div><div></div></div>
+          <div id="moReviewList"><div class="sa-empty">Loading...</div></div>
+        </div>
+      </div>
+
+      <div class="sa-wrap pm-panel pm-pane hidden" id="moPane-scripts">
+        <div class="sa-head"><h2 class="sa-title">Scripts</h2></div>
+        <div class="sa-filters">
+          <input type="text" id="moScriptSearch" class="form-control sa-search" style="width: 230px;" placeholder="Search class, module or author" oninput="renderMoScripts()">
+          <select id="moScriptProgram" class="form-control sa-select" style="width: 230px;" onchange="renderMoScripts()"><option value="">All programs</option></select>
+          <select id="moScriptStage" class="form-control sa-select" style="width: 190px;" onchange="renderMoScripts()">
+            <option value="">All statuses</option>
+            <option value="mo">Pending review</option>
+            <option value="draft">Draft</option>
+            <option value="gtg">Approved</option>
+          </select>
+          <button class="btn btn-ghost sa-clear" onclick="clearMoScriptFilters()">Clear</button>
+        </div>
+        <div class="sa-table">
+          <div class="mr-row sa-cols"><div>Class</div><div>Author</div><div>Status</div><div>Cards</div><div></div></div>
+          <div id="moScriptsList"><div class="sa-empty">Loading...</div></div>
+        </div>
+      </div>
+
+      <div class="sa-wrap pm-panel pm-pane hidden" id="moPane-curriculum">
+        <div class="sa-head">
+          <h2 class="sa-title">Curriculum</h2>
+          <div class="sa-tools">
+            <input type="text" id="moSearchInput" class="form-control sa-search" style="width: 230px;" placeholder="Search modules or classes" oninput="applyMoFilters()">
+            <select id="moModuleTypeFilter" class="form-control sa-select" style="width: 170px;" onchange="applyMoFilters()">
+              <option value="">All module types</option>
+              <option value="Core">Core</option>
+              <option value="Specialisation">Specialisation</option>
+              <option value="Elective">Elective</option>
+            </select>
+          </div>
+        </div>
+        <div class="mo-cur-body">
+          <div id="moCurriculumProgramTabs" class="program-subtabs-nav"></div>
+          <div id="moCurriculumTrackTabs" class="track-subtabs-nav"></div>
+          <div id="moDashboardTreeContainer"><div class="sa-empty">Loading curriculum...</div></div>
+        </div>
+      </div>
+
+      <div class="pm-pane hidden" id="moPane-turnaround"><div id="tatMo" class="tat-box"></div></div>
+
+      <div class="sa-wrap pm-panel pm-pane hidden" id="moPane-activity">
+        <div class="sa-head">
+          <div>
+            <h2 class="sa-title">Script activity</h2>
+            <div class="sa-sub" style="margin-top:4px;">Recent actions on scripts in your assigned programs</div>
+          </div>
+        </div>
+        <div class="sa-table">
+          <div class="pa-row sa-cols"><div>When</div><div>Person</div><div>Action</div></div>
+          <div id="moActivityList"><div class="sa-empty">Loading...</div></div>
+        </div>
+      </div>
+
+      <div id="moAssignedProgramsTags" class="hidden"></div>
+    </div>
+  </div>
+
+  <!-- 3. PROGRAM MANAGER (PM) DASHBOARD (PRD ROLE 3 - READ-ONLY) -->
+  <div id="pmDashboardView" class="dashboard-view hidden">
+    <div class="dashboard-page-container">
+      <div class="pm-head">
+        <div>
+          <h1 class="pm-title">Program Manager Dashboard</h1>
+          <p class="pm-sub">Every class across all programs, with the status of its script. You can look at everything here, but you cannot change anything.</p>
+        </div>
+      </div>
+
+      <div class="pm-stats">
+        <div><span id="pmTotalPrograms">-</span><label>Programs</label></div>
+        <div><span id="pmTotalModules">-</span><label>Modules</label></div>
+        <div><span id="pmTotalClasses">-</span><label>Classes</label></div>
+        <div><span id="pmTotalScripts">-</span><label>Scripts generated</label></div>
+        <div><span id="pmGtgCount">-</span><label>Classes approved</label></div>
+        <div><span id="pmGtgRate" class="pm-stat-brand">-</span><label>Share of classes approved</label></div>
+      </div>
+
+      <div class="pm-tabs" id="pmTabs">
+        <button type="button" class="cur-tab active" data-pane="progress" onclick="showPmPane('progress')">Progress</button>
+        <button type="button" class="cur-tab" data-pane="waiting" onclick="showPmPane('waiting')">Not approved yet <span class="cur-tab-count" id="pmWaitingCount"></span></button>
+        <button type="button" class="cur-tab" data-pane="classes" onclick="showPmPane('classes')">Classes and script status</button>
+        <button type="button" class="cur-tab" data-pane="turnaround" onclick="showPmPane('turnaround')">Turnaround</button>
+        <button type="button" class="cur-tab" data-pane="activity" onclick="showPmPane('activity')">Recent activity</button>
+      </div>
+
+      <div class="pm-two pm-pane" id="pmPane-progress">
+        <div class="sa-wrap pm-panel">
+          <div class="sa-head">
+            <h2 class="sa-title">Progress</h2>
+            <div class="sa-tools">
+              <select id="pmGroupSelect" class="form-control sa-select" style="width: 150px;" onchange="onPmGroupChange()">
+                <option value="program">By program</option>
+                <option value="track">By track</option>
+              </select>
+            </div>
+          </div>
+          <div class="sa-table">
+            <div class="pg-row sa-cols"><div id="pmGroupHead">Program</div><div>Classes</div><div>Scripts generated</div><div>Module Owner review</div><div>Approved</div><div>Approved %</div><div>Avg time to approve</div></div>
+            <div id="pmProgressList"><div class="sa-empty">Loading...</div></div>
+          </div>
+        </div>
+        <div class="sa-wrap pm-panel">
+          <div class="sa-head"><h2 class="sa-title">Scripts approved per week</h2></div>
+          <div id="pmWeekly" class="pm-weekly"></div>
+        </div>
+      </div>
+
+      <div class="sa-wrap pm-panel pm-pane hidden" id="pmPane-waiting">
+        <div class="sa-head">
+          <h2 class="sa-title">Not approved yet, longest waiting first</h2>
+          <div class="sa-tools">
+            <select id="pmWaitingSelect" class="form-control sa-select" style="width: 230px;" onchange="renderPmWaiting()">
+              <option value="all">All scripts not approved</option>
+              <option value="mo">Only Module Owner review</option>
+              <option value="draft">Only drafts</option>
+            </select>
+          </div>
+        </div>
+        <div class="sa-table">
+          <div class="pw-row sa-cols"><div>Class</div><div>Stage</div><div>Author</div><div>Program's Module Owners</div><div>Waiting</div><div>Last edited</div><div></div></div>
+          <div id="pmWaitingList"><div class="sa-empty">Loading...</div></div>
+        </div>
+      </div>
+
+      <div class="pm-pane hidden" id="pmPane-turnaround"><div id="tatPm" class="tat-box"></div></div>
+
+      <div class="sa-wrap pm-panel pm-pane hidden" id="pmPane-activity">
+        <div class="sa-head">
+          <h2 class="sa-title">Recent script activity</h2>
+          <div class="sa-tools"><span class="sa-sub" style="margin:0;">What authors and Module Owners did to scripts, newest first</span></div>
+        </div>
+        <div class="sa-table">
+          <div class="pa-row sa-cols"><div>When</div><div>Person</div><div>What happened</div></div>
+          <div id="pmActivityList"><div class="sa-empty">Loading...</div></div>
+        </div>
+      </div>
+
+      <div class="sa-wrap pm-panel pm-pane hidden" id="pmPane-classes">
+        <div class="sa-head">
+          <h2 class="sa-title">Classes and script status</h2>
+          <div class="sa-tools">
+            <button id="refreshPmDashboardBtn" class="btn btn-secondary sa-refresh">Refresh</button>
+          </div>
+        </div>
+        <div class="sa-filters">
+          <input type="text" id="pmClassSearchInput" class="form-control sa-search" style="width: 230px;" placeholder="Search class, module, track...">
+          <select id="pmProgramFilterSelect" class="form-control sa-select" style="width: 230px;">
+            <option value="">All programs</option>
+          </select>
+          <select id="pmStatusFilterSelect" class="form-control sa-select" style="width: 190px;" onchange="filterPmCoverageTable()">
+            <option value="">All scripts</option>
+            <option value="generated">Generated</option>
+            <option value="none">Not generated</option>
+            <option value="progress">Draft</option>
+            <option value="review">SME review</option>
+            <option value="mo">Module Owner review</option>
+            <option value="approved">Approved</option>
+          </select>
+          <select id="pmModuleFilterSelect" class="form-control sa-select" style="width: 170px;" onchange="filterPmCoverageTable()">
+            <option value="">All module states</option>
+            <option value="Locked">Module locked</option>
+            <option value="In Review">Module in review</option>
+          </select>
+          <select id="pmGapFilterSelect" class="form-control sa-select" style="width: 200px;" onchange="filterPmCoverageTable()" title="Classes that need the Module Owners' attention">
+            <option value="">No data filter</option>
+            <option value="generic">Generic agendas only</option>
+            <option value="notype">Class type not set</option>
+          </select>
+          <select id="pmTypeFilterSelect" class="form-control sa-select" style="width: 150px;" onchange="filterPmCoverageTable()">
+            <option value="">All class types</option>
+            <option value="Live">Live</option>
+            <option value="Lab">Lab</option>
+            <option value="Inverted">Inverted</option>
+          </select>
+          <button class="btn btn-ghost sa-clear" onclick="clearPmFilters()">Clear</button>
+        </div>
+        <div class="sa-table">
+          <div class="pm-row sa-cols">
+            <div>Class</div>
+            <div>Type</div>
+            <div>Time</div>
+            <div>Agendas</div>
+            <div>Script</div>
+            <div>People</div>
+            <div>Updated</div>
+            <div></div>
+          </div>
+          <div id="pmCoverageList"><div class="sa-empty">Loading classes...</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ADMIN DASHBOARD (PRD ROLE 4) -->
+  <div id="adminDashboardView" class="dashboard-view hidden">
+    <div class="dashboard-page-container">
+      <div class="dashboard-header-block">
+        <div>
+          <h1 class="dashboard-heading">Admin System & Governance Console</h1>
+        </div>
+        <div>
+          <button id="refreshAdminDashboardBtn" class="btn btn-secondary">Refresh Diagnostics</button>
+        </div>
+      </div>
+
+
+      <!-- Admin Navigation Tabs -->
+      <div class="admin-tab-nav">
+        <button id="adminTabBtnUsers" class="admin-tab-btn active" onclick="switchAdminTab('users')">Users & SME
+          Enrollment</button>
+        <button id="adminTabBtnCurriculum" class="admin-tab-btn" onclick="switchAdminTab('curriculum')">Curriculum
+          Architecture (Programs, Tracks & Modules)</button>
+        <button id="adminTabBtnScripts" class="admin-tab-btn" onclick="switchAdminTab('scripts')">Generated Scripts &
+          Approvals</button>
+        <button id="adminTabBtnTat" class="admin-tab-btn" onclick="switchAdminTab('tat')">Turnaround</button>
+        <button id="adminTabBtnActivities" class="admin-tab-btn" onclick="switchAdminTab('activities')">User
+          Activities</button>
+      </div>
+
+      <!-- Tab 1: Users, Roles & SME Program Enrollment -->
+      <div id="adminTabUsers" class="admin-tab-panel">
+        <div class="panel-section"
+          style="background: var(--bg-card); padding: 20px; border-radius: 8px; border: 1px solid var(--border-subtle); margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin: 0;">Users, Roles &
+                Program Membership Governance</h2>
+            </div>
+            <button class="btn btn-primary" onclick="openAddUserModal()">+ Add New User</button>
+          </div>
+          <div id="adminUsersGroups"><div style="color: var(--text-secondary); padding: 12px;">Loading user directory...</div></div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Unified Curriculum Architecture Tree (Programs, Tracks, Levels, Modules & Classes) -->
+      <div id="adminTabCurriculum" class="admin-tab-panel hidden">
+        <div class="panel-section"
+          style="background: var(--bg-card); padding: 20px; border-radius: 8px; border: 1px solid var(--border-subtle); margin-bottom: 24px;">
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin: 0;">Curriculum
+                Architecture & Structure</h2>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <input type="text" id="adminTreeSearchInput" class="form-control"
+                placeholder="Search tracks, modules, classes..."
+                style="width: 250px; font-size: 0.82rem; padding: 6px 12px;" oninput="filterAdminTree(this.value)">
+              <button id="treeExpandToggleBtn" class="btn btn-secondary" onclick="toggleExpandAllTree()"
+                style="font-size: 0.82rem; padding: 6px 12px;">Expand All</button>
+              <button class="btn btn-primary" onclick="openAddProgramModal()"
+                style="font-size: 0.82rem; padding: 6px 12px;">+ Add Program</button>
+              <span id="adminProgramMenu"></span>
+            </div>
+          </div>
+
+          <!-- Program Sub-Tabs Navigation (5 Programs) -->
+          <div id="adminCurriculumProgramSubTabs" class="program-subtabs-nav"
+            style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: nowrap; overflow-x: auto; align-items: center;">
+          </div>
+
+          <!-- Track Sub-Tabs Navigation (e.g. Beginner Track, Intermediate Track, Advanced Track) -->
+          <div id="adminCurriculumTrackSubTabs" class="track-subtabs-nav"
+            style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; flex-wrap: wrap;">
+          </div>
+
+          <div id="adminCurriculumTreeContainer">
+            <div class="loader-text">Loading curriculum architecture...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Generated Scripts & MO Approvals Audit Ledger -->
+      <div id="adminTabScripts" class="admin-tab-panel hidden">
+        <div class="sa-wrap">
+          <div class="sa-head">
+            <div>
+              <h2 class="sa-title">Generated scripts</h2>
+            </div>
+            <div class="sa-tools">
+              <label class="sa-date">Sort by
+              <select id="adminScriptsSort" class="form-control" onchange="filterAdminScriptsTable()">
+                <option value="newest">Newest generated</option>
+                <option value="oldest">Oldest generated</option>
+                <option value="approved">Recently approved</option>
+                <option value="cost">Cost, highest first</option>
+                <option value="waiting">Longest waiting</option>
+              </select>
+            </label>
+              <button class="btn btn-secondary sa-refresh" onclick="clearAdminScriptFilters()" title="Reset the search, filters and sort">Clear</button>
+              <button class="btn btn-primary sa-refresh" onclick="exportAdminScriptsCsv()">Export CSV</button>
+            </div>
+          </div>
+          <div class="sa-filters">
+            <input type="text" id="adminScriptsSearchInput" class="form-control sa-search"
+              placeholder="Search scripts..." title="Searches class, module, program, author and approver" oninput="filterAdminScriptsTable()">
+            <select id="adminScriptsProgramFilter" class="form-control sa-select" onchange="filterAdminScriptsTable()">
+              <option value="">All programs</option>
+            </select>
+            <select id="adminScriptsStatusFilter" class="form-control sa-select" onchange="filterAdminScriptsTable()">
+              <option value="">All statuses</option>
+              <option value="GTG">Approved</option>
+              <option value="MO Approval">Module Owner review</option>
+              <option value="SME Review">SME review</option>
+              <option value="Script WIP">Draft</option>
+            </select>
+            <select id="adminScriptsAuthorFilter" class="form-control sa-select" onchange="filterAdminScriptsTable()">
+              <option value="">All authors</option>
+            </select>
+            <select id="adminScriptsMoFilter" class="form-control sa-select" onchange="filterAdminScriptsTable()" title="Scripts this Module Owner approved, or that wait in their programs">
+              <option value="">All Module Owners</option>
+            </select>
+            <label class="sa-date">From <input type="date" id="adminScriptsFromDate" class="form-control" onchange="filterAdminScriptsTable()"></label>
+            <label class="sa-date">to <input type="date" id="adminScriptsToDate" class="form-control" onchange="filterAdminScriptsTable()"></label>
+          </div>
+
+          <div class="sa-table">
+            <div class="sa-row sa-cols">
+              <div>Script</div>
+              <div>Class</div>
+              <div>Author</div>
+              <div>Generated</div>
+              <div>Progress</div>
+              <div>Approved on</div>
+              <div>Stage</div>
+              <div class="sa-cost-col">Cost</div>
+              <div></div>
+            </div>
+            <div id="adminScriptsList"><div class="sa-empty">Loading scripts...</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Platform User Activities Ledger -->
+      <div id="adminTabTat" class="admin-tab-panel hidden"><div id="tatAdmin" class="tat-box"></div></div>
+
+      <div id="adminTabActivities" class="admin-tab-panel hidden">
+        <div class="sa-wrap">
+          <div class="sa-head">
+            <div>
+              <h2 class="sa-title">User activity</h2>
+            </div>
+            <div class="sa-tools">
+              <button class="btn btn-secondary sa-refresh" onclick="clearAdminActivityFilters()" title="Reset the search and filters">Clear</button>
+              <button class="btn btn-secondary sa-refresh" onclick="loadUserActivities()">Refresh</button>
+              <button class="btn btn-primary sa-refresh" onclick="exportActivityCsv()" title="Download what the filters show">Export CSV</button>
+            </div>
+          </div>
+          <div class="sa-filters">
+            <input type="text" id="adminActivitySearchInput" class="form-control sa-search" style="width: 220px;"
+              placeholder="Search user or activity..." oninput="filterAdminActivities()">
+            <select id="adminActivityPersonFilter" class="form-control sa-select" style="width: 170px;" onchange="filterAdminActivities()">
+              <option value="">All people</option>
+            </select>
+            <select id="adminActivityRoleFilter" class="form-control sa-select" onchange="filterAdminActivities()">
+              <option value="">All roles</option>
+              <option value="sme">SME</option>
+              <option value="mo">Module Owner</option>
+              <option value="pm">Program Manager</option>
+              <option value="admin">Admin</option>
+            </select>
+            <select id="adminActivityTypeFilter" class="form-control sa-select" style="width: 170px;" title="Work actions hides page navigation, clicks and filter changes" onchange="filterAdminActivities()">
+              <option value="work">Work actions</option>
+              <option value="all">Everything</option>
+              <option value="signin">Sign-ins</option>
+              <option value="scripts">Scripts</option>
+              <option value="approvals">Approvals</option>
+              <option value="admin">Curriculum, users</option>
+              <option value="navigation">Page navigation</option>
+              <option value="clicks">Clicks and filters</option>
+            </select>
+            <select id="adminActivityPeriod" class="form-control sa-select" style="width: 150px;" onchange="onActivityPeriodChange()" title="Look at one calendar day, the last 7 days, or everything">
+              <option value="day">One day</option>
+              <option value="week">Last 7 days</option>
+              <option value="all">All days</option>
+            </select>
+            <span id="adminActivityDayPicker" class="ua-daypick">
+              <button type="button" class="btn btn-secondary" onclick="stepActivityDay(-1)" title="Previous day">&lsaquo;</button>
+              <input type="date" id="adminActivityDate" class="form-control" onchange="onActivityDatePicked()" title="Pick a day: shows 12:00 AM to 11:59 PM of that day">
+              <button type="button" class="btn btn-secondary" onclick="stepActivityDay(1)" title="Next day">&rsaquo;</button>
+              <button type="button" class="btn btn-secondary" onclick="setActivityDay('today')">Today</button>
+            </span>
+          </div>
+          <div class="sa-table">
+            <div class="ut-row sa-cols">
+              <div>Date and time</div>
+              <div>User</div>
+              <div>Role</div>
+              <div>Action</div>
+              <div>Details</div>
+            </div>
+            <div id="adminActivitiesList"><div class="sa-empty">Loading activity...</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card Edit Modal (PRD FR-11) -->
+  <div id="cardEditModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="editModalTitle">Edit Card</h3>
+        <button id="closeEditModalBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editCardId">
+        <div class="form-group">
+          <label>Card Title</label>
+          <input type="text" id="editCardTitle" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Stage Directions (Whiteboard / Staging)</label>
+          <input type="text" id="editCardStageDir" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Verbatim Spoken Script (Dialog for Live Class)</label>
+          <textarea id="editCardScript" class="form-control" rows="8"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Code Snippet</label>
+          <textarea id="editCardCode" class="form-control" rows="4" style="font-family: monospace;"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="saveCardEditBtn" class="btn btn-primary">Save Card Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Chat Co-Pilot Assist Modal (PRD FR-11 & FR-21) -->
+  <div id="chatAssistModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="chatModalTitle">AI Chat Assist</h3>
+        <button id="closeChatModalBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="chatCardIndex">
+        <p class="section-desc">Ask Claude Sonnet to refine this card, its code included (e.g. "Simplify for non-CS learners", "Change the code to also count the rows", "Fix the error in the code", "Add a
+          failure mode for memory limit", "Make analogy sharper").</p>
+        <div class="form-group" style="margin-top: 12px;">
+          <textarea id="chatPromptInput" class="form-control" rows="3"
+            placeholder="What revision would you like to make to this card?"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="submitChatAssistBtn" class="btn btn-accent">Apply AI Revision</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assignments & Mock Interviews Modal (PRD FR-23) -->
+  <div id="assignmentsModal" class="modal-overlay hidden">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h3 id="assignmentsModalTitle">Assignments & Mock Interview Questions (PRD FR-23)</h3>
+        <button id="closeAssignmentsModalBtn" class="close-btn">&times;</button>
+      </div>
+      <div id="assignmentsModalBody" class="modal-body">
+        <div id="assignmentsContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Module Owner (MO) Curriculum Console Modal (PRD FR-3, FR-5) -->
+  <div id="moCurriculumModal" class="modal-overlay hidden">
+    <div class="modal-card modal-large" style="max-width: 1050px; height: 85vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <div>
+          <h3 id="moModalTitle">Module Owner (MO) Curriculum Console</h3>
+          <p class="section-desc">Manage curriculum structure, module locking, and class agendas. All edits save to the
+            official database and update SME dropdowns immediately.</p>
+        </div>
+        <button id="closeMoModalBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 16px;">
+        <div style="display: flex; gap: 12px; margin-bottom: 16px; align-items: center;">
+          <label style="font-weight: 600; font-size: 0.9rem;">Filter Program:</label>
+          <select id="moProgramFilter" class="form-control" style="max-width: 300px;">
+            <option value="">All 5 Programs</option>
+          </select>
+          <button id="refreshMoTreeBtn" class="btn btn-secondary">Refresh Tree</button>
+        </div>
+
+        <div id="moCurriculumTreeContainer"
+          style="border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; background: var(--bg-card); max-height: calc(85vh - 220px); overflow-y: auto;">
+          <div class="loader-text">Loading curriculum tree...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MO Edit Class Sub-Modal -->
+  <div id="moEditClassModal" class="modal-overlay hidden" style="z-index: 1100;">
+    <div class="modal-card" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 id="moEditClassTitle">Edit Class Details</h3>
+        <button id="closeMoEditClassBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="moEditClassId">
+        <div class="form-group">
+          <label for="moClassTitleInput">Class Title</label>
+          <input type="text" id="moClassTitleInput" class="form-control">
+        </div>
+        <div id="moClassTopRow" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label for="moClassDurationInput">Duration (Minutes)</label>
+            <input type="number" id="moClassDurationInput" class="form-control" min="30" max="180">
+          </div>
+          <div class="form-group">
+            <label for="moClassTypeInput">Class Type</label>
+            <select id="moClassTypeInput" class="form-control">
+              <option value="Live">Live</option>
+              <option value="Lab">Lab</option>
+              <option value="Inverted">Inverted</option>
+            </select>
+          </div>
+          <div id="moClassModuleTypeGroup" class="form-group">
+            <label for="moClassModuleTypeInput">Module Tag</label>
+            <select id="moClassModuleTypeInput" class="form-control">
+              <option value="Core">Core</option>
+              <option value="Specialisation">Specialisation</option>
+              <option value="Elective">Elective</option>
+            </select>
+          </div>
+        </div>
+        <div id="moClassChangeGroup" class="hidden" style="display: none; grid-template-columns: 170px 1fr; gap: 12px; margin-top: 12px;">
+          <div class="form-group">
+            <label for="moClassChangePctInput">Content changed (%)</label>
+            <input type="number" id="moClassChangePctInput" class="form-control" min="0" max="100" value="0" oninput="syncClassChangeDesc()">
+          </div>
+          <div id="moClassChangeDescGroup" class="form-group hidden">
+            <label for="moClassChangeDescInput">What changed</label>
+            <textarea id="moClassChangeDescInput" class="form-control" rows="2"
+              placeholder="e.g. Replaced the old examples with the new ones"></textarea>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="moClassOutcomesInput">Learning outcomes <span style="font-weight:400;color:var(--text-secondary);">(optional: what learners can do after this class)</span></label>
+          <textarea id="moClassOutcomesInput" class="form-control" rows="3" placeholder="For example: Learners can write a SELECT query with a WHERE clause and read its result."></textarea>
+        </div>
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="moClassRefScriptInput">Previous script of this class <span style="font-weight:400;color:var(--text-secondary);">(optional reference for the AI draft)</span></label>
+          <input type="file" id="moClassRefScriptInput" class="form-control" accept=".txt,.md,.markdown" onchange="moRefScriptChosen(this)">
+          <div id="moClassRefScriptState" style="font-size:0.84rem;color:var(--text-secondary);margin-top:4px;"></div>
+          <input type="hidden" id="moClassRefScriptText"><input type="hidden" id="moClassRefScriptName"><input type="hidden" id="moClassRefScriptChanged" value="">
+        </div>
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="moClassAgendasInput">Official Agendas (One per line)</label>
+          <textarea id="moClassAgendasInput" class="form-control" rows="5"
+            placeholder="One agenda item per line, for example:&#10;What a database is and why it exists&#10;Your first SQL query"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; gap: 10px;">
+        <button id="deleteMoClassBtn" class="btn btn-warning">Delete Class</button>
+        <div style="display: flex; gap: 10px; margin-left: auto;">
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('moEditClassModal').classList.add('hidden')">Cancel</button>
+          <button id="saveMoClassBtn" class="btn btn-primary">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Curriculum Action Modal (Add / Edit Program, Track, Module) -->
+  <div id="curriculumEntityModal" class="modal-overlay hidden" style="z-index: 1150;">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 id="curriculumEntityModalTitle">Curriculum Item</h3>
+        <button id="closeCurriculumEntityModalBtn" class="close-btn"
+          onclick="closeCurriculumEntityModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="curriculumEntityType">
+        <input type="hidden" id="curriculumEntityAction">
+        <input type="hidden" id="curriculumEntityId">
+        <input type="hidden" id="curriculumEntityParentId">
+
+        <div class="form-group">
+          <label id="curriculumEntityNameLabel" for="curriculumEntityNameInput">Name</label>
+          <input type="text" id="curriculumEntityNameInput" class="form-control" placeholder="Enter name...">
+        </div>
+
+        <div id="curriculumEntityDescGroup" class="form-group hidden" style="margin-top: 12px;">
+          <label for="curriculumEntityDescInput">Description (Optional)</label>
+          <textarea id="curriculumEntityDescInput" class="form-control" rows="3"
+            placeholder="Enter curriculum program description..."></textarea>
+        </div>
+
+        <div id="curriculumEntityTatGroup" class="form-group hidden" style="margin-top: 12px;">
+          <label for="curriculumEntityTatInput">Script turnaround target (days) <span style="font-weight:400;color:var(--text-secondary);">(from module kickoff to the Module Owner's approval)</span></label>
+          <input type="number" id="curriculumEntityTatInput" class="form-control" min="0" max="3650" placeholder="For example 14. Empty or 0 means no target.">
+        </div>
+                <div id="curriculumEntityModuleTypeGroup" class="form-group hidden" style="margin-top: 12px;">
+          <label for="curriculumEntityModuleTypeSelect">Module Type</label>
+          <select id="curriculumEntityModuleTypeSelect" class="form-control">
+            <option value="Core">Core</option>
+            <option value="Specialisation">Specialisation</option>
+            <option value="Elective">Elective</option>
+            <option value="Optional">Optional</option>
+          </select>
+        </div>
+        <div id="curriculumEntityModuleExtraGroup" class="hidden" style="margin-top: 12px;">
+          <div style="display: grid; grid-template-columns: 1fr 150px; gap: 12px;">
+            <div class="form-group">
+              <label for="curriculumEntitySegmentInput">Segment label <span style="color: var(--danger-color);">*</span></label>
+              <input type="text" id="curriculumEntitySegmentInput" class="form-control" maxlength="100" placeholder="e.g. DSA">
+            </div>
+            <div class="form-group">
+              <label for="curriculumEntityDurationInput">Duration (months) <span style="color: var(--danger-color);">*</span></label>
+              <input type="number" id="curriculumEntityDurationInput" class="form-control" min="0.25" max="60" step="0.25" placeholder="e.g. 1.5">
+            </div>
+          </div>
+          <small id="curriculumEntityExtraNote" class="hidden" style="color: var(--text-secondary); font-size: 0.78rem;">Only an Administrator can set these.</small>
+        </div>
+        <div id="curriculumEntityKickoffGroup" class="form-group hidden" style="margin-top: 12px;">
+          <label for="curriculumEntityKickoffInput">Kickoff date <span style="font-weight:400;color:var(--text-secondary);">(when work on this module started; script turnaround is counted from here)</span></label>
+          <input type="date" id="curriculumEntityKickoffInput" class="form-control">
+        </div>
+        <div id="curriculumEntityOwnerGroup" class="form-group hidden" style="margin-top: 12px;">
+          <label for="curriculumEntityOwnerInput">Module owner <span style="font-weight:400;color:var(--text-secondary);">(who answers questions about this module)</span></label>
+          <input type="text" id="curriculumEntityOwnerInput" class="form-control" maxlength="120" placeholder="Name of the owner or SME">
+        </div>
+        <div id="curriculumEntitySourcesGroup" class="form-group hidden" style="margin-top: 12px;">
+          <label for="curriculumEntitySourcesInput">Approved documentation sources</label>
+          <textarea id="curriculumEntitySourcesInput" class="form-control" rows="4" placeholder="One per line, for example:&#10;Spring Boot 3.2 reference: https://docs.spring.io/spring-boot/docs/3.2.x/reference/html/&#10;PostgreSQL 16 manual: https://www.postgresql.org/docs/16/"></textarea>
+          <small style="color: var(--text-secondary); font-size: 0.78rem;">Scripts for this module use these first and cite them. The AI may search the web for gaps; those references are marked for the author to check.</small>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary" onclick="closeCurriculumEntityModal()">Cancel</button>
+        <button type="button" id="curriculumEntitySubmitBtn" class="btn btn-primary"
+          onclick="submitCurriculumEntityForm()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Module plan status: reopen for review / review and lock -->
+  <div id="requestChangesModal" class="modal-overlay hidden" style="z-index: 1255;">
+    <div class="modal-card" style="max-width: 540px;">
+      <div class="modal-header">
+        <h3>Not approved: request changes</h3>
+        <button class="close-btn" onclick="closeRequestChanges()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="requestChangesScriptId">
+        <div id="requestChangesTitle" class="ms-module"></div>
+        <p class="ms-text">The script goes back to its author as a draft, and they see your note. Say what is wrong and what to change.</p>
+        <textarea id="requestChangesReason" class="form-control" oninput="document.getElementById('requestChangesError').classList.add('hidden')" rows="6" maxlength="4000" placeholder="For example: Card 4 explains joins before the learners know keys. Add a short recap of primary keys first, and replace the sales example with the orders table."></textarea>
+        <div id="requestChangesError" class="rev-error hidden"></div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary" onclick="closeRequestChanges()">Cancel</button>
+        <button type="button" id="requestChangesBtn" class="btn btn-primary" onclick="submitRequestChanges()">Send back to author</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="moduleStatusModal" class="modal-overlay hidden" style="z-index: 1255;">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 id="moduleStatusTitle">Module plan</h3>
+        <button class="close-btn" onclick="closeModuleStatusModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="moduleStatusModId">
+        <input type="hidden" id="moduleStatusAction">
+        <div id="moduleStatusModuleName" class="ms-module"></div>
+        <div id="moduleStatusFlow" class="ms-flow"></div>
+        <p id="moduleStatusMessage" class="ms-text"></p>
+        <div id="moduleStatusChecks" class="ms-checks"></div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModuleStatusModal()">Cancel</button>
+        <button type="button" id="moduleStatusConfirmBtn" class="btn btn-primary" onclick="confirmModuleStatus()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Curriculum Confirm Deletion Modal -->
+  <div id="curriculumConfirmModal" class="modal-overlay hidden" style="z-index: 1250;">
+    <div class="modal-card" style="max-width: 460px;">
+      <div class="modal-header">
+        <h3 id="curriculumConfirmTitle" style="color: var(--danger-color);">Confirm Deletion</h3>
+        <button id="closeCurriculumConfirmModalBtn" class="close-btn"
+          onclick="closeCurriculumConfirmModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="confirmDeleteType">
+        <input type="hidden" id="confirmDeleteId">
+        <p id="curriculumConfirmMessage" style="font-size: 0.95rem; color: var(--text-primary); line-height: 1.5;"></p>
+        <div id="curriculumConfirmImpact" class="confirm-impact hidden"></div>
+        <div id="curriculumConfirmTypeGroup" class="form-group hidden" style="margin-top: 12px;">
+          <label for="curriculumConfirmTypeInput" id="curriculumConfirmTypeLabel"></label>
+          <input type="text" id="curriculumConfirmTypeInput" class="form-control" autocomplete="off">
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary" onclick="closeCurriculumConfirmModal()">Cancel</button>
+        <button type="button" id="curriculumConfirmDeleteBtn" class="btn btn-warning"
+          onclick="executeCurriculumDeletion()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MO GTG Sign-Off Approval Modal -->
+  <div id="moGtgApprovalModal" class="modal-overlay hidden" style="z-index: 1260;">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 id="moGtgApprovalTitle" style="color: var(--success-color);">Grant Official MO GTG Mark</h3>
+        <button id="closeMoGtgApprovalModalBtn" class="close-btn" onclick="closeMoGtgApprovalModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="gtgApprovalScriptId">
+        <p id="moGtgApprovalMessage"
+          style="font-size: 0.95rem; color: var(--text-primary); line-height: 1.6; margin-bottom: 12px;"></p>
+        <div
+          style="background: var(--bg-main); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 12px; font-size: 0.85rem; color: var(--text-secondary);">
+          <div>&bull; Seals production script cards as official canonical material.</div>
+          <div style="margin-top: 4px;">&bull; Archives pedagogical memory ledger snapshots for Class N+1 continuity.
+          </div>
+          <div style="margin-top: 4px;">&bull; Updates delivery readiness metrics across all dashboard monitors.</div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary" onclick="closeMoGtgApprovalModal()">Cancel</button>
+        <button type="button" id="confirmGtgApprovalBtn" class="btn btn-success" onclick="executeGtgApproval()">Apply
+          GTG Sign-Off</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Management Modal (PRD Users & Roles) -->
+  <div id="userManageModal" class="modal-overlay hidden" style="z-index: 1200;">
+    <div class="modal-card" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 id="userManageModalTitle">Add New User</h3>
+        <button id="closeUserManageModalBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editUserId">
+        <div class="form-group">
+          <label for="userNameInput">Full Name</label>
+          <input type="text" id="userNameInput" class="form-control" placeholder="e.g. Ankit Sharma">
+        </div>
+        <div class="form-group">
+          <label for="userEmailInput">Email Address</label>
+          <input type="email" id="userEmailInput" class="form-control" placeholder="e.g. ankit.sme@scaler.com">
+        </div>
+        <div class="form-group">
+          <label for="userRoleInput">Role in System</label>
+          <select id="userRoleInput" class="form-control">
+            <option value="sme">SME / Author (Generates, writes and edits class scripts with AI help)</option>
+            <option value="mo">Module Owner - MO (Edits curriculum lists & grants GTG mark)</option>
+            <option value="pm">Program Manager - PM (Read-Only access across all programs)</option>
+            <option value="admin">Admin (Manages programs, tracks, levels, users & structure)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 600;">Joined Programs (Scope of Access)</span>
+            <span style="font-size: 0.72rem; color: var(--text-secondary);">Select programs this user has joined</span>
+          </label>
+          <div id="userProgramCheckboxes"
+            style="display: flex; flex-direction: column; gap: 8px; background: var(--bg-panel); padding: 12px; border-radius: 6px; border: 1px solid var(--border-subtle); max-height: 180px; overflow-y: auto;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button id="cancelUserManageBtn" class="btn btn-secondary">Cancel</button>
+        <button id="saveUserBtn" class="btn btn-primary">Save User & Access Scope</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Course Outline Preview Modal -->
+  <div id="courseOutlineModal" class="modal-overlay hidden" style="z-index: 1250;">
+    <div class="modal-card"
+      style="max-width: 950px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <h3 id="courseOutlineModalTitle">Course Outline</h3>
+        <button class="close-btn" onclick="closeLevelOutlineModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto; padding: 20px;">
+        <p id="courseOutlineModalSubtitle"
+          style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px;"></p>
+        <div style="overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: 8px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+            <thead>
+              <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-subtle);">
+                <th style="padding: 10px 14px; text-align: left; font-weight: 700; color: var(--text-secondary);">#</th>
+                <th style="padding: 10px 14px; text-align: left; font-weight: 700; color: var(--text-secondary);">
+                  Segment</th>
+                <th style="padding: 10px 14px; text-align: left; font-weight: 700; color: var(--text-secondary);">Type
+                </th>
+                <th style="padding: 10px 14px; text-align: left; font-weight: 700; color: var(--text-secondary);">Module
+                  Name</th>
+                <th style="padding: 10px 14px; text-align: left; font-weight: 700; color: var(--text-secondary);">
+                  Duration</th>
+                <th style="padding: 10px 14px; text-align: center; font-weight: 700; color: var(--text-secondary);">
+                  Classes</th>
+                <th style="padding: 10px 14px; text-align: left; font-weight: 700; color: var(--text-secondary);">
+                  Class types</th>
+              </tr>
+            </thead>
+            <tbody id="courseOutlineModalTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer"
+        style="display: flex; justify-content: flex-end; padding: 14px 20px; border-top: 1px solid var(--border-subtle);">
+        <button class="btn btn-secondary" onclick="closeLevelOutlineModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email Login Modal -->
+  <div id="emailLoginModal" class="modal-overlay hidden" style="z-index: 1300;">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 id="emailLoginTitle">Login with Email</h3>
+        <button id="closeEmailLoginModalBtn" class="close-btn" onclick="closeEmailLoginModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="section-desc">Enter your registered email address to sign into the system. If you are an SME, your
+          enrolled programs will be displayed immediately upon login.</p>
+        <div class="form-group" style="margin-top: 10px;">
+          <label for="emailLoginInput">Work Email Address</label>
+          <input type="email" id="emailLoginInput" class="form-control" placeholder="e.g. ankit.sme@scaler.com"
+            autocomplete="email">
+        </div>
+
+        <div style="margin-top: 14px;">
+          <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">Demo
+            Profiles (Click to Auto-Fill):</div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <button type="button" class="btn btn-secondary"
+              style="text-align: left; justify-content: flex-start; padding: 6px 12px; font-size: 0.8rem;"
+              onclick="fillEmailLogin('ankit.sme@scaler.com')">
+              <strong>ankit.sme@scaler.com</strong> &mdash; SME (Academy, DSML)
+            </button>
+            <button type="button" class="btn btn-secondary"
+              style="text-align: left; justify-content: flex-start; padding: 6px 12px; font-size: 0.8rem;"
+              onclick="fillEmailLogin('ruchira.sme@scaler.com')">
+              <strong>ruchira.sme@scaler.com</strong> &mdash; SME (DevOps, AI FDE, AI/ML)
+            </button>
+            <button type="button" class="btn btn-secondary"
+              style="text-align: left; justify-content: flex-start; padding: 6px 12px; font-size: 0.8rem;"
+              onclick="fillEmailLogin('rohan.mo@scaler.com')">
+              <strong>rohan.mo@scaler.com</strong> &mdash; Module Owner (Academy)
+            </button>
+            <button type="button" class="btn btn-secondary"
+              style="text-align: left; justify-content: flex-start; padding: 6px 12px; font-size: 0.8rem;"
+              onclick="fillEmailLogin('priya.pm@scaler.com')">
+              <strong>priya.pm@scaler.com</strong> &mdash; Program Manager (All Programs Read-Only)
+            </button>
+            <button type="button" class="btn btn-secondary"
+              style="text-align: left; justify-content: flex-start; padding: 6px 12px; font-size: 0.8rem;"
+              onclick="fillEmailLogin('admin@scaler.com')">
+              <strong>admin@scaler.com</strong> &mdash; Administrator (Full Governance)
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-secondary" onclick="closeEmailLoginModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitEmailLogin()">Sign In</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reassign Module Track Modal -->
+  <div id="reassignTrackModal" class="modal-overlay hidden" style="z-index: 1270;">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>Reassign Module to Track</h3>
+        <button class="close-btn"
+          onclick="document.getElementById('reassignTrackModal').classList.add('hidden')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="reassignModuleId">
+        <div class="form-group">
+          <label for="reassignTrackSelect">Select Target Track</label>
+          <select id="reassignTrackSelect" class="form-control"></select>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-secondary"
+          onclick="document.getElementById('reassignTrackModal').classList.add('hidden')">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmReassignModuleTrack()">Reassign</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Syllabus Upload Modal (FR-3) -->
+  <div id="syllabusUploadModal" class="modal-overlay hidden" style="z-index: 1280;">
+    <div class="modal-card" style="max-width: 620px;">
+      <div class="modal-header">
+        <h3 id="syllabusModalTitle">Upload Syllabus for Module</h3>
+        <button class="close-btn"
+          onclick="document.getElementById('syllabusUploadModal').classList.add('hidden')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="syllabusModuleId">
+        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 14px;">Paste your syllabus text
+          below. The AI will parse it into classes with titles, agendas, and learning outcomes. The module will move to
+          "In Review" status until you lock it.</p>
+        <div class="form-group">
+          <label for="syllabusTextInput">Syllabus Text</label>
+          <textarea id="syllabusTextInput" class="form-control" rows="10"
+            placeholder="Class 1: Introduction to Event-Driven Architecture&#10;- What is EDA&#10;- Producer/Consumer model&#10;- Real-world use cases&#10;&#10;Class 2: Kafka Fundamentals&#10;- Topics and partitions&#10;- Brokers and clusters"></textarea>
+        </div>
+        <div class="form-group" style="margin-top: 10px;">
+          <label for="syllabusModeSelect">Import Mode</label>
+          <select id="syllabusModeSelect" class="form-control">
+            <option value="merge">Merge (keep existing classes, add parsed ones)</option>
+            <option value="replace">Replace (remove existing classes without scripts)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-secondary"
+          onclick="document.getElementById('syllabusUploadModal').classList.add('hidden')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitSyllabusUpload()">Parse & Import Classes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Single Card Edit Modal -->
+  <div id="singleCardEditModal" class="modal-overlay hidden" style="z-index: 1280;">
+    <div class="modal-card" style="max-width: 580px; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <h3 id="singleCardEditModalTitle">Edit Card</h3>
+        <button class="close-btn"
+          onclick="document.getElementById('singleCardEditModal').classList.add('hidden')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px;">
+        <input type="hidden" id="singleCardEditIndex">
+        <div class="form-group">
+          <label
+            style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; display: block;">Card
+            Title</label>
+          <input type="text" id="singleCardEditTitle" class="form-control"
+            style="font-size: 0.92rem; font-weight: 600;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label
+              style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; display: block;">Duration
+              (minutes)</label>
+            <input type="number" id="singleCardEditDuration" class="form-control" min="1" max="25" step="0.5">
+          </div>
+          <div class="form-group">
+            <label
+              style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; display: block;">Pedagogical
+              Phase</label>
+            <select id="singleCardEditPhase" class="form-control">
+              <option value="INSTRUCTOR_NOTE">Instructor Note</option>
+              <option value="Metadata & Lock">Metadata & Lock</option>
+              <option value="Agenda">Agenda</option>
+              <option value="Concept">Concept</option>
+              <option value="Failure Mode">Failure Mode</option>
+              <option value="Code Trace">Code Trace</option>
+              <option value="Mental Model">Mental Model</option>
+              <option value="Hands-on">Hands-on</option>
+              <option value="Quiz">Quiz</option>
+              <option value="Recap">Recap</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label
+            style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; display: block;">Key
+            Concept / Description</label>
+          <textarea id="singleCardEditConcept" class="form-control" rows="3"
+            placeholder="Core pedagogical concept, analogy or breakdown..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 12px 20px;">
+        <button class="btn btn-secondary"
+          onclick="document.getElementById('singleCardEditModal').classList.add('hidden')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSingleCardEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Single Card Chat Modal -->
+  <div id="singleCardChatModal" class="modal-overlay hidden" style="z-index: 1280;">
+    <div class="modal-card" style="max-width: 520px; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <h3 id="singleCardChatModalTitle">Chat</h3>
+        <button class="close-btn"
+          onclick="document.getElementById('singleCardChatModal').classList.add('hidden')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 16px 20px;">
+        <input type="hidden" id="singleCardChatIndex">
+        <div class="form-group" style="margin-bottom: 0;">
+          <textarea id="singleCardChatPrompt" class="form-control" rows="4"
+            placeholder="Enter your prompt / revision instructions for this card..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 12px 20px;">
+        <button class="btn btn-secondary"
+          onclick="document.getElementById('singleCardChatModal').classList.add('hidden')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitSingleCardChat()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Needs from the SME: one screen for every [[FROM_SME]] gap -->
+  <div id="smeItemsModal" class="modal-overlay hidden" style="z-index: 1250;">
+    <div class="modal-card" style="max-width: 760px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid #e2e8f0;">
+        <h3 style="margin: 0;">Needs from the SME</h3>
+        <button class="close-btn" onclick="closeSmeItems()" style="font-size: 1.5rem; background: none; border: none; cursor: pointer;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px 24px; overflow-y: auto; display: block;">
+        <div id="smeItemsError" class="hidden" role="alert" style="background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.86rem;"></div>
+        <p style="margin: 0 0 12px; font-size: 0.86rem; color: #64748b;">The writer left a marker wherever it needed a fact only you can give. Type each one in and it replaces the marker in the card.</p>
+        <div id="smeItemsList"></div>
+        <div id="smeKitGaps"></div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; padding: 12px 24px; border-top: 1px solid #e2e8f0;">
+        <button class="btn btn-primary" onclick="closeSmeItems()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Usage & Cost Modal -->
+  <div id="apiUsageModal" class="modal-overlay hidden" style="z-index: 1300;">
+    <div class="modal-card" style="max-width: 900px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 24px; border-bottom: 1px solid #e2e8f0;">
+        <div>
+          <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+            <span>⚡</span> AI API Usage &amp; Cost
+          </h3>
+          <p id="usageSubtitle" style="margin: 4px 0 0; font-size: 0.82rem; color: #64748b;">Token use, time and estimated cost of every model call.</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <label for="usageDays" style="font-size: 0.8rem; color: #64748b;">Period</label>
+          <select id="usageDays" onchange="loadApiUsageData()" style="padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.82rem;">
+            <option value="0">All time</option>
+            <option value="1">Last 24 hours</option>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+          </select>
+          <button class="close-btn" onclick="closeApiUsageModal()" style="font-size: 1.5rem; background: none; border: none; cursor: pointer;">&times;</button>
+        </div>
+      </div>
+
+      <!-- display: block keeps the tables at full height; the body scrolls, the tables do not shrink -->
+      <div class="modal-body" style="padding: 20px 24px; overflow-y: auto; display: block;">
+        <div id="usageError" class="hidden" role="alert" style="background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.86rem;"></div>
+        <div id="usageWarnings" style="margin-bottom: 16px;"></div>
+
+        <div id="usageBudget" style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; background: #fff;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.84rem; color: #334155; margin-bottom: 6px; gap: 12px;">
+            <strong>Budget (all time)</strong><span id="usageBudgetText">-</span>
+          </div>
+          <div style="height: 10px; background: #e2e8f0; border-radius: 6px; overflow: hidden;">
+            <div id="usageBudgetBar" style="height: 100%; width: 0%; background: #10b981;"></div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px;">
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px;">
+            <div style="font-size: 0.74rem; font-weight: 600; text-transform: uppercase; color: #64748b;">Scripts With Usage</div>
+            <div id="usageTotalScripts" style="font-size: 1.5rem; font-weight: 800; color: #8b5cf6; margin-top: 4px;">0</div>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px;">
+            <div style="font-size: 0.74rem; font-weight: 600; text-transform: uppercase; color: #64748b;">API Invocations</div>
+            <div id="usageTotalCalls" style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-top: 4px;">0</div>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px;">
+            <div style="font-size: 0.74rem; font-weight: 600; text-transform: uppercase; color: #64748b;">Input (Prompt) Tokens</div>
+            <div id="usagePromptTokens" style="font-size: 1.5rem; font-weight: 800; color: #0284c7; margin-top: 4px;">0</div>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px;">
+            <div style="font-size: 0.74rem; font-weight: 600; text-transform: uppercase; color: #64748b;">Output (Completion)</div>
+            <div id="usageCompletionTokens" style="font-size: 1.5rem; font-weight: 800; color: #10b981; margin-top: 4px;">0</div>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px;">
+            <div style="font-size: 0.74rem; font-weight: 600; text-transform: uppercase; color: #64748b;">Total API Cost</div>
+            <div id="usageTotalCost" style="font-size: 1.5rem; font-weight: 800; color: #e11d48; margin-top: 4px;">$0.00</div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 12px;">
+          <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #1e293b;">Per-Script Token Usage &amp; Cost</h4><span style="font-size: 0.78rem; color: #64748b; text-align: right;">Every call is counted once. Calls outside a script are on the last row.</span>
+        </div>
+        <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow-x: auto; margin-bottom: 24px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+            <thead style="background: #f1f5f9; color: #475569; font-weight: 600;"><tr><th style="padding: 10px 14px;">Script / Class Title</th><th style="padding: 10px 14px;">Status</th><th style="padding: 10px 14px;">Calls</th><th style="padding: 10px 14px;">Input Tokens</th><th style="padding: 10px 14px;">Output Tokens</th><th style="padding: 10px 14px;">Total Tokens</th><th style="padding: 10px 14px;">Cost (USD)</th></tr></thead>
+            <tbody id="usageByScriptTable"><tr><td colspan="7" style="padding: 14px; text-align: center; color: #94a3b8;">No calls in this period.</td></tr></tbody>
+          </table>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 12px;">
+          <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #1e293b;">Agent Component Breakdown</h4>
+        </div>
+        <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow-x: auto; margin-bottom: 24px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+            <thead style="background: #f1f5f9; color: #475569; font-weight: 600;"><tr><th style="padding: 10px 14px;">Agent Component</th><th style="padding: 10px 14px;">Calls</th><th style="padding: 10px 14px;">Errors</th><th style="padding: 10px 14px;">Prompt Tokens</th><th style="padding: 10px 14px;">Completion Tokens</th><th style="padding: 10px 14px;">Cost (USD)</th></tr></thead>
+            <tbody id="usageByAgentTable"><tr><td colspan="6" style="padding: 14px; text-align: center; color: #94a3b8;">No calls in this period.</td></tr></tbody>
+          </table>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 12px;">
+          <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #1e293b;">By Model</h4><span style="font-size: 0.78rem; color: #64748b; text-align: right;"><span id="usagePricingNote"></span></span>
+        </div>
+        <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow-x: auto; margin-bottom: 24px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+            <thead style="background: #f1f5f9; color: #475569; font-weight: 600;"><tr><th style="padding: 10px 14px;">Provider</th><th style="padding: 10px 14px;">Model</th><th style="padding: 10px 14px;">Calls</th><th style="padding: 10px 14px;">Tokens</th><th style="padding: 10px 14px;">Cost (USD)</th><th style="padding: 10px 14px;">Cost from</th></tr></thead>
+            <tbody id="usageByModelTable"><tr><td colspan="6" style="padding: 14px; text-align: center; color: #94a3b8;">No calls in this period.</td></tr></tbody>
+          </table>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 12px;">
+          <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #1e293b;">Recent API Calls</h4><span style="font-size: 0.78rem; color: #64748b; text-align: right;">The latest 25 in this period</span>
+        </div>
+        <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left;">
+            <thead style="background: #f1f5f9; color: #475569; font-weight: 600;">
+              <tr>
+                <th style="padding: 8px 12px;">Time</th><th style="padding: 8px 12px;">Agent</th><th style="padding: 8px 12px;">Model</th>
+                <th style="padding: 8px 12px;">Tokens</th><th style="padding: 8px 12px;">Latency</th><th style="padding: 8px 12px;">Cost</th><th style="padding: 8px 12px;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="usageRecentTable"><tr><td colspan="7" style="padding: 14px; text-align: center; color: #94a3b8;">No calls in this period.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; border-top: 1px solid #e2e8f0; background: #fafafa;">
+        <span id="usageFooterNote" style="font-size: 0.8rem; color: #64748b;">API keys are configured in <code>backend/.env</code></span>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-secondary" onclick="loadApiUsageData()">Refresh</button>
+          <button class="btn btn-primary" onclick="closeApiUsageModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="code_trace.js?v=2.0"></script>
+  <script src="app.js?v=67.9"></script>
+</body>
+
+</html>

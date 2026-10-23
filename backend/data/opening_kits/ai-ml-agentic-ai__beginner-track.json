@@ -1,0 +1,27 @@
+{
+  "program": "AI / ML & Agentic AI",
+  "track": "Beginner Track",
+  "status": "Extracted from the notebook AI_Beginners_Class1.ipynb by the authoring assistant. The Module Owner must verify it. The script has no onboarding material (no PSP, attendance, FAQs, contacts).",
+  "source": "https://colab.research.google.com/drive/1KuTL9l2tsdyDtyfVvKH-gvSTCYSwlCwr",
+  "facts": {
+    "class_title_and_format": "Class 1: Runway to the AI World and the LLM Landscape. Zero coding required, beginner friendly: no code, no maths, just a rock-solid mental model. By the end, a sentence like 'Let's call an LLM API from an application' makes sense word by word. The source plans 2 hours with 5 terms decoded, 13 simulators, 20 industry use cases and 4 checkpoint quizzes.",
+    "flight_plan": "Opening, AI is already running your day (8 min, live poll); AI vocabulary, the 5 terms everyone confuses (24 min); tooling comfort: Colab, APIs, JSON, terminal, GitHub, web (23 min); a 5 minute stretch break; why this changes everything, the GenAI timeline (8 min); how LLMs work, the autocomplete secret (12 min); meet the Big 5 LLMs with a live demo across 3 tabs (13 min); the three dials: tokens, context window, temperature (17 min); wrap-up, your AI toolkit mental model (10 min).",
+    "opening": "Before any definition, show that learners already used AI 20 times before breakfast. Wake-Up Audit: learners type their morning routine in chat and you count the AI systems in it (face unlock, Gmail spam filter, Spotify or YouTube recommendations, Ola or Uber pricing, UPI fraud check, Swiggy or Zomato delivery time, Google Maps rerouting, Instagram feed ranking, keyboard autocorrect, Amazon recommendations). Respond to the tally: 1 to 2 'and you have not even had breakfast yet'; 3 to 5 'N production AI systems before 9 AM, all narrow AI'; 6 or more 'most people say I do not really use AI, you do, constantly'.",
+    "game": "AI or Not, 8 items, learners answer in chat before the reveal. Examples: phone calculator is not AI (fixed rules); Gmail spam filter is AI (learned from billions of emails); Excel SUM is not AI; Google Maps ETA is AI (a prediction from historical and live traffic); alarm clock is not AI.",
+    "section_pattern": "For each of the 5 terms (AI, generative AI, LLM, AI agent, agentic AI): a plain-English definition, an everyday example, an Indian industry example, then an interactive simulator or a short TRY IT cell. Each of the four checkpoint quizzes has a question, four options, the correct one, and a Why explanation that says why the others fail.",
+    "analogies_and_simulators": "The Russian doll of AI, each ring inside the last. Analyse versus create for generative AI. Chatbot versus agent in a flight booking showdown. One agent versus an agent team planning a Goa trip under 20,000 rupees. An API as a restaurant waiter, with a restaurant API ordering demo. Building a pizza order and watching the JSON write itself, then reading a real AI API response. Zomato order as the way AI apps fit together. Be the LLM: predict the next token. Same prompt in three LLMs. Token Machine. Context window as the model's desk. Temperature as the creativity dial.",
+    "wrap_up": "A decision framework to use before any AI-assisted task, a full summary table of everything covered, and key links with a homework playground.",
+    "resource_links": "ChatGPT chat.openai.com ; Claude claude.ai ; Google AI Studio aistudio.google.com ; OpenAI Tokenizer platform.openai.com/tokenizer ; Chatbot Arena chat.lmsys.org ; Context Window Visualizer context-windows.damien-henry.com ; Temperature and Top-K Visualizer andreban.github.io/temperature-topk-visualizer",
+    "interaction_note": "The source asks learners to shout answers. Online, learners answer in chat (rule E3).",
+    "onboarding_note": "No onboarding facts (PSP, attendance, FAQs, support contact, timings) were in the source. If the agenda asks for them, use [[FROM_SME: onboarding facts for this program]]."
+  },
+  "existing_animations": [],
+  "onboarding_cards": [
+    "Opening: AI already ran your morning",
+    "AI or Not game",
+    "Vocabulary sections, each with a simulator",
+    "Tooling comfort",
+    "Checkpoint quizzes with Why explanations",
+    "Wrap-up: decision framework, summary and links"
+  ]
+}

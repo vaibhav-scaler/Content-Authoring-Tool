@@ -1,0 +1,445 @@
+# Scaler Academy / Beginner Track: official module and class mapping.
+# Format:  "## <module name>" starts a module (modules are ordered as listed).
+#          "<class title> | <junction number> | <type>" is one class (classes are ordered as listed).
+# A junction number is written only on the first class of a junction; it applies to every
+# following class until the next number, and resets at each module.
+# Type is Live, Inverted, Lab, To be planned, or "-" when the source leaves it blank.
+
+## Programming Fundamentals - Thinking with AI: Loops, Logic & Control Flow || Programming Fundamentals
+Beginner: Programming Foundations & AI Awareness | 1 | Live
+Beginner: Operators & Expression Evaluation using AI | | Live
+Beginner: Data Types 1 | | Live
+Beginner: Data Types 2 + Reading Inputs | | Live
+Beginner: Operators | 2 | Live
+Beginner : If-Else & AI Edge Case Thinking | | Live
+Beginner: Lab Session on If-Else | | Inverted
+Beginner: Loops & Iteration Analysis by AI | 3 | Live
+Beginner: Lab Session on Loop | | Inverted
+Beginner: More problems on Loops & Patterns | | Live
+Beginner: Lab Session on Patterns | | Inverted
+Beginner Sample Contest: Dual Camera Proctoring | | Inverted
+Beginner Contest 1: Data Types, If-Else & Loops | | Inverted
+
+## Programming Fundamentals - Code Smarter with AI: Function & Arrays || Programming Fundamentals
+Beginner: Functions & Modularity: Designing Code with AI | 1 | Live
+Beginner: Lab Session on Functions | | Inverted
+Beginner: Introduction to Strings | | Live
+Beginner: 1D Array | 2 | Live
+Beginner: Lab Session on 1D Array - 1 | | Inverted
+Beginner: Lab Session on 1D Array - 2 | | Inverted
+Beginner: 2D Array | 3 | Live
+Beginner: Lab Session on 2D Arrays - 1 | | Inverted
+Beginner: Lab Session on 2D Arrays - 2 | | Inverted
+Beginner:Strings in Memory: Visualizing with AI | 4 | Live
+Beginner: Maths Basics & Calculate Iterations | | Live
+Beginner: Revision: Language | | Live
+Beginner Contest 2: Functions & Arrays & Contest discussion | | Inverted
+
+## Intermediate DSA : AI Assisted Problem Solving || Programming Fundamentals
+Intermediate DSA: Time Complexity | 1 | Live
+Intermediate DSA: Introduction to Arrays & Basics of AI | | Live
+Intermediate DSA: Lab Session on TC, SC, Output & Debugging | | Inverted
+Intermediate DSA: Arrays: Prefix Sum & Carry Forward with AI-Assisted Problem Solving | 2 | Live
+Intermediate DSA: Lab Session on Prefix Sum & Carry Forward | | Inverted
+Intermediate DSA: Arrays: Arrays techniques & smart prompting | | Live
+Intermediate DSA: Memory Management & Sorting Basics | 3 | Live
+Intermediate DSA: Bit Manipulations Basics | | Live
+Intermediate DSA: 2D Matrices | | Live
+Intermediate DSA : Strings & Immutability visualisations through AI | 4 | Live
+Intermediate DSA: Lab on Matrix & Strings using AI | | Inverted
+Intermediate DSA: Contest & Contest discussion | | Inverted
+
+## AI & Agents: From Talking to AI to Building One || Agentic AI
+The runway to AI | | Live
+GenAI World & LLM Landscape | | Live
+Prompt Engineering Basics | | Live
+Advanced Prompting & AI Safety Basics | | Live
+LLM Built-in Power Tools | | Live
+RAG | | Live
+n8n Automation Workflow | | Live
+What Is an AI Agent? | | Live
+Building Agents with n8n & Zapier | | Live
+OpenClaw: Your Personal 24/7 AI Agent | | Live
+Multi-Agent Systems | | Live
+Debugging AI via vibecoding tools | | Live
+Capstone Intro | | Live
+
+## Advanced DSA: Foundations:Core Techniques & Optimization || DSA
+DSA: Time Complexity | 1 | Live
+DSA: Arrays Techniques | | Live
+DSA: Arrays 1: One Dimensional | | Live
+DSA: Arrays 2: Two Dimensional | 2 | Live
+DSA: Lab Session on Arrays | | Inverted
+DSA: Bit Manipulation | | Live
+DSA: Lab Session on Bit Manipulation | | Inverted
+DSA: Recursion | 3 | Live
+DSA: Lab Session on Recursion | | Inverted
+DSA: Maths: Modular Arithmetic & GCD | | Live
+DSA: Hashing | 4 | Live
+DSA: Lab Session on Hashing | | Inverted
+DSA: Sorting 1: Count Sort & Merge Sort | 5 | Live
+DSA: Sorting 2: Quick Sort & Comparator Problems | | Live
+DSA: Sample Contest: Dual Camera Proctoring | | Inverted
+DSA Contest 1: Arrays, Bit Manipulation, Recursion, Math, Hashing & Sorting & Contest discussion | | Inverted
+
+## Advanced DSA: Linear Data Structures || DSA
+DSA: Searching 1: Binary Search on Array | 1 | Live
+DSA: Searching 2: Binary Search on Answer | | Live
+DSA: Lab Session on Searching | | Inverted
+DSA: Classes, Objects & Linked List Introduction | 2 | Live
+DSA: Linked List: Basic Problems | | Live
+DSA: Linked List: Sorting and Problems | | Live
+DSA: Linked List: Doubly Linked List & Detecting Loop | | Live
+DSA: Stacks | | Live
+DSA: Lab Session on Stacks | | Inverted
+DSA: Queues: Implementation & Problems | | Live
+DSA: Revision of DSA 1 & 2 | | Inverted
+DSA Contest 2: Searching, Linked List, Stacks, Queues | | Inverted
+
+## Advanced DSA: Backtracking & Advanced Trees || DSA
+DSA: Maths: Combinatorics Basics & Prime Numbers | 1 | Live
+DSA: Lab Session on Prime Numbers & 2 Pointers | | Inverted
+DSA: Lab Session on Maths & 2 Pointers | | Inverted
+DSA: Backtracking | 2 | Live
+DSA: Lab Session on Backtracking | | Inverted
+DSA: Trees 1: Structure & Traversal | 3 | Live
+DSA: Trees 2: BST | | Live
+DSA: Lab Session on Binary Trees | | -
+DSA: Trees 4: Morris Inorder Traversal + LCA | 4 | Live
+DSA: Lab Session on Binary Trees 2 | | Inverted
+DSA: Hashing 3: Internal Implementation & Problems | | Live
+DSA Contest 3: Math, Two Pointers, Backtracking, Trees & Contest discussion | | Inverted
+
+## Advanced DSA: DP, Heaps & Graphs — Crack It with AI Edge || DSA
+DSA: Heaps: Introduction | 1 | Live
+DSA: Heap Sort & Greedy | | Live
+DSA: Lab Session on Heaps & Greedy | | Inverted
+DSA: Lab Session on Interview Problems 1 | | Inverted
+DSA: DP 1: One Dimensional | 2 | Live
+DSA: DP 2: Two Dimensional | | Live
+DSA: DP 3: Knapsack | | Live
+DSA: Lab Session on Applications of Knapsack | | Inverted
+DSA: DP on Strings | | Live
+DSA: Graphs 1: Introduction, DFS & Cycle Detection | 3 | Live
+DSA: Graphs 2: BFS & MST | | Live
+DSA: Graphs 3: Dijkstra Algo & Topological Sort | | Live
+DSA: Graphs 4: Famous Graphs Question | | -
+DSA: Lab Session on Interview Problems 2 | | Inverted
+DSA: Revision of DSA 3 & 4 | | Inverted
+DSA Contest 4: Heaps, Greedy, DP & Graphs & Contest discussion | | Inverted
+Mandatory Skill Evaluation Test: DSA | | Inverted
+Skill Evaluation Test Discussion + How to ace DSA Interview | | Inverted
+DSA : Real World Project 1 | | Live
+DSA : Real world Project 2 | | Live
+
+## Databases & SQL || Databases & SQL
+SQL 1 : Introduction to DBMS & Keys | | Live
+SQL 2: CRUD Operations - 1 | | Live
+SQL 3: CRUD Operations - 2 | | Live
+SQL 4 : Joins | | Live
+SQL 5: Aggregate Queries | | Live
+SQL 6 : Joins and Aggregate Queries Working Session | | Live
+SQL 7: Subqueries & Views | | Live
+SQL 8: Indexing | | Live
+SQL 9: Transactions | | Live
+SQL 10: Window Functions | | Live
+SQL 11: Schema Design - 1 | | Live
+SQL 12: Schema Design - 2 | | Live
+Databases & SQL Contest: SQL and Schema Design (This is for Certification) | | -
+
+## Foundations of Object-Oriented Design & Scalable Systems || Backend
+Backend LLD: Intro to LLD for Scalable & AI-Ready Systems | 1 | Live
+Backend LLD: OOP-1: Intro to OOP Lab | | Live
+Backend LLD: OOP-2: Access Modifiers and Constructors | | Live
+Backend LLD: OOP-3: Inheritance and Polymorphism | | Live
+Backend LLD: OOP-4: Interfaces, Abstract Classes | | Live
+Backend LLD: Concurrency-1: Introduction to Processes and Threads | 2 | Live
+Backend LLD: Concurrency-2: Executors and Callables | | Live
+Backend LLD: Concurrency-3: Introduction to Synchronization | | Live
+Backend LLD: Concurrency-4: Synchronization with Semaphores | | Live
+Backend LLD: Java Advanced Concepts - 1 [Generics] | 3 | Live
+Backend LLD: Java Advanced Concepts - 2 [Generics & Collections Lab] | | Inverted
+Backend LLD: Java Advanced Concepts - 3 [Streams and Lambdas] | | Live
+Backend LLD: Java Advanced Concepts - 4 [Exception Handling and Miscellaneous Topics] | | Live
+Backend LLD: Contest - 1: Java, OOP, and Concurrency | | Live
+
+## Design Principles & Patterns for Extensible Systems || Backend
+Backend LLD: SOLID Principles for Extensible Systems with AI integrations | 1 | Live
+Backend LLD: Design Patterns: Introduction and Singleton | | Live
+Backend LLD: Design Patterns: Builder | | Live
+Backend LLD: Design Patterns: Prototype and Registry | | Live
+Backend LLD: Design Patterns: Factory Pattern for Service Abstraction (APIs & AI Services) | | Live
+Backend LLD: Design Patterns: Adapter and Facade | 2 | Live
+Backend LLD: Design Patterns: Decorator and Flyweight | | Live
+Backend LLD: Design Patterns: Behavioural Design Patterns | 3 | Live
+Backend LLD: UML Diagrams | | Live
+Backend LLD: Contest - 2: Design Principles & Design Patterns | | Live
+
+## Applied Design & Machine Coding || Backend
+Backend LLD: Machine Coding - 1: How to Approach Design Problems | 1 | Live
+Backend LLD: Machine Coding - 2: Design TicTacToe | | Live
+Backend LLD: Machine Coding - 3: Code TicTacToe 1 | | Live
+Backend LLD: Machine Coding - 4: Code TicTacToe 2 | | Live
+Backend LLD: Machine Coding - 5: Design Parking Lot | 2 | Live
+Backend LLD: Machine Coding - 6: Code Parking Lot 1 | | Live
+Backend LLD: Machine Coding - 7: Code Parking Lot 2 | | -
+Backend LLD: Machine Coding - 8: Design BookMyShow | 3 | Live
+Backend LLD: Machine Coding - 9: Code BookMyShow 1 | | Live
+Backend LLD: Machine Coding - 10: Code BookMyShow 2 | | Live
+Backend LLD: Machine Coding - 11: Code BookMyShow 3 | | Live
+Backend LLD: Machine Coding - 12: Design Splitwise | 4 | Live
+Backend LLD: Machine Coding - 13: Code Splitwise 1 | | Live
+Backend LLD: Machine Coding - 14: Code Splitwise 2 | | Live
+Backend LLD: Contest - 3: Machine Coding | | Live
+
+## AI-First Backend Capstone Project - Primer || Backend
+Backend Projects: Intro to Backend Systems & AI-Augmented Development | | Live
+Backend Projects: Version Control and Git | | Live
+Backend Projects: Learning Git Commands & AI Dev Tools | | Live
+Backend Projects: Intro to Spring Framework and Building APIs | | Live
+Backend Projects: MVC, Requests in Spring and Starting First Microservice | | Live
+Backend Projects: Calling 3rd Party APIs & LLM/AI Services | | Live
+Backend Projects: Intro to Spring Data JPA | | Live
+Backend Projects: JPA Queries and Repositories | | Live
+Backend Projects: Unit Testing and Good Practices (including AI-assisted testing) | | Live
+Backend Projects: Authentication vs Authorization, OAuth2, JWT | | Live
+Backend Projects: Implementing UserAuthService | | Live
+Backend Projects: Deploying Backend & AI-Enabled Applications to AWS | | Live
+
+## AI-First Backend Capstone Project - Advance || Backend
+Backend Projects: RestTemplate, Resilience & Handling Failures in AI/API Systems | | Live
+Backend Projects: UUIDs and Representing Inheritance | | Live
+Backend Projects: Mocking and Writing Unit Tests (including AI services) | | Live
+Backend Projects: Advanced Testing Strategies for Backend Systems | | Live
+Backend Projects: JWT Generation and Validation | | Live
+Backend Projects: Authentication - Implementing OAuth 2 | | Live
+Backend Projects: EBS, RDS | | Live
+Backend Projects: VPC, Security Groups, Route 53 | | Live
+Backend Projects: Implementing Search: Paging, Sorting & Intro to Semantic Search | | Live
+Backend Projects: Creating Payment Microservice | | Live
+Backend Projects: Implementing Stripe PG and Reconciliation | | Live
+Backend Projects: Optimizing APIs using Redis and Kafka for Async & AI Workloads | | Live
+Backend Projects: Spring Cloud for Distributed Microservices & AI Services | | Live
+Backend Projects: Spring Cloud: API Gateway, Load Balancing, Logging & Monitoring | | Live
+Backend Projects: Docker for Backend & AI Service Deployment | | Live
+
+## Web Platform Foundations & UI Systems || Full Stack
+How the Web Works: Browsers, HTML, DevTools, and AI Inspection | 1 | Live
+Semantic HTML, Forms, and Structured User Input | | Lab
+CSS Foundations: Cascade, Selectors, Box Model | | Live
+Layout Foundations: Display, Units, and Positioning | | Live
+Flexible Layouts with Flexbox | | Live
+CSS Grid and Reusable CSS: Variables, and Page-Level Layouts | | Lab
+Responsive Design: Media Queries, Fluid Units, and Mobile-First Layouts | | Live
+Advanced CSS: Selectors, Specificity, Inheritance, and Interactions | | Lab
+HTML & CSS Certification Contest | | -
+
+## JavaScript Runtime Systems, Browser APIs & Product Engineering Labs || Full Stack
+JavaScript Foundations: Values, Types, Variables, Control Flow, and Basic Programming | 1 | Live
+Execution Model: Scope, Hoisting, and How JavaScript Runs | | Live
+Closures, Lexical Scope, and Persistent State | | Live
+Runtime Reasoning Lab: Predicting Output, Tracing Execution, and Debugging | | Lab
+Functional JavaScript: Functions, Callbacks, and Higher Order Thinking | 2 | Live
+The Browser as a Runtime: DOM Structure and Browser APIs | | Live
+Event Systems: User Interaction, Handlers, and UI Behavior | | Live
+Event Systems: DOM Cleanup & Event Delegation | | Live
+Product Lab I: Realtime Weather App, JSON, APIs, Async Flow, and Rendering | 3 | Lab
+Product Lab II: Kanban Board, Product Breakdown, UI Structure, and State Model | | Lab
+Product Lab III: Kanban Board, DOM Manipulation and Dynamic Rendering | | Lab
+Product Lab IV: Kanban Board, Business Logic, Persistence, and Local Storage | | Live
+Product Lab V: Kanban Board, Edge Cases, UX Refinement, and Extensibility | | Live
+Async Systems I: Callbacks, Web APIs, and Non Blocking Execution | 4 | Live
+Async Systems II: Promises, Microtasks, and Chained Control Flow | | Live
+Async Systems III: Async Await, Error Handling, and Resilient Flows | | Live
+Async Systems IV: Promise Combinators, Coordination, and Real World Async Patterns | | Live
+Async Debugging Lab: Race Conditions, Failure States, and AI Assisted Investigation | | Lab
+Browser Event Flow: Bubbling, Capturing, and Propagation | | Live
+Interaction Patterns Lab: Event Delegation, Scalable UI Behavior, and Machine Coding | | Lab
+Performance Patterns Lab: Debouncing, Throttling, and Efficient Frontend Flows | | Lab
+Object Model I: this, Method Context, and Function Invocation | | Live
+JS Certification Contest | | -
+
+## React and Frontend Product Architecture Fundamentals || Full Stack
+React Foundations: Components, JSX and Thinking in UI Trees | 1 | Live
+React Tooling: Build Tools, JSX and Project Structure | | Live
+Props, Lists, Forms and Component Composition | | Live
+State, Events and Interactive UI in React | | Live
+Lifting State Up, useEffect and Data Flow in Component Trees | | Live
+Product Lab 1: IMDB App: App Setup, Routing and Frontend Structure | 2 | Lab
+Product Lab 2: IMDB App: Movies Page, Pagination and Data Rendering | | Lab
+Product Lab 3: IMDB App : API Integration, Watchlist and Local Storage | | Lab
+Product Lab 4: IMDB App : Search, Sorting, Filtering and Shared State | | Lab
+Context API, State Sharing and Component Communication | | Live
+Redux Foundations: Store Design, Actions and Predictable State | 3 | Live
+Redux Integration Lab: Product Scale State Management in React | | Lab
+React Certification Contest | | -
+
+## Backend Product Systems, APIs and Production Engineering || Full Stack
+Backend Foundations: Node.js, APIs, Express and Service Thinking | 1 | Live
+Data Systems: MongoDB, Mongoose, Schema Design and SQL vs NoSQL Thinking | | Live
+Middleware, Validation and MVC for Scalable Backend Structure | | Live
+Product Lab 1: Backend Architecture, Domain Modeling and Project Setup | 2 | Live
+Product Lab 2: Authentication, Authorization and Role Based Access | | Lab
+Product Lab 3: Protected Routes, Tokens and Session Aware Flows | | Lab
+Product Lab 4: Movies, Theatres and Show APIs | | Lab
+Product Lab 5: Partner Workflows, Admin Approval and Moderated Actions | | Lab
+Product Lab 6: Booking Flow, Seat Management and Transaction Safety | | Lab
+Product Lab 7: Payments, Ticket Generation and Order Lifecycle | | Lab
+Product Lab 8: Email Workflows, Password Reset and User Communication | | Live
+Realtime Backend Systems: WebSockets, Live Updates and Event Driven Flows | | Live
+MERN Certification Contest | | -
+
+## Backend Product Systems - Deep Dive || Full Stack
+Backend Quality Lab: API Testing, Debugging and Error Handling | 1 | Live
+Backend Security Lab: Validation, Auth Hardening, Abuse Prevention and Safe Defaults | | Lab
+Production Readiness: Environment Management, Deployment, Logging and Docker Basics | | Live
+Scalability Lab: Caching, Queues, Background Jobs and Data Flow Trade Offs | | Live
+AI Feature Integration Lab: LLM APIs, Structured Responses and Backend Orchestration | | Lab
+Architecture and Interview Lab: Backend Design, Trade Offs and AI Assisted Review | | Live
+
+## Foundations of AI-Assisted Full-Stack Development || Full Stack
+Full-Stack Development in the Age of AI | 1 | Live
+AI Coding Tools for Full-Stack Builders | | Lab
+Prompting for UI, Logic, APIs, and Debugging | | Live
+Reviewing and Validating AI-Generated Full-Stack Code | | Live
+From Screen to Server: AI-Assisted Development Workflows | | Lab
+Building Faster Without Losing Fundamentals | | Live
+
+## JavaScript Object System & Engineering Patterns || Full Stack
+Object Model II: Classes, Constructors, and Object Oriented Modeling | 1 | Live
+Object Model III: Prototypes, Inheritance, and Reusable Behavior | | Live
+JavaScript Engineering Lab: Call, Apply, Bind, and Polyfill Thinking | | Lab
+Polyfills Lab: Higher Order Methods and Implementation Reasoning | | Lab
+Data Handling Lab: Deep Copy, Shallow Copy, and Reference Behavior | | Live
+
+## React, TypeScript and Frontend Product Architecture Deep Dive || Full Stack
+TypeScript Foundations for JavaScript Developers | 1 | Live
+Advanced Hooks: useRef, useMemo, useCallback and useReducer | | Live
+Custom Hooks and Reusable Logic Patterns | | Live
+React Performance Lab: Rendering, Memoization and UI Efficiency | | Lab
+Machine Coding Lab: Component Design, State Design and Real UI Problem Solving | | Lab
+Architecture Studio: React Patterns, State Trade Offs and AI Assisted Review | | Live
+Next.js Foundations: App Router, Layouts and Modern React Delivery | 2 | Live
+Next.js Data Fetching: Server and Client Components, Rendering Strategy and SEO | | Live
+Next.js Product Lab: Forms, Route Handlers, Auth Flow and Deployment | | Lab
+Advanced React Systems: Fiber, Concurrent Rendering, Suspense, Lazy Loading and Error Boundaries | | Live
+React Interview and Frontend Reasoning Lab | | Lab
+
+## Distributed System Design & AI-Integrated Architectures || System Design
+System Design Foundations & Modern Infrastructure | | Live
+Load Balancing, Consistent Hashing & Traffic Routing at Scale | | Live
+Caching Systems: CDN, Backend Caches, Cache Invalidation | | Live
+Case Study: Caching at Scale (Scaler Code Judge and Contest Leaderboards + AI Workloads) | | Live
+Case Study: Caching Facebook News Feed | | Live
+CAP / PACELC theorem + Master Slave Replication | | Live
+SQL vs NoSQL + Sharding | | Live
+Database Orchestration & Shard Creation | | Live
+Case study: Google Typeahead (How to approach System Design Problems) | | Live
+Case Study: Google Typeahead (Design and Optimizations) | | Live
+NoSQL Internals - LSM Tree and Multi Master | | Live
+Case Study: Messaging Apps (FB Messenger, Whatsapp, Slack) | | Live
+Messaging Queues - Apache Kafka & Zookeeper | | Live
+Case Study: ElasticSearch (Full Text Search) | | Live
+Case Study: S3, HDFS (Large File Storage) | | Live
+Case Study: Uber (Nearest Neighbor Search) | | Live
+Case Study: Rate Limiter + Unique ID Generator (Infra) | | Live
+Case Study: OTT Platform (OTT) | | Live
+Microservices - 1 | | Live
+Microservices - 2 | | Live
+Case Study: Ecommerce Platform (Microservices) | | Live
+
+## Build a Production-Ready AI-Enabled System || Backend
+Module Introduction - Intro to LLMs for Backend Engineers & Prompt Engineering for Backend APIs | | To be planned
+Building BookMyShow Chat Agent - 1 | | To be planned
+Building BookMyShow Chat Agent - 2 | | To be planned
+Building BookMyShow Chat Agent - 3 | | To be planned
+Buildng Splitwise AI Receipt Processor - 1 | | To be planned
+Buildng Splitwise AI Receipt Processor - 2 | | To be planned
+Buildng Splitwise AI Receipt Processor - 3 | | To be planned
+Backend Capstone Project: Contest | | To be planned
+
+## Mastering LastMile - Interview Simulation || Interview Preparation
+DSA Interview Simulation: Problem Solving & Thinking Under Pressure | | Live
+LLD Interview Simulation: Structuring Scalable Solutions | | Live
+HLD Interview Simulation: Designing Systems & Communicating Tradeoffs | | Live
+
+## Forward Deployment Engineering (FDE) Lab || Forward Deployment Engineering
+The FDE Mindset: How We Operate | | Live
+Python for Production - Async, Concurrency & Environment Management | | Live
+Build a Production-Grade Integration Harness | | Live
+Cloud Architecture for FDEs - Enterprise VPC Patterns | | Live
+Application Deployment - Containers, CI/CD & Secret Management | | Live
+Deploy a Secure Cloud Integration Service | | Live
+Observe Everything: Logs, Metrics & Traces | | Live
+Production Debugging - Live Systems Under Pressure | | Live
+Instrument, Break & Debug a Production Service | | Live
+Data Pipelines for FDEs - ETL vs ELT, Batch vs Streaming | | Live
+Data Pipelines for FDEs - Advanced Patterns: CDC, Webhooks & Reverse ETL | | Live
+Build a Cloud-Native Data Pipeline with Quality Gates | | Live
+ML Deployment Architecture — From Notebook to Production | | Live
+MLOps - Monitoring Models in Production: Data Drift & Model Decay | | Live
+Ship a Model: Serve, Monitor & Handle Drift on Managed Infra | | Live
+LLM Fine-tuning for Client Use Cases — Strategy & Implementation | | Live
+Enterprise LLM Optimization - Routing, Speed & Cost Management | | Live
+Deploy and Optimize an Enterprise LLM Infrastructure | | Live
+Agentic Systems - Architecture, Reliability & Failure Modes | | Live
+Orchestration Frameworks - LangGraph, CrewAI & Production Deployment | | Live
+Build a Multi-Agent System with Human-in-the-Loop | | Live
+Lock It Down: Cross-Account Access & Attack Surfaces | | Live
+Compliance Frameworks & Data Privacy for ML Systems | | Live
+Security Audit & Hardening of a Deployed System | | Live
+Performance Engineering — Load Testing Systems You Didn't Build | | Live
+The FDE Operating Model — Discovery, Requirements & Managing Ambiguity | | Live
+Mock FDE Engagement: System Optimization & Architecture Design | | Live
+
+## DSA Edge: Advanced Patterns & Interview Techniques || DSA
+DSA Edge : Townhall | | Live
+DSA Edge : Townhall (Post-SQL - change name after scheduling) | | Live
+Revision of DSA Topics | | Live
+Maths: Inverse Mod & Problems | | Live
+Backtracking: Famous Problems | | Live
+Tries 1: Trie of Character | | Live
+Tries 2: Trie of Bits + Problems on Trees | | Live
+Strings Pattern Matching | | Live
+DP 1: DP on Strings | | Live
+DP 2: Famous Problems | | Live
+Graphs 1: Bipartite Graph | | Live
+Graphs 2: Belleman Ford & Floyd Warshall Algorithm | | Live
+Advanced Interview Problems | | Live
+DSA Edge Mandatory Contest: Full Syllabus | | Live
+DSA Edge Full Syllabus: Contest Discussion | | Live
+
+## Product Management for Engineers || Product Management for Engineers
+Townhall: Product Management | | -
+Introduction to Product Management 1 | | -
+Understanding the Product Lifecycle 1 | | -
+Understanding the Product Lifecycle 2 | | -
+Critical Thinking in Product Development 1 | | -
+Critical Thinking in Product Development 2 | | -
+Market Structure Analysis and Its Technical Aspects 1 | | -
+Market Structure Analysis and Its Technical Aspects 2 | | -
+MVPs, Prototyping, and Growth Hacking 1 | | -
+MVPs, Prototyping, and Growth Hacking 2 | | -
+Concept Development, Validation, and the Role of Developers 1 | | -
+Concept Development, Validation, and the Role of Developers 2 | | -
+Introduction to Product Analytics 1 | | -
+
+## Gen AI for Software Engineers || Gen AI
+Introduction to AI Engineering | | -
+Refresher: Modern Text & Image AI Model Architectures | | -
+Getting started with Text Generation LLM APIs (OpenAI API) | | -
+Designing Eval Pipelines for AI Apps and Observability | | -
+Prompt Engineering: Introduction | | -
+Retrieval-Augmented Generation (RAG) Introduction | | -
+Embeddings Deep Dive | | -
+Multimodal & Tabular RAG | | -
+Prompt Engineering: Security | | -
+Agents: Foundations & Planning | | -
+Advanced Agent Concepts | | -
+Agent: Frameworks and Protocols | | -
+Fine Tuning Existing Models | | -
+Audio, Image, Video, Expressions: AI Modalities | | -
+Scaling AI Applications | | -
+Model Quantization Techniques | | -
+Advanced Fine Tuning Techniques | | -
+Dataset Engineering && Inference Optimization | | -

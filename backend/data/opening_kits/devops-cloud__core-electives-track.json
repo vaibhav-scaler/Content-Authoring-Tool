@@ -1,0 +1,60 @@
+{
+  "program": "DevOps & Cloud",
+  "track": "Core & Electives Track",
+  "status": "Extracted from the HackMD script by the authoring assistant. The Module Owner must verify every number and name before relying on it. DevOps numbers differ from Academy: do not copy values between programs.",
+  "source": "https://hackmd.io/@topics/Bke9Lh6DMe",
+  "facts": {
+    "welcome": "Open with a welcome to the learners' first session at Scaler and ask them to send two lines about themselves in chat. The instructor then introduces themselves.",
+    "psp": "PSP is the Problem Solving Percentage: solved assignment problems divided by total open assignment problems. Only assignment problems count. Additional problems are optional but recommended. Aim for at least 90%.",
+    "attendance": "Aim for at least 90% attendance, through live classes or recordings. A learner who misses a session messages the WhatsApp group with the reason. Instructors reach out if performance dips.",
+    "contest": "The contest runs live for 2 days: 5 coding questions and 5 MCQs, 2 hours, no pass or fail. The module ends with a full-syllabus contest, DevOps-Python: Full Syllabus Contest.",
+    "faqs": "Notes are uploaded after class. Assignments unlock after class and have no deadline. Ask questions in the public chat; answers can come in the private chat.",
+    "community": "Post stuck issues in the WhatsApp or Slack group, and help each other.",
+    "module_topics_as_given": "Introduction to Python and Data Types with AI awareness; Operators and Control Statements; Loops; Functions; 1D and 2D Lists; Tuples and Strings; Regex; Sets and Dictionaries; File and Exception Handling; Interview Problems; and the DevOps-Python full syllabus contest. The source says 14 items in all and names only these, so the full list comes from the curriculum position in the context.",
+    "assumed_knowledge": "No prior programming. Explain print, types, variables and input from scratch. Assume basic maths and a web browser.",
+    "environment": "Google Colab: open a browser, search for Colab, open a new notebook, write code in a cell and run it.",
+    "devops_flavour": "Tie basics to DevOps tasks where natural, for example why / versus // matters for percentages and scaling.",
+    "teaching_pattern": "Tiny steps. One idea, one code line, one prediction, then a short quiz. Python is case-sensitive (print versus Print). Variables are labels that point to objects, not boxes. Show the error on purpose (a misspelt print, int of a word) and read it aloud. Defer casting detail to the next session where the script does.",
+    "technical_order": "First program with print, then quotes and case sensitivity, arithmetic (+, -, *, /, //, **), string concatenation and spaces, comments, primitive types (int, float, str, bool, NoneType) with type(), variables and naming rules (PEP 8 snake_case), type casting (int, float, str, bool, ValueError, truncation, bool of the string False), and input() always returning a string.",
+    "ai_awareness_block": "A run of short conversational cards about AI, near the end of the class. (1) Ask first: let learners say how they already use AI before you teach. (2) History repeats: calculators, Excel and Google each looked scary and then became ordinary tools; AI does not replace developers, it replaces developers who refuse to learn it. (3) What AI is good at (writing code, explaining, drafting) and where it fails (vague requirements, subtle bugs, accountability). (4) How real developers use AI: writing features, debugging, learning, test cases, refactoring, translation, pair programming. (5) Why fundamentals matter more now: show that AI can give inconsistent answers, for example asking for the middle value of [10, 20, 30, 40] and getting 25 once and 20 another time, so you need the fundamentals to judge it. (6) How the course uses AI: struggle first, then ask peers, then ask AI for hints, and only then ask for a full answer.",
+    "ai_coding_and_probing": "Instructor note near the end: introduce the four AI Coding modes (explain, debug, optimise, implement) and AI Probing, where the AI asks follow-up questions about the code a learner submitted. Learners should know both before moving on.",
+    "dashboard_walkthrough": "The agenda lists a dashboard walkthrough but the source script has no card for it. If the agenda lists one, use [[FROM_SME: dashboard walkthrough video link]].",
+    "support_contact": "[[FROM_SME: support contact or email for this program]]",
+    "session_timings": "[[FROM_SME: batch timings and break times for this program]]"
+  },
+  "existing_animations": [
+    {
+      "topic": "Arithmetic and / versus //",
+      "url": "https://scaler-mk.github.io/algo-visualizer/Animation_1_Arithmetic.html"
+    },
+    {
+      "topic": "String concatenation and spaces",
+      "url": "https://scaler-mk.github.io/algo-visualizer/Animation_2_StringConcat.html"
+    },
+    {
+      "topic": "Type detection",
+      "url": "https://scaler-mk.github.io/algo-visualizer/Animation_3_TypeDetector.html"
+    },
+    {
+      "topic": "Variables as labels",
+      "url": "https://scaler-mk.github.io/algo-visualizer/Animation_4_VariablesAsLabels.html"
+    },
+    {
+      "topic": "Type casting",
+      "url": "https://scaler-mk.github.io/algo-visualizer/Animation_5_TypeCasting.html"
+    },
+    {
+      "topic": "Why fundamentals matter",
+      "url": "https://scaler-mk.github.io/algo-visualizer/06_why_fundamentals_matter.html"
+    }
+  ],
+  "onboarding_cards": [
+    "Welcome and introduction",
+    "Common terms: PSP and attendance",
+    "Module description and contest",
+    "FAQs and community",
+    "Agenda",
+    "AI awareness cards",
+    "AI Coding and AI Probing instructor note"
+  ]
+}

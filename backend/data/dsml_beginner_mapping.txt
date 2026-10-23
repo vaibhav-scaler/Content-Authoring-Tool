@@ -1,0 +1,102 @@
+# Scaler DSML / Beginner Track: official module and class mapping.
+# Format: "## <module> || <segment> || <duration in months>" starts a module (segment and duration optional);
+# "<class title> | <junction number> | <type>" is one class. The source table has no junction numbers.
+# Type is Live, Inverted, Lab, To be planned, Recorded, or "-" when the source leaves it blank.
+# The source table has no Track column; segments are the labels the app already showed for these modules.
+# The five Pandas classes are marked "Temporary Module : (Pandas with AI infusion)" in the source and are
+# kept in the Python module, where the database already had them.
+
+## Advanced SQL & AI for Data Professionals || Data Foundations
+Data Foundations & SQL Introduction | | Live
+Keys, Data Types & SQL Basics | | Live
+Data Filtering with SQL | | Live
+NULLs & Aggregation | | Live
+GROUP BY Metrics | | Live
+Applied SQL Lab 1: GroupBy Problems | | Inverted
+CASE WHEN and Conditional Aggregation | | Live
+JOINs 1: Relationships + INNER JOIN | | Live
+JOINs 2: LEFT + FULL OUTER + CROSS | | Live
+JOINs 3: SELF JOIN + NON-EQUI JOINS | | Live
+Subqueries 1: Non-Correlated | | Live
+Subqueries 2: Correlated + EXISTS | | Live
+CTEs + UNION / UNION ALL | | Live
+Applied SQL Lab 2: JOIN-heavy Problems | | Inverted
+Date & Time SQL Functions | | Live
+Window Functions 1: Ranking & Aggregates | | Live
+Window Functions 2: Advanced Ranking & Frames | | Live
+Window Functions 3: Navigation & Trend Analysis | | Live
+Applied SQL Lab 3: Windows + Dates | | Inverted
+MySQL Setup & DDL, DML Commands | | Live
+Advanced Concepts 1: Views, Indexing & Partitioning | | Live
+Advanced Concepts 2: Functions & Stored Procedures | | Live
+Funnel Analytics in SQL | | Live
+Cohorts & Retention Analysis | | Live
+Final SQL Revision | | Inverted
+
+## Spreadsheets & Dashboarding with AI Storytelling || Data Foundations
+Spreadsheet 1: Cleanup + Structure | | Live
+Spreadsheet 2: Core Formulas | | Live
+Spreadsheet 3: Lookups + Reporting | | Live
+Spreadsheet 4: Pivot Tables + Mini Dashboard | | Live
+Live Business Case: Spreadsheet Reporting Case | | Inverted
+Tableau 1: Viz Fundamentals + KPIs | | Live
+Tableau 2: Filters + Calculations | | Live
+Tableau 3: LOD (Practical) | | Live
+Tableau 4: Table Calcs + Analytics | | Live
+Tableau 5: Operations on Dataset | | Live
+Tableau 6: Dashboard Creation | | Live
+Live Business Case : Dashboard Storytelling | | Inverted
+
+## Python Foundations + AI Coding Assistants || Programming
+Python 1: Data Types + Variables + I/O | | Live
+Python 2: Control Flow + Loops | | Live
+Python 3: Functions + Strings | | Live
+Python 4: List | | Live
+Python 5 : Tuple, Sets & Dictionaries | | Live
+Python 6 : Functional Programming | | Live
+Python 7 : File Handling, and Error Handling | | Live
+Pandas 1 : Introduction to Pandas & DataFrame Operations | | Live
+Pandas 2 : Core DataFrame Operations | | Live
+Pandas 3 - Group Operations & Hierarchical Indexing | | Live
+Pandas 4 - Data Transformation & Preprocessing | | Live
+Data Visualization for Data Analytics | | Live
+
+## Data to Decisions: Product Analytics with AI || Analytics
+Product Strategy & Business Acumen | | Live
+Product Metrics 1 | | Live
+Product Metrics 2 | | Live
+RCA I | | Live
+RCA II - Case Study | | Live
+Guesstimates I | | Live
+Guesstimates II - Case Study | | Live
+CRM Analytics | | Live
+Customer Segmentation | | Live
+A/B Testing & Launch Recommendations | | Live
+Applied Case Study 1 | | Live
+Applied Case Study 2 | | Live
+
+## Generative AI for Data Analytics & Automation || AI & GenAI
+GenAI 1: Introduction to AI, LLMs & Analyst Workflows | | -
+GenAI 2: Prompt Engineering for Data Tasks (SQL, Python, Insights) | | -
+GenAI 3: Using AI for SQL Query Generation & Debugging | | -
+GenAI 4: Using AI for Python & Pandas Automation | | -
+GenAI 5: AI for Data Cleaning & EDA | | -
+GenAI 6: AI for Dashboard Insights & Storytelling | | -
+GenAI 7: Building AI-Assisted Reports & Business Narratives | | -
+GenAI 8: Automating Repetitive Analysis using AI | | -
+GenAI 9: Evaluating AI Outputs (Hallucination, Bias, Errors) | | -
+GenAI 10: Using AI APIs (OpenAI) for Data Workflows | | -
+GenAI 11: Building Mini AI Tools for Analysts (End-to-End) | | -
+Applied GenAI Lab: Solve a Business Case using AI + Analytics | | -
+
+## Interview Readiness || Career
+Interview Prep 1: SQL Basics & Pattern Recognition | | -
+Interview Prep 2: SQL Intermediate (JOINs, Aggregations) | | -
+Interview Prep 3: SQL Advanced (Window Functions, CTEs) | | -
+Interview Prep 4: SQL Case-Based Problem Solving | | -
+Interview Prep 5: Python Basics for Interviews | | -
+Interview Prep 6: Pandas-Based Interview Questions | | -
+Interview Prep 7: Product Case Interviews (Metrics & Business Thinking) | | -
+Interview Prep 8: Estimation & Guesstimates for Analysts | | -
+Interview Prep 9: Resume Building (Projects, Impact, Storytelling) | | -
+Interview Prep 10: LinkedIn & Portfolio Optimization | | -

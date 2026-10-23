@@ -1,0 +1,3776 @@
+================================================================================
+SCALER OFFICIAL CURRICULUM & COURSE CATALOG
+================================================================================
+
+
+Source of Truth: Extracted directly from official curriculum documentation (c:\Users\aryan\OneDrive\Desktop\Script_Generator\Documents)
+Programs Covered:
+1. Scaler Academy (Software Development)
+2. Scaler DSML (Data Science & Machine Learning)
+3. Scaler DevOps & Cloud Engineering
+4. Scaler AI Forward Deployed Engineer (FDE)
+5. Scaler AI / ML & Agentic AI
+
+---
+
+--------------------------------------------------------------------------------
+1. Curriculum Rules & Governance Legend
+--------------------------------------------------------------------------------
+
+
+
+---
+
+---
+
+--------------------------------------------------------------------------------
+2. Program 1: Scaler Academy (Software Development)
+--------------------------------------------------------------------------------
+
+
+=== 2.1 Program Level Rules & Governance ===
+
+- * Customized Module: This module is customised at learner level i.e. a learner can opt for this module at any point during the course post the completion of Data Structures & Algorithms module, once they have demonstrated their command on the concepts of Data Structures & Algorithms module.
+-  Specialisation Rule: Only 1 Specialisation is allowed per learner. Recorded lectures for the other can be availed via Student Dashboard. At Least 1 Specialisation is mandatory for successful completion of the course.
+- * Elective Rule: A learner can do as many electives as they want, but only after completion of Core Curriculum.
+
+---
+
+=== 2.2 Course Outline for Beginners (Timeline: 14 to 24 Months) ===
+
+
+  [Programming Fundamentals]
+  Module: Programming Fundamentals - Thinking with AI: Loops, Logic & Control Flow
+  Type: Core | Duration: 1
+
+  [Programming Fundamentals]
+  Module: Programming Fundamentals - Code Smarter with AI: Function & Arrays
+  Type: Core | Duration: 1
+
+  [Programming Fundamentals]
+  Module: Intermediate DSA : AI Assisted Problem Solving
+  Type: Core | Duration: 1
+
+  [Agentic AI]
+  Module: AI & Agents: From Talking to AI to Building One
+  Type: Core | Duration: 1
+
+  [Advanced DSA]
+  Module: Advanced DSA: Foundations:Core Techniques & Optimization
+  Type: Core | Duration: 1
+
+  [Advanced DSA]
+  Module: Advanced DSA: Linear Data Structures
+  Type: Core | Duration: 1
+
+  [Advanced DSA]
+  Module: Advanced DSA: Backtracking & Advanced Trees
+  Type: Core | Duration: 1
+
+  [Advanced DSA]
+  Module: Advanced DSA: DP, Heaps & Graphs — Crack It with AI Edge
+  Type: Core | Duration: 1
+
+  [Databases & SQL]
+  Module: Databases & SQL
+  Type: Core | Duration: 1
+
+  [Backend]
+  Module: Foundations of Object-Oriented Design & Scalable Systems
+  Type: Specialisation** | Duration: 1
+
+  [Backend]
+  Module: Design Principles & Patterns for Extensible Systems
+  Type: Specialisation** | Duration: 1
+
+  [Backend]
+  Module: Applied Design & Machine Coding
+  Type: Specialisation** | Duration: 1
+
+  [Backend]
+  Module: AI-First Backend Capstone Project - Primer
+  Type: Specialisation** | Duration: 1
+
+  [Backend]
+  Module: AI-First Backend Capstone Project - Advance
+  Type: Elective*** | Duration: 1.5
+
+  [Backend]
+  Module: Build a Production-Ready AI-Enabled System
+  Type: Elective*** | Duration: 1
+
+  [Fullstack]
+  Module: Web Platform Foundations & UI Systems
+  Type: Specialisation** | Duration: 0.5
+
+  [Fullstack]
+  Module: JavaScript Runtime Systems, Browser APIs & Product Engineering Labs
+  Type: Specialisation** | Duration: 1.5
+
+  [Fullstack]
+  Module: React and Frontend Product Architecture Fundamentals
+  Type: Specialisation** | Duration: 1
+
+  [Fullstack]
+  Module: Backend Product Systems, APIs and Production Engineering
+  Type: Specialisation** | Duration: 1
+
+  [Fullstack]
+  Module: Backend Product Systems - Deep Dive
+  Type: Elective*** | Duration: 0.5
+
+  [Fullstack]
+  Module: Foundations of AI-Assisted Full-Stack Development
+  Type: Elective*** | Duration: 0.5
+
+  [Fullstack]
+  Module: JavaScript Object System & Engineering Patterns
+  Type: Elective*** | Duration: 0.5
+
+  [Fullstack]
+  Module: React, TypeScript and Frontend Product Architecture Deep Dive
+  Type: Elective*** | Duration: 1
+
+  [System Design]
+  Module: Distributed System Design & AI-Integrated Architectures
+  Type: Elective*** | Duration: 1.5
+
+  [Interview Preparation]
+  Module: Mastering LastMile - Interview Simulation
+  Type: Core | Duration: 1.5 weeks
+
+  [Data Engineering]
+  Module: Data Engineering*
+  Type: Elective*** | Duration: 2
+
+  [Advanced DSA]
+  Module: DSA Edge: Advanced Patterns & Interview Techniques*
+  Type: Elective*** | Duration: 1
+
+  [Product Management]
+  Module: Product Management for Engineers*
+  Type: Elective*** | Duration: 1
+
+  [Gen AI]
+  Module: Gen AI for Software Engineers*
+  Type: Elective*** | Duration: 1.5
+
+
+---
+
+=== 2.3 Course Outline for Intermediate (Timeline: 11.5 Months) ===
+
+
+  [Programming Fundamentals]
+  Module: Intermediate DSA : AI Assisted Problem Solving
+  Type: Core | Duration: 1
+
+  [Agentic AI]
+  Module: AI & Agents: From Talking to AI to Building One
+  Type: Core | Duration: 1
+
+  [Advanced DSA]
+  Module: Advanced DSA: Foundations:Core Techniques & Optimization
+  Type: Core | Duration: 1
+
+  [Advanced DSA]
+  Module: Advanced DSA: Linear Data Structures
+  Type: Core | Duration: 1
+
+  [Advanced DSA]
+  Module: Advanced DSA: Backtracking & Advanced Trees
+  Type: Core | Duration: 1
+
+  [Advanced DSA]
+  Module: Advanced DSA: DP, Heaps & Graphs — Crack It with AI Edge
+  Type: Core | Duration: 1
+
+  [Databases & SQL]
+  Module: Databases & SQL
+  Type: Core | Duration: 1
+
+  [Backend]
+  Module: Foundations of Object-Oriented Design & Scalable Systems
+  Type: Specialisation** | Duration: 1
+
+  [Backend]
+  Module: Design Principles & Patterns for Extensible Systems
+  Type: Specialisation** | Duration: 1
+
+  [Backend]
+  Module: Applied Design & Machine Coding
+  Type: Specialisation** | Duration: 1
+
+  [Backend]
+  Module: AI-First Backend Capstone Project - Primer
+  Type: Specialisation** | Duration: 1
+
+  [Backend]
+  Module: AI-First Backend Capstone Project - Advance
+  Type: Specialisation** | Duration: 1.5
+
+  [Backend]
+  Module: Build a Production-Ready AI-Enabled System
+  Type: Elective*** | Duration: 1
+
+  [Fullstack]
+  Module: Web Platform Foundations & UI Systems
+  Type: Specialisation** | Duration: 0.5
+
+  [Fullstack]
+  Module: JavaScript Runtime Systems, Browser APIs & Product Engineering Labs
+  Type: Specialisation** | Duration: 1.5
+
+  [Fullstack]
+  Module: React and Frontend Product Architecture Fundamentals
+  Type: Specialisation** | Duration: 1
+
+  [Fullstack]
+  Module: Backend Product Systems, APIs and Production Engineering
+  Type: Specialisation** | Duration: 1
+
+  [Fullstack]
+  Module: Backend Product Systems - Deep Dive
+  Type: Specialisation** | Duration: 0.5
+
+  [Fullstack]
+  Module: Foundations of AI-Assisted Full-Stack Development
+  Type: Elective*** | Duration: 0.5
+
+  [Fullstack]
+  Module: JavaScript Object System & Engineering Patterns
+  Type: Elective*** | Duration: 0.5
+
+  [Fullstack]
+  Module: React, TypeScript and Frontend Product Architecture Deep Dive
+  Type: Elective*** | Duration: 1
+
+  [System Design]
+  Module: Distributed System Design & AI-Integrated Architectures
+  Type: Elective*** | Duration: 1.5
+
+  [Interview Preparation]
+  Module: Mastering LastMile - Interview Simulation
+  Type: Core | Duration: 1.5 weeks
+
+  [Data Engineering]
+  Module: Data Engineering*
+  Type: Elective*** | Duration: 2
+
+  [Advanced DSA]
+  Module: DSA Edge: Advanced Patterns & Interview Techniques*
+  Type: Elective*** | Duration: 1
+
+  [Product Management]
+  Module: Product Management for Engineers*
+  Type: Elective*** | Duration: 1
+
+  [Gen AI]
+  Module: Gen AI for Software Engineers*
+  Type: Elective*** | Duration: 1.5
+
+
+---
+
+=== 2.4 Course Outline for Advanced (Timeline: 9 Months) ===
+
+
+  [Agentic AI]
+  Module: AI & Agents: From Talking to AI to Building One
+  Type: Core | Duration: 1
+
+  [Advanced DSA]
+  Module: Advanced DSA: Foundations:Core Techniques & Optimization
+  Type: Core | Duration: 1
+
+  [Advanced DSA]
+  Module: Advanced DSA: Linear Data Structures
+  Type: Core | Duration: 1
+
+  [Advanced DSA]
+  Module: Advanced DSA: Backtracking & Advanced Trees
+  Type: Core | Duration: 1
+
+  [Advanced DSA]
+  Module: Advanced DSA: DP, Heaps & Graphs — Crack It with AI Edge
+  Type: Core | Duration: 1
+
+  [Databases & SQL]
+  Module: Databases & SQL
+  Type: Core | Duration: 1
+
+  [Backend]
+  Module: Foundations of Object-Oriented Design & Scalable Systems
+  Type: Specialisation** | Duration: 1
+
+  [Backend]
+  Module: Design Principles & Patterns for Extensible Systems
+  Type: Specialisation** | Duration: 1
+
+  [Backend]
+  Module: Applied Design & Machine Coding
+  Type: Specialisation** | Duration: 1
+
+  [Backend]
+  Module: AI-First Backend Capstone Project - Primer
+  Type: Specialisation** | Duration: 1
+
+  [Backend]
+  Module: AI-First Backend Capstone Project - Advance
+  Type: Specialisation** | Duration: 1.5
+
+  [Backend]
+  Module: Build a Production-Ready AI-Enabled System
+  Type: Elective*** | Duration: 1
+
+  [Fullstack]
+  Module: Web Platform Foundations & UI Systems
+  Type: Specialisation** | Duration: 0.5
+
+  [Fullstack]
+  Module: JavaScript Runtime Systems, Browser APIs & Product Engineering Labs
+  Type: Specialisation** | Duration: 1.5
+
+  [Fullstack]
+  Module: React and Frontend Product Architecture Fundamentals
+  Type: Specialisation** | Duration: 1
+
+  [Fullstack]
+  Module: Backend Product Systems, APIs and Production Engineering
+  Type: Specialisation** | Duration: 1
+
+  [Fullstack]
+  Module: Backend Product Systems - Deep Dive
+  Type: Specialisation** | Duration: 0.5
+
+  [Fullstack]
+  Module: Foundations of AI-Assisted Full-Stack Development
+  Type: Elective*** | Duration: 0.5
+
+  [Fullstack]
+  Module: JavaScript Object System & Engineering Patterns
+  Type: Elective*** | Duration: 0.5
+
+  [Fullstack]
+  Module: React, TypeScript and Frontend Product Architecture Deep Dive
+  Type: Elective*** | Duration: 1
+
+  [System Design]
+  Module: Distributed System Design & AI-Integrated Architectures
+  Type: Core | Duration: 1.5
+
+  [Interview Preparation]
+  Module: Mastering LastMile - Interview Simulation
+  Type: Elective*** | Duration: 1.5 weeks
+
+  [Data Engineering]
+  Module: Data Engineering*
+  Type: Elective*** | Duration: 2
+
+  [Advanced DSA]
+  Module: DSA Edge: Advanced Patterns & Interview Techniques*
+  Type: Elective*** | Duration: 1
+
+  [Product Management]
+  Module: Product Management for Engineers*
+  Type: Elective*** | Duration: 1
+
+  [Gen AI]
+  Module: Gen AI for Software Engineers*
+  Type: Elective*** | Duration: 1.5
+
+
+---
+
+=== 2.5 Scaler Academy: Beginners Track — Comprehensive Module & Class Deep Dive ===
+
+
+NOTE: Track Focus: Non-CS / Absolute Beginners starting from zero programming foundation. Includes 2 introductory programming modules before entering Intermediate DSA.
+
+  [Programming Fundamentals]
+  Module: Programming Fundamentals - Thinking with AI: Loops, Logic & Control Flow
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Beginner: Programming Foundations & AI Awareness
+    - Beginner: Operators & Expression Evaluation using AI
+    - Beginner: Data Types 1
+    - Beginner: Data Types 2 + Reading Inputs
+    - Beginner: Operators
+    - Beginner : If-Else & AI Edge Case Thinking
+    - Beginner: Lab Session on If-Else
+    - Beginner: Loops & Iteration Analysis by AI
+    - Beginner: Lab Session on Loop
+    - Beginner: More problems on Loops & Patterns
+    - Beginner: Lab Session on Patterns
+    - Beginner Sample Contest: Dual Camera Proctoring
+    - Beginner Contest 1: Data Types, If-Else & Loops
+
+  [Programming Fundamentals]
+  Module: Programming Fundamentals - Code Smarter with AI: Function & Arrays
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Beginner: Functions & Modularity: Designing Code with AI
+    - Beginner: Lab Session on Functions
+    - Beginner: Introduction to Strings
+    - Beginner: 1D Array
+    - Beginner: Lab Session on 1D Array - 1
+    - Beginner: Lab Session on 1D Array - 2
+    - Beginner: 2D Array
+    - Beginner: Lab Session on 2D Arrays - 1
+    - Beginner: Lab Session on 2D Arrays - 2
+    - Beginner: Strings in Memory: Visualizing with AI
+    - Beginner: Maths Basics & Calculate Iterations
+    - Beginner: Revision: Language
+    - Beginner Contest 2: Functions & Arrays & Contest discussion
+
+  [Programming Fundamentals]
+  Module: Intermediate DSA : AI Assisted Problem Solving
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Intermediate DSA: Time Complexity
+    - Intermediate DSA: Introduction to Arrays & Basics of AI
+    - Intermediate DSA: Lab Session on TC, SC, Output & Debugging
+    - Intermediate DSA: Arrays: Prefix Sum & Carry Forward with AI-Assisted Problem Solving
+    - Intermediate DSA: Lab Session on Prefix Sum & Carry Forward
+    - Intermediate DSA: Arrays: Arrays techniques & smart prompting
+    - Intermediate DSA: Memory Management & Sorting Basics
+    - Intermediate DSA: Bit Manipulations Basics
+    - Intermediate DSA: 2D Matrices
+    - Intermediate DSA : Strings & Immutability visualisations through AI
+    - Intermediate DSA: Lab on Matrix & Strings using AI
+    - Intermediate DSA: Contest & Contest discussion
+
+  [Agentic AI]
+  Module: AI & Agents: From Talking to AI to Building One
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - The runway to AI
+    - GenAI World & LLM Landscape
+    - Prompt Engineering Basics
+    - Advanced Prompting & AI Safety Basics
+    - LLM Built-in Power Tools
+    - RAG
+    - n8n Automation Workflow
+    - What Is an AI Agent?
+    - Building Agents with n8n & Zapier
+    - OpenClaw: Your Personal 24/7 AI Agent
+    - Multi-Agent Systems
+    - Debugging AI via vibecoding tools
+    - Capstone Intro
+
+  [Advanced DSA]
+  Module: Advanced DSA: Foundations:Core Techniques & Optimization
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - DSA: Time Complexity
+    - DSA: Arrays Techniques
+    - DSA: Arrays 1: One Dimensional
+    - DSA: Arrays 2: Two Dimensional
+    - DSA: Lab Session on Arrays
+    - DSA: Bit Manipulation
+    - DSA: Lab Session on Bit Manipulation
+    - DSA: Recursion
+    - DSA: Lab Session on Recursion
+    - DSA: Maths: Modular Arithmetic & GCD
+    - DSA: Hashing
+    - DSA: Lab Session on Hashing
+    - DSA: Sorting 1: Count Sort & Merge Sort
+    - DSA: Sorting 2: Quick Sort & Comparator Problems
+    - DSA: Sample Contest: Dual Camera Proctoring
+    - DSA Contest 1: Arrays, Bit Manipulation, Recursion, Math, Hashing & Sorting & Contest discussion
+
+  [Advanced DSA]
+  Module: Advanced DSA: Linear Data Structures
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - DSA: Searching 1: Binary Search on Array
+    - DSA: Searching 2: Binary Search on Answer
+    - DSA: Lab Session on Searching
+    - DSA: Classes, Objects & Linked List Introduction
+    - DSA: Linked List: Basic Problems
+    - DSA: Linked List: Sorting and Problems
+    - DSA: Linked List: Doubly Linked List & Detecting Loop
+    - DSA: Stacks
+    - DSA: Lab Session on Stacks
+    - DSA: Queues: Implementation & Problems
+    - DSA: Revision of DSA 1 & 2
+    - DSA Contest 2: Searching, Linked List, Stacks, Queues
+
+  [Advanced DSA]
+  Module: Advanced DSA: Backtracking & Advanced Trees
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - DSA: Maths: Combinatorics Basics & Prime Numbers
+    - DSA: Lab Session on Prime Numbers & 2 Pointers
+    - DSA: Lab Session on Maths & 2 Pointers
+    - DSA: Backtracking
+    - DSA: Lab Session on Backtracking
+    - DSA: Trees 1: Structure & Traversal
+    - DSA: Trees 2: BST
+    - DSA: Lab Session on Binary Trees
+    - DSA: Trees 4: Morris Inorder Traversal + LCA
+    - DSA: Lab Session on Binary Trees 2
+    - DSA: Hashing 3: Internal Implementation & Problems
+    - DSA Contest 3: Math, Two Pointers, Backtracking, Trees & Contest discussion
+
+  [Advanced DSA]
+  Module: Advanced DSA: DP, Heaps & Graphs — Crack It with AI Edge
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - DSA: Heaps: Introduction
+    - DSA: Heap Sort & Greedy
+    - DSA: Lab Session on Heaps & Greedy
+    - DSA: Lab Session on Interview Problems 1
+    - DSA: DP 1: One Dimensional
+    - DSA: DP 2: Two Dimensional
+    - DSA: DP 3: Knapsack
+    - DSA: Lab Session on Applications of Knapsack
+    - DSA: DP on Strings
+    - DSA: Graphs 1: Introduction, DFS & Cycle Detection
+    - DSA: Graphs 2: BFS & MST
+    - DSA: Graphs 3: Dijkstra Algo & Topological Sort
+    - DSA: Graphs 4: Famous Graphs Question
+    - DSA: Lab Session on Interview Problems 2
+    - DSA: Revision of DSA 3 & 4
+    - DSA Contest 4: Heaps, Greedy, DP & Graphs & Contest discussion
+    - Mandatory Skill Evaluation Test: DSA
+    - Skill Evaluation Test Discussion + How to ace DSA Interview
+    - DSA : Real World Project 1
+    - DSA : Real world Project 2
+
+  [Databases & SQL]
+  Module: Databases & SQL
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - SQL 1 : Introduction to DBMS & Keys
+    - SQL 2: CRUD Operations - 1
+    - SQL 3: CRUD Operations - 2
+    - SQL 4 : Joins
+    - SQL 5: Aggregate Queries
+    - SQL 6 : Joins and Aggregate Queries Working Session
+    - SQL 7: Subqueries & Views
+    - SQL 8: Indexing
+    - SQL 9: Transactions
+    - SQL 10: Window Functions
+    - SQL 11: Schema Design - 1
+    - SQL 12: Schema Design - 2
+    - Databases & SQL Contest: SQL and Schema Design (This is for Certification)
+
+  [Backend]
+  Module: Foundations of Object-Oriented Design & Scalable Systems
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - Backend LLD: Intro to LLD for Scalable & AI-Ready Systems
+    - Backend LLD: OOP-1: Intro to OOP Lab
+    - Backend LLD: OOP-2: Access Modifiers and Constructors
+    - Backend LLD: OOP-3: Inheritance and Polymorphism
+    - Backend LLD: OOP-4: Interfaces, Abstract Classes
+    - Backend LLD: Concurrency-1: Introduction to Processes and Threads
+    - Backend LLD: Concurrency-2: Executors and Callables
+    - Backend LLD: Concurrency-3: Introduction to Synchronization
+    - Backend LLD: Concurrency-4: Synchronization with Semaphores
+    - Backend LLD: Java Advanced Concepts - 1 [Generics]
+    - Backend LLD: Java Advanced Concepts - 2 [Generics & Collections Lab]
+    - Backend LLD: Java Advanced Concepts - 3 [Streams and Lambdas]
+    - Backend LLD: Java Advanced Concepts - 4 [Exception Handling and Miscellaneous Topics]
+    - Backend LLD: Contest - 1: Java, OOP, and Concurrency
+
+  [Backend]
+  Module: Design Principles & Patterns for Extensible Systems
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - Backend LLD: SOLID Principles for Extensible Systems with AI integrations
+    - Backend LLD: Design Patterns: Introduction and Singleton
+    - Backend LLD: Design Patterns: Builder
+    - Backend LLD: Design Patterns: Prototype and Registry
+    - Backend LLD: Design Patterns: Factory Pattern for Service Abstraction (APIs & AI Services)
+    - Backend LLD: Design Patterns: Adapter and Facade
+    - Backend LLD: Design Patterns: Decorator and Flyweight
+    - Backend LLD: Design Patterns: Behavioural Design Patterns
+    - Backend LLD: UML Diagrams
+    - Backend LLD: Contest - 2: Design Principles & Design Patterns
+
+  [Backend]
+  Module: Applied Design & Machine Coding
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - Backend LLD: Machine Coding - 1: How to Approach Design Problems
+    - Backend LLD: Machine Coding - 2: Design TicTacToe
+    - Backend LLD: Machine Coding - 3: Code TicTacToe 1
+    - Backend LLD: Machine Coding - 4: Code TicTacToe 2
+    - Backend LLD: Machine Coding - 5: Design Parking Lot
+    - Backend LLD: Machine Coding - 6: Code Parking Lot 1
+    - Backend LLD: Machine Coding - 7: Code Parking Lot 2
+    - Backend LLD: Machine Coding - 8: Design BookMyShow
+    - Backend LLD: Machine Coding - 9: Code BookMyShow 1
+    - Backend LLD: Machine Coding - 10: Code BookMyShow 2
+    - Backend LLD: Machine Coding - 11: Code BookMyShow 3
+    - Backend LLD: Machine Coding - 12: Design Splitwise
+    - Backend LLD: Machine Coding - 13: Code Splitwise 1
+    - Backend LLD: Machine Coding - 14: Code Splitwise 2
+    - Backend LLD: Contest - 3: Machine Coding
+
+  [Backend]
+  Module: AI-First Backend Capstone Project - Primer
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - Backend Projects: Intro to Backend Systems & AI-Augmented Development
+    - Backend Projects: Version Control and Git
+    - Backend Projects: Learning Git Commands & AI Dev Tools
+    - Backend Projects: Intro to Spring Framework and Building APIs
+    - Backend Projects: MVC, Requests in Spring and Starting First Microservice (with AI Service Integration)
+    - Backend Projects: Calling 3rd Party APIs & LLM/AI Services
+    - Backend Projects: Intro to Spring Data JPA
+    - Backend Projects: JPA Queries and Repositories
+    - Backend Projects: Unit Testing and Good Practices (including AI-assisted testing)
+    - Backend Projects: Authentication vs Authorization, OAuth2, JWT
+    - Backend Projects: Implementing UserAuthService
+    - Backend Projects: Deploying Backend & AI-Enabled Applications to AWS
+
+  [Backend]
+  Module: AI-First Backend Capstone Project - Advance
+  Type: Elective*** | Duration: 1.5 Months
+  Classes Covered:
+    - Backend Projects: RestTemplate, Resilience & Handling Failures in AI/API Systems
+    - Backend Projects: UUIDs and Representing Inheritance
+    - Backend Projects: Mocking and Writing Unit Tests (including AI services)
+    - Backend Projects: Advanced Testing Strategies for Backend Systems
+    - Backend Projects: JWT Generation and Validation
+    - Backend Projects: Authentication - Implementing OAuth 2
+    - Backend Projects: EBS, RDS
+    - Backend Projects: VPC, Security Groups, Route 53
+    - Backend Projects: Implementing Search: Paging, Sorting & Intro to Semantic Search
+    - Backend Projects: Creating Payment Microservice
+    - Backend Projects: Implementing Stripe PG and Reconciliation
+    - Backend Projects: Optimizing APIs using Redis and Kafka for Async & AI Workloads
+    - Backend Projects: Spring Cloud for Distributed Microservices & AI Services
+    - Backend Projects: Spring Cloud: API Gateway, Load Balancing, Logging & Monitoring
+    - Backend Projects: Docker for Backend & AI Service Deployment
+
+  [Backend]
+  Module: Build a Production-Ready AI-Enabled System
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - Module Introduction - Intro to LLMs for Backend Engineers & Prompt Engineering for Backend APIs
+    - Building BookMyShow Chat Agent - 1
+    - Building BookMyShow Chat Agent - 2
+    - Building BookMyShow Chat Agent - 3
+    - Buildng Splitwise AI Receipt Processor - 1
+    - Buildng Splitwise AI Receipt Processor - 2
+    - Buildng Splitwise AI Receipt Processor - 3
+    - Backend Capstone Project: Contest
+
+  [Fullstack]
+  Module: Web Platform Foundations & UI Systems
+  Type: Specialisation** | Duration: 0.5 Month
+  Classes Covered:
+    - How the Web Works: Browsers, HTML, DevTools, and AI Inspection
+    - Semantic HTML, Forms, and Structured User Input
+    - CSS Foundations: Cascade, Selectors, Box Model
+    - Layout Foundations: Display, Units, and Positioning
+    - Flexible Layouts with Flexbox
+    - CSS Grid and Reusable CSS: Variables, and Page-Level Layouts
+    - Responsive Design: Media Queries, Fluid Units, and Mobile-First Layouts
+    - Advanced CSS: Selectors, Specificity, Inheritance, and Interactions
+    - HTML & CSS Certification Contest
+
+  [Fullstack]
+  Module: JavaScript Runtime Systems, Browser APIs & Product Engineering Labs
+  Type: Specialisation** | Duration: 1.5 Months
+  Classes Covered:
+    - JavaScript Foundations: Values, Types, Variables, Control Flow, and Basic Programming
+    - Execution Model: Scope, Hoisting, and How JavaScript Runs
+    - Closures, Lexical Scope, and Persistent State
+    - Runtime Reasoning Lab: Predicting Output, Tracing Execution, and Debugging
+    - Functional JavaScript: Functions, Callbacks, and Higher Order Thinking
+    - The Browser as a Runtime: DOM Structure and Browser APIs
+    - Event Systems: User Interaction, Handlers, and UI Behavior
+    - Event Systems: DOM Cleanup & Event Delegation
+    - Product Lab I: Realtime Weather App, JSON, APIs, Async Flow, and Rendering
+    - Product Lab II: Kanban Board, Product Breakdown, UI Structure, and State Model
+    - Product Lab III: Kanban Board, DOM Manipulation and Dynamic Rendering
+    - Product Lab IV: Kanban Board, Business Logic, Persistence, and Local Storage
+    - Product Lab V: Kanban Board, Edge Cases, UX Refinement, and Extensibility
+    - Async Systems I: Callbacks, Web APIs, and Non Blocking Execution
+    - Async Systems II: Promises, Microtasks, and Chained Control Flow
+    - Async Systems III: Async Await, Error Handling, and Resilient Flows
+    - Async Systems IV: Promise Combinators, Coordination, and Real World Async Patterns
+    - Async Debugging Lab: Race Conditions, Failure States, and AI Assisted Investigation
+    - Browser Event Flow: Bubbling, Capturing, and Propagation
+    - Interaction Patterns Lab: Event Delegation, Scalable UI Behavior, and Machine Coding
+    - Performance Patterns Lab: Debouncing, Throttling, and Efficient Frontend Flows
+    - Object Model I: this, Method Context, and Function Invocation
+    - JS Certification Contest
+
+  [Fullstack]
+  Module: React and Frontend Product Architecture Fundamentals
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - React Foundations: Components, JSX and Thinking in UI Trees
+    - React Tooling: Build Tools, JSX and Project Structure
+    - Props, Lists, Forms and Component Composition
+    - State, Events and Interactive UI in React
+    - Lifting State Up, useEffect and Data Flow in Component Trees
+    - Product Lab 1: IMDB App: App Setup, Routing and Frontend Structure
+    - Product Lab 2: IMDB App: Movies Page, Pagination and Data Rendering
+    - Product Lab 3: IMDB App : API Integration, Watchlist and Local Storage
+    - Product Lab 4: IMDB App : Search, Sorting, Filtering and Shared State
+    - Context API, State Sharing and Component Communication
+    - Redux Foundations: Store Design, Actions and Predictable State
+    - Redux Integration Lab: Product Scale State Management in React
+    - React Certification Contest
+
+  [Fullstack]
+  Module: Backend Product Systems, APIs and Production Engineering
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - Backend Foundations: Node.js, APIs, Express and Service Thinking
+    - Data Systems: MongoDB, Mongoose, Schema Design and SQL vs NoSQL Thinking
+    - Middleware, Validation and MVC for Scalable Backend Structure
+    - Product Lab 1: Backend Architecture, Domain Modeling and Project Setup
+    - Product Lab 2: Authentication, Authorization and Role Based Access
+    - Product Lab 3: Protected Routes, Tokens and Session Aware Flows
+    - Product Lab 4: Movies, Theatres and Show APIs
+    - Product Lab 5: Partner Workflows, Admin Approval and Moderated Actions
+    - Product Lab 6: Booking Flow, Seat Management and Transaction Safety
+    - Product Lab 7: Payments, Ticket Generation and Order Lifecycle
+    - Product Lab 8: Email Workflows, Password Reset and User Communication
+    - Realtime Backend Systems: WebSockets, Live Updates and Event Driven Flows
+    - MERN Certification Contest
+
+  [Fullstack]
+  Module: Backend Product Systems - Deep Dive
+  Type: Elective*** | Duration: 0.5 Month
+  Classes Covered:
+    - Backend Quality Lab: API Testing, Debugging and Error Handling
+    - Backend Security Lab: Validation, Auth Hardening, Abuse Prevention and Safe Defaults
+    - Production Readiness: Environment Management, Deployment, Logging and Docker Basics
+    - Scalability Lab: Caching, Queues, Background Jobs and Data Flow Trade Offs
+    - AI Feature Integration Lab: LLM APIs, Structured Responses and Backend Orchestration
+    - Architecture and Interview Lab: Backend Design, Trade Offs and AI Assisted Review
+
+  [Fullstack]
+  Module: Foundations of AI-Assisted Full-Stack Development
+  Type: Elective*** | Duration: 0.5 Month
+  Classes Covered:
+    - Full-Stack Development in the Age of AI
+    - AI Coding Tools for Full-Stack Builders
+    - Prompting for UI, Logic, APIs, and Debugging
+    - Reviewing and Validating AI-Generated Full-Stack Code
+    - From Screen to Server: AI-Assisted Development Workflows
+    - Building Faster Without Losing Fundamentals
+
+  [Fullstack]
+  Module: JavaScript Object System & Engineering Patterns
+  Type: Elective*** | Duration: 0.5 Month
+  Classes Covered:
+    - Object Model II: Classes, Constructors, and Object Oriented Modeling
+    - Object Model III: Prototypes, Inheritance, and Reusable Behavior
+    - JavaScript Engineering Lab: Call, Apply, Bind, and Polyfill Thinking
+    - Polyfills Lab: Higher Order Methods and Implementation Reasoning
+    - Data Handling Lab: Deep Copy, Shallow Copy, and Reference Behavior
+
+  [Fullstack]
+  Module: React, TypeScript and Frontend Product Architecture Deep Dive
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - TypeScript Foundations for JavaScript Developers
+    - Advanced Hooks: useRef, useMemo, useCallback and useReducer
+    - Custom Hooks and Reusable Logic Patterns
+    - React Performance Lab: Rendering, Memoization and UI Efficiency
+    - Machine Coding Lab: Component Design, State Design and Real UI Problem Solving
+    - Architecture Studio: React Patterns, State Trade Offs and AI Assisted Review
+    - Next.js Foundations: App Router, Layouts and Modern React Delivery
+    - Next.js Data Fetching: Server and Client Components, Rendering Strategy and SEO
+    - Next.js Product Lab: Forms, Route Handlers, Auth Flow and Deployment
+    - Advanced React Systems: Fiber, Concurrent Rendering, Suspense, Lazy Loading and Error Boundaries
+    - React Interview and Frontend Reasoning Lab
+
+  [System Design]
+  Module: Distributed System Design & AI-Integrated Architectures
+  Type: Elective*** | Duration: 1.5 Months
+  Classes Covered:
+    - System Design Foundations & Modern Infrastructure
+    - Load Balancing, Consistent Hashing & Traffic Routing at Scale
+    - Caching Systems: CDN, Backend Caches, Cache Invalidation
+    - Case Study: Caching at Scale (Scaler Code Judge and Contest Leaderboards + AI Workloads)
+    - Case Study: Caching Facebook News Feed
+    - CAP / PACELC theorem + Master Slave Replication
+    - SQL vs NoSQL + Sharding
+    - Database Orchestration & Shard Creation
+    - Case study: Google Typeahead (How to approach System Design Problems)
+    - Case Study: Google Typeahead (Design and Optimizations)
+    - NoSQL Internals - LSM Tree and Multi Master
+    - Case Study: Messaging Apps (FB Messenger, Whatsapp, Slack)
+    - Messaging Queues - Apache Kafka & Zookeeper
+    - Case Study: ElasticSearch (Full Text Search)
+    - Case Study: S3, HDFS (Large File Storage)
+    - Case Study: Uber (Nearest Neighbor Search)
+    - Case Study: Rate Limiter + Unique ID Generator (Infra)
+    - Case Study: OTT Platform (OTT)
+    - Microservices - 1
+    - Microservices - 2
+    - Case Study: Ecommerce Platform (Microservices)
+
+  [Interview Preparation]
+  Module: Mastering LastMile - Interview Simulation
+  Type: Core | Duration: 1.5 Weeks
+  Classes Covered:
+    - DSA Interview Simulation: Problem Solving & Thinking Under Pressure
+    - LLD Interview Simulation: Structuring Scalable Solutions
+    - HLD Interview Simulation: Designing Systems & Communicating Trad
+
+  [Data Engineering]
+  Module: Data Engineering*
+  Type: Elective*** | Duration: 2 Months
+  Classes Covered:
+    - Introduction to Data Engineering
+    - Writing Efficient Queries: Part 1
+    - Writing Efficient Queries: Part 2
+    - Intro to Hadoop
+    - HDFS and MAP-REDUCE
+    - Introduction to Hive
+    - Advanced features of Hive
+    - Basics of Spark
+    - Spark Programming
+    - Structured API - PySpark
+    - PySpark Operations
+    - Introduction to Streaming
+    - Apache Spark Streaming
+    - Advanced Spark Streaming
+    - Additional Streaming Services: Bringing it all together
+    - Modern Data Architecures
+    - AWS Services for Data Engineering
+    - Data Modelling
+    - Orchestrating data pipelines
+    - Orchestration Continued
+    - Distributed Coordination
+    - Load Balancing
+    - Data Pillars
+    - Capstone
+
+  [Advanced DSA]
+  Module: DSA Edge: Advanced Patterns & Interview Techniques*
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - DSA Edge : Townhall
+    - DSA Edge : Townhall (Post-SQL - change name after scheduling)
+    - Revision of DSA Topics
+    - Maths: Inverse Mod & Problems
+    - Backtracking: Famous Problems
+    - Tries 1: Trie of Character
+    - Tries 2: Trie of Bits + Problems on Trees
+    - Strings Pattern Matching
+    - DP 1: DP on Strings
+    - DP 2: Famous Problems
+    - Graphs 1: Bipartite Graph
+    - Graphs 2: Belleman Ford & Floyd Warshall Algorithm
+    - Advanced Interview Problems
+    - DSA Edge Mandatory Contest: Full Syllabus
+    - DSA Edge Full Syllabus: Contest Discussion
+
+  [Product Management]
+  Module: Product Management for Engineers*
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - Townhall: Product Management
+    - Introduction to Product Management 1
+    - Understanding the Product Lifecycle 1
+    - Understanding the Product Lifecycle 2
+    - Critical Thinking in Product Development 1
+    - Critical Thinking in Product Development 2
+    - Market Structure Analysis and Its Technical Aspects 1
+    - Market Structure Analysis and Its Technical Aspects 2
+    - MVPs, Prototyping, and Growth Hacking 1
+    - MVPs, Prototyping, and Growth Hacking 2
+    - Concept Development, Validation, and the Role of Developers 1
+    - Concept Development, Validation, and the Role of Developers 2
+    - Introduction to Product Analytics 1
+
+  [Gen AI]
+  Module: Gen AI for Software Engineers*
+  Type: Elective*** | Duration: 1.5 Months
+  Classes Covered:
+    - Introduction to AI Engineering
+    - Refresher: Modern Text & Image AI Model Architectures
+    - Getting started with Text Generation LLM APIs (OpenAI API)
+    - Designing Eval Pipelines for AI Apps and Observability
+    - Prompt Engineering: Introduction
+    - Retrieval-Augmented Generation (RAG) Introduction
+    - Embeddings Deep Dive
+    - Multimodal & Tabular RAG
+    - Prompt Engineering: Security
+    - Agents: Foundations & Planning
+    - Advanced Agent Concepts
+    - Agent: Frameworks and Protocols
+    - Fine Tuning Existing Models
+    - Audio, Image, Video, Expressions: AI Modalities
+    - Scaling AI Applications
+    - Model Quantization Techniques
+    - Advanced Fine Tuning Techniques
+    - Dataset Engineering & Inference Optimization
+
+
+---
+
+=== 2.6 Scaler Academy: Intermediate Track — Comprehensive Module & Class Deep Dive ===
+
+
+NOTE: Track Focus: Engineers or learners with basic coding knowledge. Skips beginner programming fundamentals and jumps straight into Intermediate DSA, advanced Fullstack JavaScript engineering, and Backend Advance Specialisation.
+
+  [Programming Fundamentals]
+  Module: Intermediate DSA : AI Assisted Problem Solving
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Intermediate DSA: Time Complexity
+    - Intermediate DSA: Introduction to Arrays & Basics of AI
+    - Intermediate DSA: Lab Session on TC, SC, Output & Debugging
+    - Intermediate DSA: Arrays: Prefix Sum & Carry Forward with AI-Assisted Problem Solving
+    - Intermediate DSA: Lab Session on Prefix Sum & Carry Forward
+    - Intermediate DSA: Arrays: Arrays techniques & smart prompting
+    - Intermediate DSA: Memory Management & Sorting Basics
+    - Intermediate DSA: Bit Manipulations Basics
+    - Intermediate DSA: 2D Matrices
+    - Intermediate DSA : Strings & Immutability visualisations through AI
+    - Intermediate DSA:  Lab on Matrix & Strings using AI
+    - Intermediate DSA: Contest & Contest discussion
+
+  [Agentic AI]
+  Module: AI & Agents: From Talking to AI to Building One
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - The runway to AI
+    - GenAI World & LLM Landscape
+    - Prompt Engineering Basics
+    - Advanced Prompting & AI Safety Basics
+    - LLM  Built-in Power Tools
+    - RAG
+    - n8n Automation Workflow
+    - What Is an AI Agent?
+    - Building Agents with n8n & Zapier
+    - OpenClaw: Your Personal 24/7 AI Agent
+    - Multi-Agent Systems
+    - Debugging AI via vibecoding tools
+    - Capstone Intro
+
+  [Advanced DSA]
+  Module: Advanced DSA: Foundations:Core Techniques & Optimization
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - DSA: Time Complexity
+    - DSA: Arrays Techniques
+    - DSA: Arrays 1: One Dimensional
+    - DSA: Arrays 2: Two Dimensional
+    - DSA: Lab Session on Arrays
+    - DSA: Bit Manipulation
+    - DSA: Lab Session on Bit Manipulation
+    - DSA: Recursion
+    - DSA: Lab Session on Recursion
+    - DSA: Maths: Modular Arithmetic & GCD
+    - DSA: Hashing
+    - DSA: Lab Session on Hashing
+    - DSA: Sorting 1: Count Sort & Merge Sort
+    - DSA: Sorting 2: Quick Sort & Comparator Problems
+    - DSA: Sample Contest: Dual Camera Proctoring
+    - DSA Contest 1: Arrays, Bit Manipulation, Recursion, Math, Hashing & Sorting & Contest discussion
+
+  [Advanced DSA]
+  Module: Advanced DSA: Linear Data Structures
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - DSA: Searching 1: Binary Search on Array
+    - DSA: Searching 2: Binary Search on Answer
+    - DSA: Lab Session on Searching
+    - DSA: Classes, Objects & Linked List Introduction
+    - DSA: Linked List: Basic Problems
+    - DSA: Linked List: Sorting and Problems
+    - DSA: Linked List: Doubly Linked List & Detecting Loop
+    - DSA: Stacks
+    - DSA: Lab Session on Stacks
+    - DSA: Queues: Implementation & Problems
+    - DSA: Revision of DSA 1 & 2
+    - DSA Contest 2: Searching, Linked List, Stacks, Queues
+
+  [Advanced DSA]
+  Module: Advanced DSA: Backtracking & Advanced Trees
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - DSA: Maths: Combinatorics Basics & Prime Numbers
+    - DSA: Lab Session on Prime Numbers & 2 Pointers
+    - DSA: Lab Session on Maths & 2 Pointers
+    - DSA: Backtracking
+    - DSA: Lab Session on Backtracking
+    - DSA: Trees 1: Structure & Traversal
+    - DSA: Trees 2: BST
+    - DSA: Lab Session on Binary Trees
+    - DSA: Trees 4: Morris Inorder Traversal + LCA
+    - DSA: Lab Session on Binary Trees 2
+    - DSA: Hashing 3: Internal Implementation & Problems
+    - DSA Contest 3: Math, Two Pointers, Backtracking, Trees & Contest discussion
+
+  [Advanced DSA]
+  Module: Advanced DSA: DP, Heaps & Graphs — Crack It with AI Edge
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - DSA: Heaps: Introduction
+    - DSA: Heap Sort & Greedy
+    - DSA: Lab Session on Heaps & Greedy
+    - DSA: Lab Session on Interview Problems 1
+    - DSA: DP 1: One Dimensional
+    - DSA: DP 2: Two Dimensional
+    - DSA: DP 3: Knapsack
+    - DSA: Lab Session on Applications of Knapsack
+    - DSA: DP on Strings
+    - DSA: Graphs 1: Introduction, DFS & Cycle Detection
+    - DSA: Graphs 2: BFS & MST
+    - DSA: Graphs 3: Dijkstra Algo & Topological Sort
+    - DSA: Graphs 4: Famous Graphs Question
+    - DSA: Lab Session on Interview Problems 2
+    - DSA: Revision of DSA 3 & 4
+    - DSA Contest 4: Heaps, Greedy, DP & Graphs & Contest discussion
+    - Mandatory Skill Evaluation Test: DSA
+    - Skill Evaluation Test Discussion + How to ace DSA Interview
+    - DSA : Real World Project 1
+    - DSA : Real world Project 2
+
+  [Databases & SQL]
+  Module: Databases & SQL
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - SQL 1 : Introduction to DBMS & Keys
+    - SQL 2: CRUD Operations - 1
+    - SQL 3: CRUD Operations - 2
+    - SQL 4 : Joins
+    - SQL 5: Aggregate Queries
+    - SQL 6 : Joins and Aggregate Queries Working Session
+    - SQL 7: Subqueries & Views
+    - SQL 8: Indexing
+    - SQL 9: Transactions
+    - SQL 10: Window Functions
+    - SQL 11: Schema Design - 1
+    - SQL 12: Schema Design - 2
+    - Databases & SQL Contest: SQL and Schema Design (This is for Certification)
+
+  [Backend]
+  Module: Foundations of Object-Oriented Design & Scalable Systems
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - Backend LLD: Intro to LLD for Scalable & AI-Ready Systems
+    - Backend LLD: OOP-1: Intro to OOP Lab
+    - Backend LLD: OOP-2: Access Modifiers and Constructors
+    - Backend LLD: OOP-3: Inheritance and Polymorphism
+    - Backend LLD: OOP-4: Interfaces, Abstract Classes
+    - Backend LLD: Concurrency-1: Introduction to Processes and Threads
+    - Backend LLD: Concurrency-2: Executors and Callables
+    - Backend LLD: Concurrency-3: Introduction to Synchronization
+    - Backend LLD: Concurrency-4: Synchronization with Semaphores
+    - Backend LLD: Java Advanced Concepts - 1 [Generics]
+    - Backend LLD: Java Advanced Concepts - 2 [Generics & Collections Lab]
+    - Backend LLD: Java Advanced Concepts - 3 [Streams and Lambdas]
+    - Backend LLD: Java Advanced Concepts - 4 [Exception Handling and Miscellaneous Topics]
+    - Backend LLD: Contest - 1: Java, OOP, and Concurrency
+
+  [Backend]
+  Module: Design Principles & Patterns for Extensible Systems
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - Backend LLD: SOLID Principles for Extensible Systems with AI integrations
+    - Backend LLD: Design Patterns: Introduction and Singleton
+    - Backend LLD: Design Patterns: Builder
+    - Backend LLD: Design Patterns: Prototype and Registry
+    - Backend LLD: Design Patterns: Factory Pattern for Service Abstraction (APIs & AI Services)
+    - Backend LLD: Design Patterns: Adapter and Facade
+    - Backend LLD: Design Patterns: Decorator and Flyweight
+    - Backend LLD: Design Patterns: Behavioural Design Patterns
+    - Backend LLD: UML Diagrams
+    - Backend LLD: Contest - 2: Design Principles & Design Patterns
+
+  [Backend]
+  Module: Applied Design & Machine Coding
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - Backend LLD: Machine Coding - 1: How to Approach Design Problems
+    - Backend LLD: Machine Coding - 2: Design TicTacToe
+    - Backend LLD: Machine Coding - 3: Code TicTacToe 1
+    - Backend LLD: Machine Coding - 4: Code TicTacToe 2
+    - Backend LLD: Machine Coding - 5: Design Parking Lot
+    - Backend LLD: Machine Coding - 6: Code Parking Lot 1
+    - Backend LLD: Machine Coding - 7: Code Parking Lot 2
+    - Backend LLD: Machine Coding - 8: Design BookMyShow
+    - Backend LLD: Machine Coding - 9: Code BookMyShow 1
+    - Backend LLD: Machine Coding - 10: Code BookMyShow 2
+    - Backend LLD: Machine Coding - 11: Code BookMyShow 3
+    - Backend LLD: Machine Coding - 12: Design Splitwise
+    - Backend LLD: Machine Coding - 13: Code Splitwise 1
+    - Backend LLD: Machine Coding - 14: Code Splitwise 2
+    - Backend LLD: Contest - 3: Machine Coding
+
+  [Backend]
+  Module: AI-First Backend Capstone Project - Primer
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - Backend Projects: Intro to Backend Systems & AI-Augmented Development
+    - Backend Projects: Version Control and Git
+    - Backend Projects: Learning Git Commands & AI Dev Tools
+    - Backend Projects: Intro to Spring Framework and Building APIs
+    - Backend Projects: MVC, Requests in Spring and Starting First Microservice (with AI Service Integration)
+    - Backend Projects: Calling 3rd Party APIs & LLM/AI Services
+    - Backend Projects: Intro to Spring Data JPA
+    - Backend Projects: JPA Queries and Repositories
+    - Backend Projects: Unit Testing and Good Practices (including AI-assisted testing)
+    - Backend Projects: Authentication vs Authorization, OAuth2, JWT
+    - Backend Projects: Implementing UserAuthService
+    - Backend Projects: Deploying Backend & AI-Enabled Applications to AWS
+
+  [Backend]
+  Module: AI-First Backend Capstone Project - Advance
+  Type: Specialisation** | Duration: 1.5 Months
+  Classes Covered:
+    - Backend Projects: RestTemplate, Resilience & Handling Failures in AI/API Systems
+    - Backend Projects: UUIDs and Representing Inheritance
+    - Backend Projects: Mocking and Writing Unit Tests (including AI services)
+    - Backend Projects: Advanced Testing Strategies for Backend Systems
+    - Backend Projects: JWT Generation and Validation
+    - Backend Projects: Authentication - Implementing OAuth 2
+    - Backend Projects: EBS, RDS
+    - Backend Projects: VPC, Security Groups, Route 53
+    - Backend Projects: Implementing Search: Paging, Sorting & Intro to Semantic Search
+    - Backend Projects: Creating Payment Microservice
+    - Backend Projects: Implementing Stripe PG and Reconciliation
+    - Backend Projects: Optimizing APIs using Redis and Kafka for Async & AI Workloads
+    - Backend Projects: Spring Cloud for Distributed Microservices & AI Services
+    - Backend Projects: Spring Cloud: API Gateway, Load Balancing, Logging & Monitoring
+    - Backend Projects: Docker for Backend & AI Service Deployment
+
+  [Backend]
+  Module: Build a Production-Ready AI-Enabled System
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - Module Introduction - Intro to LLMs for Backend Engineers & Prompt Engineering for Backend APIs
+    - Building BookMyShow Chat Agent - 1
+    - Building BookMyShow Chat Agent - 2
+    - Building BookMyShow Chat Agent - 3
+    - Buildng Splitwise AI Receipt Processor - 1
+    - Buildng Splitwise AI Receipt Processor - 2
+    - Buildng Splitwise AI Receipt Processor - 3
+    - Backend Capstone Project: Contest
+
+  [Fullstack]
+  Module: Web Platform Foundations & UI Systems
+  Type: Specialisation** | Duration: 0.5 Month
+  Classes Covered:
+    - How the Web Works: Browsers, HTML, DevTools, and AI Inspection
+    - Semantic HTML, Forms, and Structured User Input
+    - CSS Foundations: Cascade, Selectors, Box Model
+    - Layout Foundations: Display, Units, and Positioning
+    - Flexible Layouts with Flexbox
+    - CSS Grid and Reusable CSS: Variables, and Page-Level Layouts
+    - Responsive Design: Media Queries, Fluid Units, and Mobile-First Layouts
+    - UI Debugging and Quality Review: Specificity, Inheritance, Stacking, and Interaction States
+    - HTML & CSS Certification Contest
+
+  [Fullstack]
+  Module: JavaScript Runtime Systems, Browser APIs & Product Engineering Labs
+  Type: Specialisation** | Duration: 1.5 Months
+  Classes Covered:
+    - JavaScript Foundations: Values, Types, Variables, Control Flow, and Basic Programming
+    - Execution Model: Scope, Hoisting, and How JavaScript Runs
+    - Closures, Lexical Scope, and Persistent State
+    - Runtime Reasoning Lab: Predicting Output, Tracing Execution, and Debugging
+    - Functional JavaScript: Functions, Callbacks, and Higher Order Thinking
+    - The Browser as a Runtime: DOM Structure and Browser APIs
+    - Event Systems: User Interaction, Handlers, and UI Behavior
+    - Product Lab I: Realtime Weather App, JSON, APIs, Async Flow, and Rendering
+    - Product Lab II: Kanban Board, Product Breakdown, UI Structure, and State Model
+    - Product Lab III: Kanban Board, DOM Manipulation and Dynamic Rendering
+    - Product Lab IV: Kanban Board, Business Logic, Persistence, and Local Storage
+    - Product Lab V: Kanban Board, Edge Cases, UX Refinement, and Extensibility
+    - Async Systems I: Callbacks, Web APIs, and Non Blocking Execution
+    - Async Systems II: Promises, Microtasks, and Chained Control Flow
+    - Async Systems III: Async Await, Error Handling, and Resilient Flows
+    - Async Systems IV: Promise Combinators, Coordination, and Real World Async Patterns
+    - Async Debugging Lab: Race Conditions, Failure States, and AI Assisted Investigation
+    - Browser Event Flow: Bubbling, Capturing, and Propagation
+    - Interaction Patterns Lab: Event Delegation, Scalable UI Behavior, and Machine Coding
+    - Performance Patterns Lab: Debouncing, Throttling, and Efficient Frontend Flows
+    - Object Model I: this, Method Context, and Function Invocation
+    - JS Certification Contest
+
+  [Fullstack]
+  Module: React and Frontend Product Architecture Fundamentals
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - React Foundations: Components, JSX and Thinking in UI Trees
+    - React Tooling: Build Tools, JSX and Project Structure
+    - Props, Lists, Forms and Component Composition
+    - State, Events and Interactive UI in React
+    - Lifting State Up, useEffect and Data Flow in Component Trees
+    - Product Lab 1: IMDB App: App Setup, Routing and Frontend Structure
+    - Product Lab 2: IMDB App: Movies Page, Pagination and Data Rendering
+    - Product Lab 3: IMDB App : API Integration, Watchlist and Local Storage
+    - Product Lab 4: IMDB App : Search, Sorting, Filtering and Shared State
+    - Context API, State Sharing and Component Communication
+    - Redux Foundations: Store Design, Actions and Predictable State
+    - Redux Integration Lab: Product Scale State Management in React
+    - React Certification Contest
+
+  [Fullstack]
+  Module: Backend Product Systems, APIs and Production Engineering
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - Backend Foundations: Node.js, APIs, Express and Service Thinking
+    - Data Systems: MongoDB, Mongoose, Schema Design and SQL vs NoSQL Thinking
+    - Middleware, Validation and MVC for Scalable Backend Structure
+    - Product Lab 1: Backend Architecture, Domain Modeling and Project Setup
+    - Product Lab 2: Authentication, Authorization and Role Based Access
+    - Product Lab 3: Protected Routes, Tokens and Session Aware Flows
+    - Product Lab 4: Movies, Theatres and Show APIs
+    - Product Lab 5: Partner Workflows, Admin Approval and Moderated Actions
+    - Product Lab 6: Booking Flow, Seat Management and Transaction Safety
+    - Product Lab 7: Payments, Ticket Generation and Order Lifecycle
+    - Product Lab 8: Email Workflows, Password Reset and User Communication
+    - Realtime Backend Systems: WebSockets, Live Updates and Event Driven Flows
+    - MERN Certification Contest
+
+  [Fullstack]
+  Module: Backend Product Systems - Deep Dive
+  Type: Specialisation** | Duration: 0.5 Month
+  Classes Covered:
+    - Backend Quality Lab: API Testing, Debugging and Error Handling
+    - Backend Security Lab: Validation, Auth Hardening, Abuse Prevention and Safe Defaults
+    - Production Readiness: Environment Management, Deployment, Logging and Docker Basics
+    - Scalability Lab: Caching, Queues, Background Jobs and Data Flow Trade Offs
+    - AI Feature Integration Lab: LLM APIs, Structured Responses and Backend Orchestration
+    - Architecture and Interview Lab: Backend Design, Trade Offs and AI Assisted Review
+
+  [Fullstack]
+  Module: Foundations of AI-Assisted Full-Stack Development
+  Type: Elective*** | Duration: 0.5 Month
+  Classes Covered:
+    - Full-Stack Development in the Age of AI
+    - AI Coding Tools for Full-Stack Builders
+    - Prompting for UI, Logic, APIs, and Debugging
+    - Reviewing and Validating AI-Generated Full-Stack Code
+    - From Screen to Server: AI-Assisted Development Workflows
+    - Building Faster Without Losing Fundamentals
+
+  [Fullstack]
+  Module: JavaScript Object System & Engineering Patterns
+  Type: Elective*** | Duration: 0.5 Month
+  Classes Covered:
+    - Object Model II: Classes, Constructors, and Object Oriented Modeling
+    - Object Model III: Prototypes, Inheritance, and Reusable Behavior
+    - JavaScript Engineering Lab: Call, Apply, Bind, and Polyfill Thinking
+    - Polyfills Lab: Higher Order Methods and Implementation Reasoning
+    - Data Handling Lab: Deep Copy, Shallow Copy, and Reference Behavior
+
+  [Fullstack]
+  Module: React, TypeScript and Frontend Product Architecture Deep Dive
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - TypeScript Foundations for JavaScript Developers
+    - Advanced Hooks: useRef, useMemo, useCallback and useReducer
+    - Custom Hooks and Reusable Logic Patterns
+    - React Performance Lab: Rendering, Memoization and UI Efficiency
+    - Machine Coding Lab: Component Design, State Design and Real UI Problem Solving
+    - Architecture Studio: React Patterns, State Trade Offs and AI Assisted Review
+    - Next.js Foundations: App Router, Layouts and Modern React Delivery
+    - Next.js Data Fetching: Server and Client Components, Rendering Strategy and SEO
+    - Next.js Product Lab: Forms, Route Handlers, Auth Flow and Deployment
+    - Advanced React Systems: Fiber, Concurrent Rendering, Suspense, Lazy Loading and Error Boundaries
+    - React Interview and Frontend Reasoning Lab
+
+  [System Design]
+  Module: Distributed System Design & AI-Integrated Architectures
+  Type: Elective*** | Duration: 1.5 Months
+  Classes Covered:
+    - System Design Foundations & Modern Infrastructure
+    - Load Balancing, Consistent Hashing & Traffic Routing at Scale
+    - Caching Systems: CDN, Backend Caches, Cache Invalidation
+    - Case Study: Caching at Scale (Scaler Code Judge and Contest Leaderboards + AI Workloads)
+    - Case Study: Caching Facebook News Feed
+    - CAP / PACELC theorem + Master Slave Replication
+    - SQL vs NoSQL + Sharding
+    - Database Orchestration & Shard Creation
+    - Case study: Google Typeahead (How to approach System Design Problems)
+    - Case Study: Google Typeahead (Design and Optimizations)
+    - NoSQL Internals - LSM Tree and Multi Master
+    - Case Study: Messaging Apps (FB Messenger, Whatsapp, Slack)
+    - Messaging Queues - Apache Kafka & Zookeeper
+    - Case Study: ElasticSearch (Full Text Search)
+    - Case Study: S3, HDFS (Large File Storage)
+    - Case Study: Uber (Nearest Neighbor Search)
+    - Case Study: Rate Limiter + Unique ID Generator (Infra)
+    - Case Study: OTT Platform (OTT)
+    - Microservices - 1
+    - Microservices - 2
+    - Case Study: Ecommerce Platform (Microservices)
+
+[Interview Preparation]
+  Module: Mastering LastMile - Interview Simulation
+  Type: Core | Duration: 1.5 Weeks
+  Classes Covered:
+    - DSA Interview Simulation: Problem Solving & Thinking Under Pressure
+    - LLD Interview Simulation: Structuring Scalable Solutions
+    - HLD Interview Simulation: Designing Systems & Communicating Trad
+
+  [Data Engineering]
+  Module: Data Engineering*
+  Type: Elective*** | Duration: 2 Months
+  Classes Covered:
+    - Introduction to Data Engineering
+    - Writing Efficient Queries: Part 1
+    - Writing Efficient Queries: Part 2
+    - Intro to Hadoop
+    - HDFS and MAP-REDUCE
+    - Introduction to Hive
+    - Advanced features of Hive
+    - Basics of Spark
+    - Spark Programming
+    - Structured API - PySpark
+    - PySpark Operations
+    - Introduction to Streaming
+    - Apache Spark Streaming
+    - Advanced Spark Streaming
+    - Additional Streaming Services: Bringing it all together
+    - Modern Data Architecures
+    - AWS Services for Data Engineering
+    - Data Modelling
+    - Orchestrating data pipelines
+    - Orchestration Continued
+    - Distributed Coordination
+    - Load Balancing
+    - Data Pillars
+    - Capstone
+
+  [Advanced DSA]
+  Module: DSA Edge: Advanced Patterns & Interview Techniques*
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - DSA Edge : Townhall
+    - DSA Edge : Townhall (Post-SQL - change name after scheduling)
+    - Revision of DSA Topics
+    - Maths: Inverse Mod & Problems
+    - Backtracking: Famous Problems
+    - Tries 1: Trie of Character
+    - Tries 2: Trie of Bits + Problems on Trees
+    - Strings Pattern Matching
+    - DP 1: DP on Strings
+    - DP 2: Famous Problems
+    - Graphs 1: Bipartite Graph
+    - Graphs 2: Belleman Ford & Floyd Warshall Algorithm
+    - Advanced Interview Problems
+    - DSA Edge Mandatory Contest: Full Syllabus
+    - DSA Edge Full Syllabus: Contest Discussion
+
+  [Product Management]
+  Module: Product Management for Engineers*
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - Townhall: Product Management
+    - Introduction to Product Management 1
+    - Understanding the Product Lifecycle 1
+    - Understanding the Product Lifecycle 2
+    - Critical Thinking in Product Development 1
+    - Critical Thinking in Product Development 2
+    - Market Structure Analysis and Its Technical Aspects 1
+    - Market Structure Analysis and Its Technical Aspects 2
+    - MVPs, Prototyping, and Growth Hacking 1
+    - MVPs, Prototyping, and Growth Hacking 2
+    - Concept Development, Validation, and the Role of Developers 1
+    - Concept Development, Validation, and the Role of Developers 2
+    - Introduction to Product Analytics 1
+
+  [Gen AI]
+  Module: Gen AI for Software Engineers*
+  Type: Elective*** | Duration: 1.5 Months
+  Classes Covered:
+    - Introduction to AI Engineering
+    - Refresher: Modern Text & Image AI Model Architectures
+    - Getting started with Text Generation LLM APIs (OpenAI API)
+    - Designing Eval Pipelines for AI Apps and Observability
+    - Prompt Engineering: Introduction
+    - Retrieval-Augmented Generation (RAG) Introduction
+    - Embeddings Deep Dive
+    - Multimodal & Tabular RAG
+    - Prompt Engineering: Security
+    - Agents: Foundations & Planning
+    - Advanced Agent Concepts
+    - Agent: Frameworks and Protocols
+    - Fine Tuning Existing Models
+    - Audio, Image, Video, Expressions: AI Modalities
+    - Scaling AI Applications
+    - Model Quantization Techniques
+    - Advanced Fine Tuning Techniques
+    - Dataset Engineering & Inference Optimization
+
+
+---
+
+=== 2.7 Scaler Academy: Advanced Track — Comprehensive Module & Class Deep Dive ===
+
+
+NOTE: Track Focus: Experienced developers (2+ years). Skips introductory DSA and intermediate foundations completely, starting directly with Agentic AI, promotes System Design to mandatory Core, and sets LastMile as an Elective.
+
+  [Agentic AI]
+  Module: AI & Agents: From Talking to AI to Building One
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - GenAI World & LLM Landscape
+    - Prompt Engineering Basics
+    - Advanced Prompting & AI Safety Basics
+    - LLM  Built-in Power Tools
+    - RAG
+    - n8n Automation Workflow
+    - What Is an AI Agent?
+    - Building Agents with n8n & Zapier
+    - OpenClaw: Your Personal 24/7 AI Agent
+    - Multi-Agent Systems
+    - Debugging AI via vibecoding tools
+    - Capstone Intro
+
+  [Advanced DSA]
+  Module: Advanced DSA: Foundations:Core Techniques & Optimization
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - DSA: Time Complexity
+    - DSA: Arrays Techniques
+    - DSA: Arrays 1: One Dimensional
+    - DSA: Arrays 2: Two Dimensional
+    - DSA: Lab Session on Arrays
+    - DSA: Bit Manipulation
+    - DSA: Lab Session on Bit Manipulation
+    - DSA: Recursion
+    - DSA: Lab Session on Recursion
+    - DSA: Maths: Modular Arithmetic & GCD
+    - DSA: Hashing
+    - DSA: Lab Session on Hashing
+    - DSA: Sorting 1: Count Sort & Merge Sort
+    - DSA: Sorting 2: Quick Sort & Comparator Problems
+    - DSA: Sample Contest: Dual Camera Proctoring
+    - DSA Contest 1: Arrays, Bit Manipulation, Recursion, Math, Hashing & Sorting & Contest discussion
+
+  [Advanced DSA]
+  Module: Advanced DSA: Linear Data Structures
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - DSA: Searching 1: Binary Search on Array
+    - DSA: Searching 2: Binary Search on Answer
+    - DSA: Lab Session on Searching
+    - DSA: Classes, Objects & Linked List Introduction
+    - DSA: Linked List: Basic Problems
+    - DSA: Linked List: Sorting and Problems
+    - DSA: Linked List: Doubly Linked List & Detecting Loop
+    - DSA: Stacks
+    - DSA: Lab Session on Stacks
+    - DSA: Queues: Implementation & Problems
+    - DSA: Revision of DSA 1 & 2
+    - DSA Contest 2: Searching, Linked List, Stacks, Queues
+
+  [Advanced DSA]
+  Module: Advanced DSA: Backtracking & Advanced Trees
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - DSA: Maths: Combinatorics Basics & Prime Numbers
+    - DSA: Lab Session on Prime Numbers & 2 Pointers
+    - DSA: Lab Session on Maths & 2 Pointers
+    - DSA: Backtracking
+    - DSA: Lab Session on Backtracking
+    - DSA: Trees 1: Structure & Traversal
+    - DSA: Trees 2: BST
+    - DSA: Lab Session on Binary Trees
+    - DSA: Trees 4: Morris Inorder Traversal + LCA
+    - DSA: Lab Session on Binary Trees 2
+    - DSA: Hashing 3: Internal Implementation & Problems
+    - DSA Contest 3: Math, Two Pointers, Backtracking, Trees & Contest discussion
+
+  [Advanced DSA]
+  Module: Advanced DSA: DP, Heaps & Graphs — Crack It with AI Edge
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - DSA: Heaps: Introduction
+    - DSA: Heap Sort & Greedy
+    - DSA: Lab Session on Heaps & Greedy
+    - DSA: Lab Session on Interview Problems 1
+    - DSA: DP 1: One Dimensional
+    - DSA: DP 2: Two Dimensional
+    - DSA: DP 3: Knapsack
+    - DSA: Lab Session on Applications of Knapsack
+    - DSA: DP on Strings
+    - DSA: Graphs 1: Introduction, DFS & Cycle Detection
+    - DSA: Graphs 2: BFS & MST
+    - DSA: Graphs 3: Dijkstra Algo & Topological Sort
+    - DSA: Graphs 4: Famous Graphs Question
+    - DSA: Lab Session on Interview Problems 2
+    - DSA: Revision of DSA 3 & 4
+    - DSA Contest 4: Heaps, Greedy, DP & Graphs & Contest discussion
+    - Mandatory Skill Evaluation Test: DSA
+    - Skill Evaluation Test Discussion + How to ace DSA Interview
+    - DSA : Real World Project 1
+    - DSA : Real world Project 2
+
+  [Databases & SQL]
+  Module: Databases & SQL
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - SQL 1 : Introduction to DBMS & Keys
+    - SQL 2: CRUD Operations - 1
+    - SQL 3: CRUD Operations - 2
+    - SQL 4 : Joins
+    - SQL 5: Aggregate Queries
+    - SQL 6 : Joins and Aggregate Queries Working Session
+    - SQL 7: Subqueries & Views
+    - SQL 8: Indexing
+    - SQL 9: Transactions
+    - SQL 10: Window Functions
+    - SQL 11: Schema Design - 1
+    - SQL 12: Schema Design - 2
+    - Databases & SQL Contest: SQL and Schema Design (This is for Certification)
+
+  [Backend]
+  Module: Foundations of Object-Oriented Design & Scalable Systems
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - Backend LLD: Intro to LLD for Scalable & AI-Ready Systems
+    - Backend LLD: OOP-1: Intro to OOP Lab
+    - Backend LLD: OOP-2: Access Modifiers and Constructors
+    - Backend LLD: OOP-3: Inheritance and Polymorphism
+    - Backend LLD: OOP-4: Interfaces, Abstract Classes
+    - Backend LLD: Concurrency-1: Introduction to Processes and Threads
+    - Backend LLD: Concurrency-2: Executors and Callables
+    - Backend LLD: Concurrency-3: Introduction to Synchronization
+    - Backend LLD: Concurrency-4: Synchronization with Semaphores
+    - Backend LLD: Java Advanced Concepts - 1 [Generics]
+    - Backend LLD: Java Advanced Concepts - 2 [Generics & Collections Lab]
+    - Backend LLD: Java Advanced Concepts - 3 [Streams and Lambdas]
+    - Backend LLD: Java Advanced Concepts - 4 [Exception Handling and Miscellaneous Topics]
+    - Backend LLD: Contest - 1: Java, OOP, and Concurrency
+
+  [Backend]
+  Module: Design Principles & Patterns for Extensible Systems
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - Backend LLD: SOLID Principles for Extensible Systems with AI integrations
+    - Backend LLD: Design Patterns: Introduction and Singleton
+    - Backend LLD: Design Patterns: Builder
+    - Backend LLD: Design Patterns: Prototype and Registry
+    - Backend LLD: Design Patterns: Factory Pattern for Service Abstraction (APIs & AI Services)
+    - Backend LLD: Design Patterns: Adapter and Facade
+    - Backend LLD: Design Patterns: Decorator and Flyweight
+    - Backend LLD: Design Patterns: Behavioural Design Patterns
+    - Backend LLD: UML Diagrams
+    - Backend LLD: Contest - 2: Design Principles & Design Patterns
+
+  [Backend]
+  Module: Applied Design & Machine Coding
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - Backend LLD: Machine Coding - 1: How to Approach Design Problems
+    - Backend LLD: Machine Coding - 2: Design TicTacToe
+    - Backend LLD: Machine Coding - 3: Code TicTacToe 1
+    - Backend LLD: Machine Coding - 4: Code TicTacToe 2
+    - Backend LLD: Machine Coding - 5: Design Parking Lot
+    - Backend LLD: Machine Coding - 6: Code Parking Lot 1
+    - Backend LLD: Machine Coding - 7: Code Parking Lot 2
+    - Backend LLD: Machine Coding - 8: Design BookMyShow
+    - Backend LLD: Machine Coding - 9: Code BookMyShow 1
+    - Backend LLD: Machine Coding - 10: Code BookMyShow 2
+    - Backend LLD: Machine Coding - 11: Code BookMyShow 3
+    - Backend LLD: Machine Coding - 12: Design Splitwise
+    - Backend LLD: Machine Coding - 13: Code Splitwise 1
+    - Backend LLD: Machine Coding - 14: Code Splitwise 2
+    - Backend LLD: Contest - 3: Machine Coding
+
+  [Backend]
+  Module: AI-First Backend Capstone Project - Primer
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - Backend Projects: Intro to Backend Systems & AI-Augmented Development
+    - Backend Projects: Version Control and Git
+    - Backend Projects: Learning Git Commands & AI Dev Tools
+    - Backend Projects: Intro to Spring Framework and Building APIs
+    - Backend Projects: MVC, Requests in Spring and Starting First Microservice (with AI Service Integration)
+    - Backend Projects: Calling 3rd Party APIs & LLM/AI Services
+    - Backend Projects: Intro to Spring Data JPA
+    - Backend Projects: JPA Queries and Repositories
+    - Backend Projects: Unit Testing and Good Practices (including AI-assisted testing)
+    - Backend Projects: Authentication vs Authorization, OAuth2, JWT
+    - Backend Projects: Implementing UserAuthService
+    - Backend Projects: Deploying Backend & AI-Enabled Applications to AWS
+
+  [Backend]
+  Module: AI-First Backend Capstone Project - Advance
+  Type: Specialisation** | Duration: 1.5 Months
+  Classes Covered:
+    - Backend Projects: RestTemplate, Resilience & Handling Failures in AI/API Systems
+    - Backend Projects: UUIDs and Representing Inheritance
+    - Backend Projects: Mocking and Writing Unit Tests (including AI services)
+    - Backend Projects: Advanced Testing Strategies for Backend Systems
+    - Backend Projects: JWT Generation and Validation
+    - Backend Projects: Authentication - Implementing OAuth 2
+    - Backend Projects: EBS, RDS
+    - Backend Projects: VPC, Security Groups, Route 53
+    - Backend Projects: Implementing Search: Paging, Sorting & Intro to Semantic Search
+    - Backend Projects: Creating Payment Microservice
+    - Backend Projects: Implementing Stripe PG and Reconciliation
+    - Backend Projects: Optimizing APIs using Redis and Kafka for Async & AI Workloads
+    - Backend Projects: Spring Cloud for Distributed Microservices & AI Services
+    - Backend Projects: Spring Cloud: API Gateway, Load Balancing, Logging & Monitoring
+    - Backend Projects: Docker for Backend & AI Service Deployment
+
+  [Backend]
+  Module: Build a Production-Ready AI-Enabled System
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - Module Introduction - Intro to LLMs for Backend Engineers & Prompt Engineering for Backend APIs
+    - Building BookMyShow Chat Agent - 1
+    - Building BookMyShow Chat Agent - 2
+    - Building BookMyShow Chat Agent - 3
+    - Buildng Splitwise AI Receipt Processor - 1
+    - Buildng Splitwise AI Receipt Processor - 2
+    - Buildng Splitwise AI Receipt Processor - 3
+    - Backend Capstone Project: Contest
+
+  [Fullstack]
+  Module: Web Platform Foundations & UI Systems
+  Type: Specialisation** | Duration: 0.5 Month
+  Classes Covered:
+    - How the Web Works: Browsers, HTML, DevTools, and AI Inspection
+    - Semantic HTML, Forms, and Structured User Input
+    - CSS Foundations: Cascade, Selectors, Box Model
+    - Layout Foundations: Display, Units, and Positioning
+    - Flexible Layouts with Flexbox
+    - CSS Grid and Reusable CSS: Variables, and Page-Level Layouts
+    - Responsive Design: Media Queries, Fluid Units, and Mobile-First Layouts
+    - UI Debugging and Quality Review: Specificity, Inheritance, Stacking, and Interaction States
+    - HTML & CSS Certification Contest
+
+  [Fullstack]
+  Module: JavaScript Runtime Systems, Browser APIs & Product Engineering Labs
+  Type: Specialisation** | Duration: 1.5 Months
+  Classes Covered:
+    - JavaScript Foundations: Values, Types, Variables, Control Flow, and Basic Programming
+    - Execution Model: Scope, Hoisting, and How JavaScript Runs
+    - Closures, Lexical Scope, and Persistent State
+    - Runtime Reasoning Lab: Predicting Output, Tracing Execution, and Debugging
+    - Functional JavaScript: Functions, Callbacks, and Higher Order Thinking
+    - The Browser as a Runtime: DOM Structure and Browser APIs
+    - Event Systems: User Interaction, Handlers, and UI Behavior
+    - Product Lab I: Realtime Weather App, JSON, APIs, Async Flow, and Rendering
+    - Product Lab II: Kanban Board, Product Breakdown, UI Structure, and State Model
+    - Product Lab III: Kanban Board, DOM Manipulation and Dynamic Rendering
+    - Product Lab IV: Kanban Board, Business Logic, Persistence, and Local Storage
+    - Product Lab V: Kanban Board, Edge Cases, UX Refinement, and Extensibility
+    - Async Systems I: Callbacks, Web APIs, and Non Blocking Execution
+    - Async Systems II: Promises, Microtasks, and Chained Control Flow
+    - Async Systems III: Async Await, Error Handling, and Resilient Flows
+    - Async Systems IV: Promise Combinators, Coordination, and Real World Async Patterns
+    - Async Debugging Lab: Race Conditions, Failure States, and AI Assisted Investigation
+    - Browser Event Flow: Bubbling, Capturing, and Propagation
+    - Interaction Patterns Lab: Event Delegation, Scalable UI Behavior, and Machine Coding
+    - Performance Patterns Lab: Debouncing, Throttling, and Efficient Frontend Flows
+    - Object Model I: this, Method Context, and Function Invocation
+    - JS Certification Contest
+
+  [Fullstack]
+  Module: React and Frontend Product Architecture Fundamentals
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - React Foundations: Components, JSX and Thinking in UI Trees
+    - React Tooling: Build Tools, JSX and Project Structure
+    - Props, Lists, Forms and Component Composition
+    - State, Events and Interactive UI in React
+    - Lifting State Up, useEffect and Data Flow in Component Trees
+    - Product Lab 1: IMDB App: App Setup, Routing and Frontend Structure
+    - Product Lab 2: IMDB App: Movies Page, Pagination and Data Rendering
+    - Product Lab 3: IMDB App : API Integration, Watchlist and Local Storage
+    - Product Lab 4: IMDB App : Search, Sorting, Filtering and Shared State
+    - Context API, State Sharing and Component Communication
+    - Redux Foundations: Store Design, Actions and Predictable State
+    - Redux Integration Lab: Product Scale State Management in React
+    - React Certification Contest
+
+  [Fullstack]
+  Module: Backend Product Systems, APIs and Production Engineering
+  Type: Specialisation** | Duration: 1 Month
+  Classes Covered:
+    - Backend Foundations: Node.js, APIs, Express and Service Thinking
+    - Data Systems: MongoDB, Mongoose, Schema Design and SQL vs NoSQL Thinking
+    - Middleware, Validation and MVC for Scalable Backend Structure
+    - Product Lab 1: Backend Architecture, Domain Modeling and Project Setup
+    - Product Lab 2: Authentication, Authorization and Role Based Access
+    - Product Lab 3: Protected Routes, Tokens and Session Aware Flows
+    - Product Lab 4: Movies, Theatres and Show APIs
+    - Product Lab 5: Partner Workflows, Admin Approval and Moderated Actions
+    - Product Lab 6: Booking Flow, Seat Management and Transaction Safety
+    - Product Lab 7: Payments, Ticket Generation and Order Lifecycle
+    - Product Lab 8: Email Workflows, Password Reset and User Communication
+    - Realtime Backend Systems: WebSockets, Live Updates and Event Driven Flows
+    - MERN Certification Contest
+
+  [Fullstack]
+  Module: Backend Product Systems - Deep Dive
+  Type: Specialisation** | Duration: 0.5 Month
+  Classes Covered:
+    - Backend Quality Lab: API Testing, Debugging and Error Handling
+    - Backend Security Lab: Validation, Auth Hardening, Abuse Prevention and Safe Defaults
+    - Production Readiness: Environment Management, Deployment, Logging and Docker Basics
+    - Scalability Lab: Caching, Queues, Background Jobs and Data Flow Trade Offs
+    - AI Feature Integration Lab: LLM APIs, Structured Responses and Backend Orchestration
+    - Architecture and Interview Lab: Backend Design, Trade Offs and AI Assisted Review
+
+  [Fullstack]
+  Module: Foundations of AI-Assisted Full-Stack Development
+  Type: Elective*** | Duration: 0.5 Month
+  Classes Covered:
+    - Full-Stack Development in the Age of AI
+    - AI Coding Tools for Full-Stack Builders
+    - Prompting for UI, Logic, APIs, and Debugging
+    - Reviewing and Validating AI-Generated Full-Stack Code
+    - From Screen to Server: AI-Assisted Development Workflows
+    - Building Faster Without Losing Fundamentals
+
+  [Fullstack]
+  Module: JavaScript Object System & Engineering Patterns
+  Type: Elective*** | Duration: 0.5 Month
+  Classes Covered:
+    - Object Model II: Classes, Constructors, and Object Oriented Modeling
+    - Object Model III: Prototypes, Inheritance, and Reusable Behavior
+    - JavaScript Engineering Lab: Call, Apply, Bind, and Polyfill Thinking
+    - Polyfills Lab: Higher Order Methods and Implementation Reasoning
+    - Data Handling Lab: Deep Copy, Shallow Copy, and Reference Behavior
+
+  [Fullstack]
+  Module: React, TypeScript and Frontend Product Architecture Deep Dive
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - TypeScript Foundations for JavaScript Developers
+    - Advanced Hooks: useRef, useMemo, useCallback and useReducer
+    - Custom Hooks and Reusable Logic Patterns
+    - React Performance Lab: Rendering, Memoization and UI Efficiency
+    - Machine Coding Lab: Component Design, State Design and Real UI Problem Solving
+    - Architecture Studio: React Patterns, State Trade Offs and AI Assisted Review
+    - Next.js Foundations: App Router, Layouts and Modern React Delivery
+    - Next.js Data Fetching: Server and Client Components, Rendering Strategy and SEO
+    - Next.js Product Lab: Forms, Route Handlers, Auth Flow and Deployment
+    - Advanced React Systems: Fiber, Concurrent Rendering, Suspense, Lazy Loading and Error Boundaries
+    - React Interview and Frontend Reasoning Lab
+
+  [System Design]
+  Module: Distributed System Design & AI-Integrated Architectures
+  Type: Core | Duration: 1.5 Months
+  Classes Covered:
+    - System Design Foundations & Modern Infrastructure
+    - Load Balancing, Consistent Hashing & Traffic Routing at Scale
+    - Caching Systems: CDN, Backend Caches, Cache Invalidation
+    - Case Study: Caching at Scale (Scaler Code Judge and Contest Leaderboards + AI Workloads)
+    - Case Study: Caching Facebook News Feed
+    - CAP / PACELC theorem + Master Slave Replication
+    - SQL vs NoSQL + Sharding
+    - Database Orchestration & Shard Creation
+    - Case study: Google Typeahead (How to approach System Design Problems)
+    - Case Study: Google Typeahead (Design and Optimizations)
+    - NoSQL Internals - LSM Tree and Multi Master
+    - Case Study: Messaging Apps (FB Messenger, Whatsapp, Slack)
+    - Messaging Queues - Apache Kafka & Zookeeper
+    - Case Study: ElasticSearch (Full Text Search)
+    - Case Study: S3, HDFS (Large File Storage)
+    - Case Study: Uber (Nearest Neighbor Search)
+    - Case Study: Rate Limiter + Unique ID Generator (Infra)
+    - Case Study: OTT Platform (OTT)
+    - Microservices - 1
+    - Microservices - 2
+    - Case Study: Ecommerce Platform (Microservices)
+
+[Interview Preparation]
+  Module: Mastering LastMile - Interview Simulation
+  Type: Elective*** | Duration: 1.5 Weeks
+  Classes Covered:
+    - DSA Interview Simulation: Problem Solving & Thinking Under Pressure
+    - LLD Interview Simulation: Structuring Scalable Solutions
+    - HLD Interview Simulation: Designing Systems & Communicating Trad
+
+  [Data Engineering]
+  Module: Data Engineering*
+  Type: Elective*** | Duration: 2 Months
+  Classes Covered:
+    - Introduction to Data Engineering
+    - Writing Efficient Queries: Part 1
+    - Writing Efficient Queries: Part 2
+    - Intro to Hadoop
+    - HDFS and MAP-REDUCE
+    - Introduction to Hive
+    - Advanced features of Hive
+    - Basics of Spark
+    - Spark Programming
+    - Structured API - PySpark
+    - PySpark Operations
+    - Introduction to Streaming
+    - Apache Spark Streaming
+    - Advanced Spark Streaming
+    - Additional Streaming Services: Bringing it all together
+    - Modern Data Architecures
+    - AWS Services for Data Engineering
+    - Data Modelling
+    - Orchestrating data pipelines
+    - Orchestration Continued
+    - Distributed Coordination
+    - Load Balancing
+    - Data Pillars
+    - Capstone
+
+  [Advanced DSA]
+  Module: DSA Edge: Advanced Patterns & Interview Techniques*
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - DSA Edge : Townhall
+    - DSA Edge : Townhall (Post-SQL - change name after scheduling)
+    - Revision of DSA Topics
+    - Maths: Inverse Mod & Problems
+    - Backtracking: Famous Problems
+    - Tries 1: Trie of Character
+    - Tries 2: Trie of Bits + Problems on Trees
+    - Strings Pattern Matching
+    - DP 1: DP on Strings
+    - DP 2: Famous Problems
+    - Graphs 1: Bipartite Graph
+    - Graphs 2: Belleman Ford & Floyd Warshall Algorithm
+    - Advanced Interview Problems
+    - DSA Edge Mandatory Contest: Full Syllabus
+    - DSA Edge Full Syllabus: Contest Discussion
+
+  [Product Management]
+  Module: Product Management for Engineers*
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - Townhall: Product Management
+    - Introduction to Product Management 1
+    - Understanding the Product Lifecycle 1
+    - Understanding the Product Lifecycle 2
+    - Critical Thinking in Product Development 1
+    - Critical Thinking in Product Development 2
+    - Market Structure Analysis and Its Technical Aspects 1
+    - Market Structure Analysis and Its Technical Aspects 2
+    - MVPs, Prototyping, and Growth Hacking 1
+    - MVPs, Prototyping, and Growth Hacking 2
+    - Concept Development, Validation, and the Role of Developers 1
+    - Concept Development, Validation, and the Role of Developers 2
+    - Introduction to Product Analytics 1
+
+  [Gen AI]
+  Module: Gen AI for Software Engineers*
+  Type: Elective*** | Duration: 1.5 Months
+  Classes Covered:
+    - Introduction to AI Engineering
+    - Refresher: Modern Text & Image AI Model Architectures
+    - Getting started with Text Generation LLM APIs (OpenAI API)
+    - Designing Eval Pipelines for AI Apps and Observability
+    - Prompt Engineering: Introduction
+    - Retrieval-Augmented Generation (RAG) Introduction
+    - Embeddings Deep Dive
+    - Multimodal & Tabular RAG
+    - Prompt Engineering: Security
+    - Agents: Foundations & Planning
+    - Advanced Agent Concepts
+    - Agent: Frameworks and Protocols
+    - Fine Tuning Existing Models
+    - Audio, Image, Video, Expressions: AI Modalities
+    - Scaling AI Applications
+    - Model Quantization Techniques
+    - Advanced Fine Tuning Techniques
+    - Dataset Engineering & Inference Optimization
+
+
+---
+
+
+
+--------------------------------------------------------------------------------
+3. Program 2: Scaler DSML (Data Science & Machine Learning)
+--------------------------------------------------------------------------------
+
+=== 3.1 Course Timelines by Learner Level ===
+
+- Beginner Course Timeline: 14 to 21.5 Months
+- Intermediate Course Timeline: 11.5 Months
+
+=== 3.2 Scaler DSML: Beginners Track (14 Months) — Comprehensive Module & Class Deep Dive ===
+
+
+NOTE: Track Focus: Aspiring data analysts and data scientists starting from zero. Covers foundational SQL, Spreadsheets, and Python reporting before progressing to advanced analytics, machine learning, and elective AI tracks.
+
+  [Data Foundations]
+  Module: Advanced SQL & AI for Data Professionals
+  Type: Core | Duration: 2 Months
+  Classes Covered:
+    - Data Foundations & SQL Introduction
+    - Keys, Data Types & SQL Basics
+    - Data Filtering with SQL
+    - NULLs & Aggregation
+    - GROUP BY Metrics
+    - Applied SQL Lab 1: GroupBy Problems
+    - CASE WHEN and Conditional Aggregation
+    - JOINs 1: Relationships + INNER JOIN
+    - JOINs 2: LEFT + FULL OUTER + CROSS
+    - JOINs 3: SELF JOIN + NON-EQUI JOINS
+    - Subqueries 1: Non-Correlated
+    - Subqueries 2: Correlated + EXISTS
+    - CTEs + UNION / UNION ALL
+    - Applied SQL Lab 2: JOIN-heavy Problems
+    - Date & Time SQL Functions
+    - Window Functions 1: Ranking & Aggregates
+    - Window Functions 2: Advanced Ranking & Frames
+    - Window Functions 3: Navigation & Trend Analysis
+    - Applied SQL Lab 3: Windows + Dates
+    - MySQL Setup & DDL, DML Commands
+    - Advanced Concepts 1: Views, Indexing & Partitioning
+    - Advanced Concepts 2: Functions & Stored Procedures
+    - Funnel Analytics in SQL
+    - Cohorts & Retention Analysis
+    - Final SQL Revision
+
+  [Business Intelligence & Visualization]
+  Module: Spreadsheets & Dashboarding with AI Storytelling
+  Type: Core | Duration: 1.5 Months
+  Classes Covered:
+    - Spreadsheet 1: Cleanup + Structure
+    - Spreadsheet 2: Core Formulas
+    - Spreadsheet 3: Lookups + Reporting
+    - Spreadsheet 4: Pivot Tables + Mini Dashboard
+    - Live Business Case: Spreadsheet Reporting Case
+    - Tableau 1: Viz Fundamentals + KPIs
+    - Tableau 2: Filters + Calculations
+    - Tableau 3: LOD (Practical)
+    - Tableau 4: Table Calcs + Analytics
+    - Tableau 5: Operations on Dataset
+    - Tableau 6: Dashboard Creation
+    - Live Business Case : Dashboard Storytelling
+
+  [Programming & Data Manipulation]
+  Module: Python Foundations + AI Coding Assistants
+  Type: Core | Duration: 2 Months
+  Classes Covered:
+    - Python 1:  Data Types + Variables + I/O
+    - Python 2:  Control Flow + Loops
+    - Python 3:  Functions + Strings
+    - Python 4:  List
+    - Python 5 : Tuple, Sets & Dictionaries
+    - Python 6 :  Functional Programming
+    - Python 7 : File Handling, and Error Handling
+    - Pandas 1 : Introduction to Pandas & DataFrame Operations
+    - Pandas 2 : Core DataFrame Operations
+    - Pandas 3 - Group Operations & Hierarchical Indexing
+    - Pandas 4 - Data Transformation & Preprocessing
+    - Data Visualization for Data Analytics
+
+  [Product Analytics & Experimentation]
+  Module: Data to Decisions: Product Analytics with AI
+  Type: Core | Duration: 1.5 Months
+  Classes Covered:
+    - Product Strategy & Business Acumen
+    - Product Metrics 1
+    - Product Metrics 2
+    - RCA I
+    - RCA II - Case Study
+    - Guesstimates I
+    - Guesstimates II - Case Study
+    - CRM Analytics
+    - Customer Segmentation
+    - A/B Testing & Launch Recommendations
+    - Applied Case Study 1
+    - Applied Case Study 2
+
+  [AI Automation & Workflows]
+  Module: Generative AI for Data Analytics & Automation
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - GenAI 1: Introduction to AI, LLMs & Analyst Workflows
+    - GenAI 2: Prompt Engineering for Data Tasks (SQL, Python, Insights)
+    - GenAI 3: Using AI for SQL Query Generation & Debugging
+    - GenAI 4: Using AI for Python & Pandas Automation
+    - GenAI 5: AI for Data Cleaning & EDA
+    - GenAI 6: AI for Dashboard Insights & Storytelling
+    - GenAI 7: Building AI-Assisted Reports & Business Narratives
+    - GenAI 8: Automating Repetitive Analysis using AI
+    - GenAI 9: Evaluating AI Outputs (Hallucination, Bias, Errors)
+    - GenAI 10: Using AI APIs (OpenAI) for Data Workflows
+    - GenAI 11: Building Mini AI Tools for Analysts (End-to-End)
+    - Applied GenAI Lab: Solve a Business Case using AI + Analytics
+
+  [Career & Placement]
+  Module: Interview Readiness
+  Type: Core | Duration: 0.5 Month
+  Classes Covered:
+    - Interview Prep 1: SQL Basics & Pattern Recognition
+    - Interview Prep 2: SQL Intermediate (JOINs, Aggregations)
+    - Interview Prep 3: SQL Advanced (Window Functions, CTEs)
+    - Interview Prep 4: SQL Case-Based Problem Solving
+    - Interview Prep 5: Python Basics for Interviews
+    - Interview Prep 6: Pandas-Based Interview Questions
+    - Interview Prep 7: Product Case Interviews (Metrics & Business Thinking)
+    - Interview Prep 8: Estimation & Guesstimates for Analysts
+    - Interview Prep 9: Resume Building (Projects, Impact, Storytelling)
+    - Interview Prep 10: LinkedIn & Portfolio Optimization
+
+
+=== 3.3 Scaler DSML: Intermediate Track (11.5 Months) — Comprehensive Module & Class Deep Dive ===
+
+
+NOTE: Track Focus: Intermediate learners with prior analytics/coding foundation. Skips introductory reporting (SQL, Excel, basic Python) and focuses on Advanced Analytics, Applied Statistics, and deep mandatory Machine Learning, MLOps, Deep Learning, and Agentic AI. All modules are Core.
+
+  [Data Analytics]
+  Module: Advanced Analytics with Python, Pandas & AI Workflows
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Time & Space Complexity
+    - Object Oriented Programming 1
+    - Object Oriented Programming 2
+    - Object Oriented Programming 3
+    - Regex
+    - NumPy 1
+    - NumPy 2
+    - NumPy 3
+    - Advanced Visualizations
+    - End to End Business case study
+
+  [Statistical Foundations]
+  Module: Statistics, Experimentation & AI for Data-Driven Decisions
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Statistics 1: Probability Foundations for Analytics
+    - Statistics 2: Distributions (Normal, Binomial, Real-world Context)
+    - Statistics 3: Sampling Techniques & Bias
+    - Statistics 4: Central Limit Theorem (Intuition + Applications)
+    - Statistics 5: Hypothesis Testing Fundamentals
+    - Statistics 6: p-values, Confidence Intervals & Errors
+    - Statistics 7: A/B Testing (Design & Setup)
+    - Statistics 8: A/B Testing (Analysis & Interpretation)
+    - Statistics 9: Experimentation Pitfalls (Bias, Peeking, Simpson’s Paradox)
+    - Statistics 10: Metric Design for Experiments
+    - Statistics 11: AI-Assisted Statistical Interpretation & Validation
+    - Applied Experiment Lab: End-to-End A/B Test Case
+
+  [Product Analytics]
+  Module: Advanced Product Analytics
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - 1: Advanced Funnel Analysis (Multi-step, Multi-channel)
+    - 2: Retention Models & Cohort Deep Dive
+    - 3: Customer Lifetime Value (LTV) Modeling
+    - 4: Customer Acquisition Cost (CAC) & Payback
+    - 5: Growth Loops & Product-Led Growth
+    - 6: Segmentation Strategies (Behavioral & Value-based)
+    - 7: Churn Analysis & Retention Strategies
+    - 8: Predictive Analytics (Intro for Product)
+    - 9: Recommendation Systems (Conceptual)
+    - 10: Decision Frameworks for Product Teams
+    - 11: AI for Product Strategy & Insights
+    - Applied Product Capstone: End-to-End Product Analytics Case
+
+  [Math for ML]
+  Module: Mathematical Foundations for AI
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Linear Algebra 1: The Math Behind ML
+    - Linear Algebra 2: Dots, Lines & Hyperplanes
+    - Linear Algebra 3: Sides, Spaces & Distance
+    - Linear Algebra 4: Drawing the Line on Loss
+    - Linear Algebra 5: Let’s Solve Some ML Problems
+    - Optimization 1: Why ML Needs Calculus
+    - Optimization 2: The Road to Gradient Descent
+    - Optimization 3: Gradient Descent in Action
+    - Optimization 4: When ML Has Rules to Follow
+    - Optimization 5: PCA — Finding the Signal in the Noise
+
+  [Machine Learning Foundations]
+  Module: Machine Learning with AI Workflows
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Intro to Machine Learning: From Data to Learning
+    - Linear Regression: Understanding the Learning Process
+    - Linear Regression: Measuring and Minimising Error
+    - Linear Regression: Finding the Best Fit
+    - Linear Regression: Understanding Model Parameters
+    - Polynomial Regression: Balancing Fit and Complexity
+    - Regularisation & Cross-Validation: Building Robust Models
+    - Logistic Regression: From Prediction to Classification
+    - Logistic Regression: Understanding Decision Boundaries
+    - Classification Metrics: Evaluating Model Performance
+    - Handling Imbalanced Data
+
+  [Cloud & Data Engineering]
+  Module: Cloud & Data Analytics on AWS
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Cloud 1: Introduction to Cloud & Modern Data Stack
+    - Cloud 2: AWS Core Services for Data Professionals
+    - Cloud 3: Data Storage with S3 (Data Lakes Concept)
+    - Cloud 4: Querying Data with Amazon Athena
+    - Cloud 5: Data Warehousing with Amazon Redshift
+    - Cloud 6: ETL Basics with AWS Glue
+    - Cloud 7: Designing End-to-End Data Pipelines
+    - Cloud 8: Connecting Tableau to Cloud Data Sources
+    - Cloud 9: Cloud Performance & Cost Optimization
+    - Cloud 10: Intro to Databricks & Lakehouse Concept
+    - Cloud 11: Real-world Architecture for Data Analytics
+    - Applied Cloud Lab: Building a Production Data Pipeline
+
+  [Domain Specialization]
+  Module: Domain Analytics
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Elective Specialisation in Banking, FinTech, E-Commerce, or Healthcare Analytics
+
+  [AI Foundations & Automation]
+  Module: AI For everyone
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Evaluating and Comparing AI Tools
+    - Model Selection: Matching AI to Your Needs
+    - AI Failure Modes and Risk Mitigation
+    - Voice-Driven Analytical Workflows
+    - No-Code Automation for Data Workflows
+    - AI Integration with Org Data & Knowledge Bases
+    - Building a Reusable Prompt Library
+    - Task Decomposition for AI Execution
+    - AI Collaboration: Delegation vs. Augmentation
+    - Workflow Mapping: The Three-Tier Framework
+    - No-Code Prototyping: From Reports to Tools
+    - Applied No-Code: Building Data Tools
+    - Structured Prototyping: Avoiding Pitfalls
+    - Visual Design for AI-Built Prototypes
+    - Prototype Handoff & Capstone Planning
+    - Autonomous AI: Architecture & Boundaries
+    - Orchestrating Multi-Step AI Pipelines
+    - Applied Agent Dev: Data-Monitoring Workflow
+    - From Analysis to Narrative
+    - Turning Analysis into Business Narratives
+    - Communicating AI-Assisted Work Responsibly
+
+  [Machine Learning Core]
+  Module: Supervised Machine Learning with AI
+  Type: Core | Duration: 1.5 Months
+  Classes Covered:
+    - k-Nearest Neighbors: Learning from Nearby Data
+    - k-Nearest Neighbors: Understanding Distance & Decisions
+    - Decision Trees: Finding the Best Splits
+    - Decision Trees: How to decide what to Split
+    - Bagging & Random Forests: Strength in Numbers
+    - Boosting: Learning from Model Mistakes
+    - Boosting: Building Stronger Predictive Models
+    - Ensemble Techniques: Combining Models for Better Predictions
+    - Naive Bayes: Learning from Probability
+    - Naive Bayes: Turning Evidence into Predictions
+    - Support Vector Machines: Finding the Optimal Boundary
+    - Support Vector Machines: Handling Complex Boundaries
+
+  [Machine Learning Core]
+  Module: Un-supervised Machine Learning with AI
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - PCA: Finding Structure in High-Dimensional Data
+    - t-SNE: Visualising High-Dimensional Data
+    - t-SNE & UMAP: Exploring Data in Lower Dimensions
+    - K-Means Clustering: Finding Natural Groups in Data
+    - K-Means++: Smarter Initialization for Better Clusters
+    - Gaussian Mixture Models: Clustering with Probability
+    - Hierarchical Clustering: Building Data Relationships
+    - DBSCAN: Discovering Clusters of Any Shape
+    - Anomaly Detection: Finding the Unusual in Data
+    - End-to-End ML: From Business Problem to Model Part1
+    - End-to-End ML: From Business Problem to Model 2
+
+  [Specialized ML]
+  Module: Time Series and Recommender Systems with AI Workflows
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Time Travels — An Introduction to Time Series & Forecasting
+    - Reading the Rhythm — Time Series Analysis I
+    - Finding Patterns in Time — Time Series Analysis II
+    - Forecasting the Future — Time Series Analysis III
+    - When Trends Get Tricky — Time Series Analysis IV
+    - Mastering the Timeline — Time Series Analysis V
+    - So, What Should You Pick? — Recommender Systems I
+    - Learning What You Like — Recommender Systems II
+    - From Users to Recommendations — Recommender Systems III
+    - The Art of the Next Best Pick — Recommender Systems IV
+    - Building Smarter Recommendations — Recommender Systems V
+    - From Data to Decisions — An End-to-End ML Practical
+
+  [Production ML & MLOps]
+  Module: MLOps & AI Deployment
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Git & GitHub: Setup for MLOps
+    - Building Cars24 ML tool using Streamlit
+    - Develop Web APIs using Flask
+    - Containerization - Docker & DockerHub
+    - Deploying APIs on AWS using ECS
+    - GitHub Actions - Setting up CI pipelines
+    - GitHub Actions - Setting up CD pipelines
+    - Experiment Tracking & Data Management using MLFlow
+    - ML System Design - 1
+    - ML System Design - 2
+    - Building ML pipelines with AWS Sagemaker
+    - Processing large scale data using Apache Spark
+
+  [Deep Learning]
+  Module: Deep Learning & Neural Networks
+  Type: Core | Duration: 1.5 Months
+  Classes Covered:
+    - Neural Networks: Building the Foundations of DL
+    - Forward & Backward propagation: How NNs Learn
+    - N-Layer Neural Networks: Building Deeper Models
+    - N-Layer Neural Networks: Learning Complex Patterns
+    - Deep Backpropagation: Training Multi-Layer Networks
+    - PyTorch 1: Building Your First Neural Network
+    - PyTorch 2: Training NNs in Practice
+    - Optimizers: Steering NNs Towards Better Learning
+    - Hyperparameter Tuning: Finding Better NN
+    - Autoencoders: Learning to Compress and Reconstruct
+    - Designing & Debugging MLPs: From Architecture to Training
+    - Model Interpretability: Understanding Neural Network Decisions
+
+  [Deep Learning Specialization]
+  Module: AI for Computer Vision
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Computer Vision: Teaching Machines to See
+    - CNNs: Tackling Overfitting for Better Generalisation
+    - CNNs Under the Hood: Understanding Feature Learning
+    - Transfer Learning: Building on What Models Already Know
+    - Image Embeddings: Measuring Similarity Beyond Pixels
+    - CNNs in Healthcare: From Images to Diagnosis
+    - Object Detection: Finding and Locating Objects in Images
+    - Object Detection: From Bounding Boxes to Predictions
+    - Image Segmentation: Understanding Objects Pixel by Pixel
+    - Siamese Networks: Learning Visual Similarity
+    - Generative Models: Teaching Machines to Create
+
+  [Deep Learning Specialization]
+  Module: AI for Natural Language Processing
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - NLP: Teaching Machines to Understand Language
+    - Text Representation: Turning Language into Data
+    - Word2Vec: Learning Meaning from Context
+    - Language Models: Predicting What Comes Next
+    - Topic Modeling: Discovering Hidden Themes in Text
+    - RNNs: Learning from Sequential Language
+    - LSTMs: Remembering What Matters in a Sequence
+    - Named Entity Recognition: Finding Meaningful Entities in Text
+    - Attention: Learning What Matters in Language
+    - Transformers: Rethinking How Machines Process Language
+    - BERT: Understanding Language from Both Directions
+
+  [Agentic AI & Engineering]
+  Module: AI engineering and Agentic AI
+  Type: Core | Duration: 1.5 Months
+  Classes Covered:
+    - Introduction to AI Engineering
+    - Refresher: Modern Text & Image AI Model Architectures
+    - Getting started with Text Generation LLM APIs (OpenAI API)
+    - Designing Eval Pipelines for AI Apps and Observability
+    - Prompt Engineering: Introduction
+    - Retrieval-Augmented Generation (RAG) Introduction
+    - Embeddings Deep Dive
+    - Multimodal & Tabular RAG
+    - Prompt Engineering: Security
+    - Agents: Foundations & Planning
+    - Advanced Agent Concepts
+    - Agent: Frameworks and Protocols
+    - Fine Tuning Existing Models
+    - Audio, Image, Video, Expressions: AI Modalities
+    - Scaling AI Applications
+    - Model Quantization Techniques
+    - Advanced Fine Tuning Techniques
+    - Dataset Engineering && Inference Optimization
+
+
+=== 4.1 Program Governance & Rules ===
+
+- Program Duration: Core Track is ~12.5 Months; Electives taken post-Core as desired.
+- Governance Rules:
+  • Core: Mandatory for all learners in the program.
+  • Elective***: Optional; can take multiple, only after Core.
+
+---
+
+=== 4.2 DevOps & Cloud Course Outline ===
+
+  [01. Beginner Python]
+  Module: Beginner Python
+  Module Type: Core
+  Duration: 1 Month
+
+  [02. Linux Shell Scripting and Computer Systems 1]
+  Module: Linux Shell Scripting and Computer Systems 1
+  Module Type: Core
+  Duration: 1 Month
+
+  [03. Linux Shell Scripting and Computer Systems 2]
+  Module: Linux Shell Scripting and Computer Systems 2
+  Module Type: Core
+  Duration: 1 Month
+
+  [04. DevOps Tools 1]
+  Module: DevOps Tools 1
+  Module Type: Core
+  Duration: 3 Months
+
+  [05. DevOps Tools 2]
+  Module: DevOps Tools 2
+  Module Type: Core
+  Duration: 2 Months
+
+  [06. AWS 1]
+  Module: AWS 1
+  Module Type: Core
+  Duration: 1.5 Months
+
+  [07. AWS 2]
+  Module: AWS 2
+  Module Type: Core
+  Duration: 3 Months
+
+  [08. Observability, Security & Responsible Systems]
+  Module: Observability, Security & Responsible Systems
+  Module Type: Elective***
+  Duration: 1.5 Months
+
+  [09. ML Systems, MLOps & DataOps]
+  Module: ML Systems, MLOps & DataOps
+  Module Type: Elective***
+  Duration: 1 Month
+
+  [10. Generative AI & Agentic Systems]
+  Module: Generative AI & Agentic Systems
+  Module Type: Elective***
+  Duration: 1 Month
+
+  [11. AI & Agents: From Talking to AI to Building One]
+  Module: AI & Agents: From Talking to AI to Building One
+  Module Type: Elective***
+  Duration: 1 Month
+
+  [12. Intermediate DSA : AI Assisted Problem Solving]
+  Module: Intermediate DSA : AI Assisted Problem Solving
+  Module Type: Elective***
+  Duration: 1 Month
+
+  [13. Advanced DSA: Foundations:Core Techniques & Optimization]
+  Module: Advanced DSA: Foundations:Core Techniques & Optimization
+  Module Type: Elective***
+  Duration: 1 Month
+
+  [14. Advanced DSA: Linear & Non-Linear Data Structures]
+  Module: Advanced DSA: Linear & Non-Linear Data Structures
+  Module Type: Elective***
+  Duration: 1 Month
+
+  [15. Advanced DSA: Backtracking & Advanced Trees]
+  Module: Advanced DSA: Backtracking & Advanced Trees
+  Module Type: Elective***
+  Duration: 1 Month
+
+  [16. Advanced DSA: DP, Heaps & Graphs — Crack It with AI Edge]
+  Module: Advanced DSA: DP, Heaps & Graphs — Crack It with AI Edge
+  Module Type: Elective***
+  Duration: 1 Month
+
+  [17. Distributed System Design & AI-Integrated Architectures]
+  Module: Distributed System Design & AI-Integrated Architectures
+  Module Type: Elective***
+  Duration: 1.5 Months
+
+
+=== 4.3 Detailed Module & Class Deep Dive ===
+
+  --- Core Modules ---
+
+  [Programming]
+  Module: Beginner Python
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Refresher : Introduction To Python and Data Types & AI Awareness
+    - Refresher : Operators and Control Statements
+    - Refresher : Iteration : Loops & Iteration Analysis by AI
+    - Refresher : Lab Session on Iteration
+    - Refresher : Functions & Modularity: Designing Code with AI
+    - Refresher : 1D List
+    - Refresher : 2D List
+    - Refresher : Lab Session on List
+    - Refresher : Tuples + Strings
+    - Refresher : Sets and Dictionaries
+    - File & Exception Handling
+    - Interview Problems
+
+  [Linux & Systems]
+  Module: Linux Shell Scripting and Computer Systems 1
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Introduction to Linux
+    - File Management in Linux
+    - User Management & Permissions in Linux
+    - Process Management in Linux
+    - Text Processing in Linux
+    - Advanced Text Processing & Scheduling in Linux
+    - Introduction To Networking
+    - OSI Model in Networking
+    - Networking Devices
+    - Networking in Linux
+    - Advanced Networking (DevSecOps)
+
+  [Linux & Systems]
+  Module: Linux Shell Scripting and Computer Systems 2
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Shell scripting introduction
+    - Fundamentals of Shell Scripting
+    - Shell scripting walk through
+    - Shell scripting for DevOps - file management
+    - Shell scripting for DevOps - process management
+    - Shell scripting for DevOps - filesystem management
+    - Shell scripting for DevOps - backup
+    - Shell scripting for DevOps - Networking
+    - Mock interview Demo by instructor
+    - Ai Assisted Scripting
+    - Git introduction
+    - Git in DevOps - GitHook, PR, Branching
+    - Git in DevOps 2
+
+  [DevOps & Containers]
+  Module: DevOps Tools 1
+  Type: Core | Duration: 3 Months
+  Classes Covered:
+    - Docker introduction
+    - Docker image and Docker containers
+    - Building your own Docker image
+    - Image and Containers Deep Dive
+    - Docker volume
+    - Docker networking deep dive
+    - Hardening the Docker env. (DevSecOps)
+    - Demo of implementing industry standard implementation (e.g. in image hardening and other security standards)
+    - Introduction to Orchestration
+    - Kubernetes architecture
+    - Kubernetes Pod deep dive
+    - Kubernetes ReplicaSet and Deployment
+    - Kubernetes networking
+    - Scaling options in kubernetes - HPA, CA and VPA - compare with Karpentor
+    - Introduction to scaling in kubernets,  Network policies
+    - Kubernetes security - RBAC (DevSecOps)
+    - Kubernetes volumes
+    - Kubernetes ingress
+    - Init Containers, Static Pods, Scheduling
+    - Kubernetes Jobs, Probes, admission controllers
+    - CRD, CNI
+    - Config maps and secrets (DevSecOps)
+    - Troubleshooting
+    - Deploying a hugging face model on K8s
+    - Introduction to Observability. Prometheus and Grafana setup
+    - Prometheus Monitoring Configuration
+    - PromQL Querying and Data Exploration
+    - Getting Started with Grafana
+    - Variables, Data Sources, and Persistent Dashboards in Grafana
+    - Scaling Grafana: Best Practices, Real-World Use Cases, and Performance Tuning
+    - Advanced Monitoring Techniques
+    - Advanced observability using Newrelic
+    - Deploying a microservice in Kubernetes cluster project 1
+    - Deploying a microservice in Kubernetes cluster project 2
+
+  [CI/CD & Automation]
+  Module: DevOps Tools 2
+  Type: Core | Duration: 2 Months
+  Classes Covered:
+    - Introduction to DevOps
+    - Introduction to CI/CD
+    - Jenkins introduction, architecture, jobs
+    - Project: CI/CD on Jenkins using simple job
+    - Jenkins pipeline syntaxt walk through
+    - Project: CI/CD on Jenkins using pipelines
+    - Jenkins advanced - add nodes, RBAC
+    - Project by engineers on Jenkins end to cicd in industry standard.
+    - Introduction to GitHub Actions
+    - Secrets, Events, and Workflow Optimization (DevSecOps)
+    - Advanced Techniques and Best Practices (DevSecOps)
+    - Efficient Workflows and Security Practices (DevSecOps)
+    - Project by engineers on GitHub actions end to cicd in industry standard.
+    - Advanced ArgoCD Usage and Configuration
+    - Advanced Features and Integration
+    - ArgoCD-Jenkins Integration
+    - Project Demo
+    - IaC fundamentatls and Ansible Fundamentals
+    - Ansible Playbooks & Modules
+    - Templates, Variables & Facts
+    - Roles & Advanced Topics
+    - Ansible Vault & Best Practices (DevSecOps)
+    - Introduction to SRE concepts
+    - Ansible Project
+
+  [Cloud Computing]
+  Module: AWS 1
+  Type: Core | Duration: 1.5 Months
+  Classes Covered:
+    - Cloud Basics & Evolution
+    - AWS Compute & EC2 Intro
+    - EC2 Deep Dive
+    - EC2 Hosting & Load Balancing
+    - AWS IAM Basics
+    - AWS Storage & CloudFront
+    - S3 Deep Dive
+    - AWS CLI & Boto Intro
+    - AWS VPC & Networking Basics
+    - Advanced AWS Networking
+    - AWS Observability & CloudWatch
+    - CloudWatch & CloudTrail Advanced (DevSecOps)
+    - Docker App on EC2 Project
+    - AWS Lambda & API Gateway
+    - End-to-End Project day1
+    - End-to-End Project day2
+    - End-to-End Project day3
+
+  [Advanced Cloud & IaC]
+  Module: AWS 2
+  Type: Core | Duration: 3 Months
+  Classes Covered:
+    - AWS ECS & ECR Intro
+    - ECS Fundamental
+    - EKS Basics
+    - EKS Advanced
+    - EKS Security & Operations
+    - Route 53 and Cert Manager
+    - Microservices on AWS Project
+    - Microservices Project – Phase 2
+    - AWS CI/CD & Pipelines
+    - AWS CI/CD & Pipelines 2
+    - AWS Queuing Service
+    - AWS Cloud Formation
+    - AWS Security: Identity & Network (DevSecOps)
+    - AWS Security: Data & Detection (DevSecOps)
+    - AWS Security Hands-on (DevSecOps)
+    - AWS RDS (SQL Databases)
+    - DynamoDB (NoSQL)
+    - AWS Data Migration
+    - AWS Data Engineering (Glue & Athena)
+    - FinOps in AWS
+    - AWS Sagemaker
+    - Generative AI on AWS
+    - AWS Services Deep Dive
+    - Project Architecture Review
+    - Kubernetes AI Project 1
+    - Kubernetes AI Project 2
+    - AWS Backup
+    - DevOps Cert Discussion 1
+    - DevOps Cert Discussion 2
+    - DevOps Cert Discussion 3
+    - Terraform & IaC Intro
+    - Terraform Language Deep Dive
+    - Terraform State & Modules
+    - Terraform Dependencies
+    - Advanced Terraform Workspaces
+    - Terraform Cluster Project
+    - Deploying an app - Project
+    - Deploying an app - Project Day 2
+
+  --- Post-Core Elective Modules ---
+
+  [Elective Track]
+  Module: Observability, Security & Responsible Systems
+  Type: Elective*** | Duration: 1.5 Months
+  Classes Covered:
+    - Introduction to Observability, Security & Responsible Systems
+    - Observability for AI and Operations
+    - Designing ML-Ready Pipelines
+    - Machine-Readable Observability Layer
+    - Anomaly Detection Systems
+    - Feature Engineering & Alerting
+    - Behavioral Fingerprinting
+    - Predictive Operations & Failure Prevention
+    - Forecasting & Early Warning
+    - Security Foundations for AI & Automation
+    - Guardrails & Access Control
+    - Zero-Trust & Audit
+    - AI Threat Models
+    - PII & Model Integrity
+    - Prompt Injection & Testing
+    - Governance and Responsible AI
+    - Audit, Compliance & Ethics
+
+  [Elective Track]
+  Module: ML Systems, MLOps & DataOps
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - Introduction to ML Systems and DataOps
+    - AI Observability and Model Health
+    - Drift Detection & Monitoring
+    - Model Health & Retraining
+    - ML-Driven Optimization
+    - Autoscaling & Cost Engineering
+    - MLOps on Kubernetes
+    - Inference & GPU Operations
+    - End-to-End MLOps Build
+    - Dataset Operations (DataOps)
+    - Data Quality & Governance
+
+  [Elective Track]
+  Module: Generative AI & Agentic Systems
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - Introduction to Gen AI
+    - Generative AI for Engineers
+    - IaC Generation & Validation
+    - Safe GenAI in Production
+    - Retrieval-Augmented Generation (RAG)
+    - Building RAG Systems
+    - RAG Quality & Strategy
+    - Agentic AI Systems
+    - Multi-Agent Architecture
+    - Agent Testing & Human-in-the-Loop
+    - LLM Gateway and Proxy Patterns
+    - Caching, Filtering & Cost Control
+
+  [Elective Track]
+  Module: AI & Agents: From Talking to AI to Building One
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - GenAI World & LLM Landscape
+    - Prompt Engineering Basics
+    - Advanced Prompting & AI Safety Basics
+    - LLM  Built-in Power Tools
+    - RAG
+    - n8n Automation Workflow
+    - What Is an AI Agent?
+    - Building Agents with n8n
+    - OpenClaw: Personal 24/7 AI Agent
+    - Multi-Agent Systems
+    - MindStudio: Building AI Apps Visually
+
+  [Elective Track]
+  Module: Intermediate DSA : AI Assisted Problem Solving
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - Intermediate DSA: Time Complexity
+    - Intermediate DSA: Introduction to Arrays & Basics of AI
+    - Intermediate DSA: Lab Session on TC, SC, Output & Debugging
+    - Intermediate DSA: Arrays: Prefix Sum & Carry Forward with AI-Assisted Problem Solving
+    - Intermediate DSA: Lab Session on Prefix Sum & Carry Forward
+    - Intermediate DSA: Arrays: Arrays techniques & smart prompting
+    - Intermediate DSA: Lab Session on Memory Management & Sorting Basics
+    - Intermediate DSA: Bit Manipulations Basics
+    - Intermediate DSA: Lab Session on 2D Matrices
+    - Intermediate DSA : Strings & Immutability visualisations through AI
+    - Intermediate DSA:  Lab on Matrix & Strings using AI
+    - Intermediate DSA: Contest & Contest discussion
+
+  [Elective Track]
+  Module: Advanced DSA: Foundations:Core Techniques & Optimization
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - DSA: Time Complexity
+    - DSA: Arrays Techniques
+    - DSA: Arrays 1: One Dimensional
+    - DSA: Arrays 2: Two Dimensional
+    - DSA: Lab Session on Arrays
+    - DSA: Bit Manipulation
+    - DSA: Lab Session on Bit Manipulation
+    - DSA: Recursion
+    - DSA: Lab Session on Recursion
+    - DSA: Maths: Modular Arithmetic & GCD
+    - DSA: Hashing
+    - DSA: Lab Session on Hashing
+    - DSA: Sorting 1: Count Sort & Merge Sort
+    - DSA: Sorting 2: Quick Sort & Comparator Problems
+    - DSA: Sample Contest: Dual Camera Proctoring
+    - DSA Contest 1: Arrays, Bit Manipulation, Recursion, Math, Hashing & Sorting & Contest discussion
+
+  [Elective Track]
+  Module: Advanced DSA: Linear & Non-Linear Data Structures
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - DSA: Searching 1: Binary Search on Array
+    - DSA: Searching 2: Binary Search on Answer
+    - DSA: Lab Session on Searching
+    - DSA: Classes, Objects & Linked List Introduction
+    - DSA: Linked List: Basic Problems
+    - DSA: Stacks
+    - DSA: Lab Session on Stacks
+    - DSA: Queues: Implementation & Problems
+    - DSA: Trees 1: Structure & Traversal
+    - DSA: Trees 2: BST
+    - DSA: Lab Session on Binary Trees
+    - DSA: Revision of DSA 1 & 2
+    - DSA: Break
+    - DSA Contest 2: Searching, Linked List, Stacks, Queues & Trees & Contest discussion
+
+  [Elective Track]
+  Module: Advanced DSA: Backtracking & Advanced Trees
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - DSA: Maths: Combinatorics Basics & Prime Numbers
+    - DSA: Lab Session on Prime Numbers & 2 Pointers
+    - DSA: Lab Session on Maths & 2 Pointers
+    - DSA: Backtracking
+    - DSA: Lab Session on Backtracking
+    - DSA: Linked List: Sorting and Problems
+    - DSA: Linked List: Doubly Linked List & Detecting Loop
+    - DSA: Trees 4: Morris Inorder Traversal + LCA
+    - DSA: Lab Session on Binary Trees 2
+    - DSA: Hashing 3: Internal Implementation & Problems
+    - DSA Contest 3: Math, Two Pointers, Backtracking, Linked List & Trees & Contest discussion
+
+  [Elective Track]
+  Module: Advanced DSA: DP, Heaps & Graphs — Crack It with AI Edge
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - DSA: Heaps: Introduction
+    - DSA: Heap Sort & Greedy
+    - DSA: Lab Session on Heaps & Greedy
+    - DSA: Lab Session on Interview Problems 1
+    - DSA: DP 1: One Dimensional
+    - DSA: DP 2: Two Dimensional
+    - DSA: DP 3: Knapsack
+    - DSA: Lab Session on Applications of Knapsack
+    - DSA: Graphs 1: Introduction, DFS & Cycle Detection
+    - DSA: Graphs 2: BFS & MST
+    - DSA: Graphs 3: Dijkstra Algo & Topological Sort
+    - DSA: Lab Session on Interview Problems 2
+    - DSA: Revision of DSA 3 & 4
+    - DSA Contest 4: Heaps, Greedy, DP & Graphs & Contest discussion
+    - Mandatory Skill Evaluation Test: DSA
+    - Skill Evaluation Test Discussion + How to ace DSA Interview
+    - DSA : Real World Project 1 (Social Network Analyzer)
+    - DSA : Real world Project 2 ( Invoice Merger )
+
+  [Elective Track]
+  Module: Distributed System Design & AI-Integrated Architectures
+  Type: Elective*** | Duration: 1.5 Months
+  Classes Covered:
+    - System Design Foundations & Modern Infrastructure
+    - Load Balancing, Consistent Hashing & Traffic Routing at Scale
+    - Caching Systems: CDN, Backend Caches, Cache Invalidation
+    - Case Study: Caching at Scale (Scaler Code Judge and Contest Leaderboards + AI Workloads)
+    - Case Study: Caching Facebook News Feed
+    - CAP / PACELC theorem + Master Slave Replication
+    - SQL vs NoSQL + Sharding
+    - Database Orchestration & Shard Creation
+    - Case study: Google Typeahead (How to approach System Design Problems)
+    - Case Study: Google Typeahead (Design and Optimizations)
+    - NoSQL Internals - LSM Tree and Multi Master
+    - Case Study: Messaging Apps (FB Messenger, Whatsapp, Slack)
+    - Messaging Queues - Apache Kafka & Zookeeper
+    - Case Study: ElasticSearch (Full Text Search)
+    - Case Study: S3, HDFS (Large File Storage)
+    - Case Study: Uber (Nearest Neighbor Search)
+    - Case Study: Rate Limiter + Unique ID Generator (Infra)
+    - Case Study: OTT Platform (OTT)
+    - Microservices - 1
+    - Microservices - 2
+    - Case Study: Ecommerce Platform (Microservices)
+
+
+=== 5.1 Program Structure ===
+
+The Forward Deployed Engineer (FDE) program is built around real-world client engagement simulations (e.g., *Meridian Retail Enterprise*).
+
+=== 5.2 Scaler AI Forward Deployed Engineer (FDE) — Comprehensive Module & Class Deep Dive ===
+
+
+NOTE: Program Architecture: Built around real-world enterprise deployments (*Meridian Retail Enterprise*). Learners complete 10 fundamental Core engineering modules (Data, Ingestion, Backend, Frontend, RAG, Agents, System Design, AI Scale, Linux, Docker/K8s) followed by 4 advanced Production Cloud, Reliability, Security & Capstone modules (available as Core or specialized Electives).
+
+--- Core Modules (All 14 Modules) ---
+
+
+  [Client Data Problem]
+  Module: The FDE Launchpad — Role, SQL & the Legacy Data Problem
+  Type: Core | Duration: 1.25 Months
+  Classes Covered:
+    - Your Playbook for Every Client Room
+    - The Artifact Toolkit That Runs Every Engagement
+    - Meet the Schema - From Entities to Queries
+    - Reporting Views That Run the Dashboard
+    - Find the Bottleneck, Fix the Query
+    - No Half-Measures - Atomic Updates That Don't Corrupt
+    - Designing a Schema the Client Won't Outgrow
+    - Building Meridian's Full Data Model
+    - Lock It Down - PII, Encryption & Audit Trails
+    - Reaching Across the Firewall - Legacy Data Access
+    - Picking the Right Engine for the Job
+    - Quick Diagnostics Before the Pipeline Exists
+    - Designing the Pipeline - ETL Thinking
+    - Explaining Your Schema to the VP Who Signs Off
+    - Turning Query Results into Client-Ready Insight
+
+  [Data Ingestion]
+  Module: The Ingestion Pipeline — Production Python
+  Type: Core | Duration: 1.25 Months
+  Classes Covered:
+    - Your Workbench - Python Toolchain Done Right
+    - Stream It, Don't Load It
+    - Reusable Building Blocks - Decorators & Context Managers
+    - Modeling the Real World in Code
+    - Make It Fast - Concurrency & Async
+    - When the Data Fights Back - Error Handling & Resilience
+    - Validate Everything, Log Everything
+    - Prove It Works - Testing & CI
+    - Code That Survives the Next Engineer
+    - PySpark - When Python Meets Big Data
+    - Pipeline Day - Full PySpark Ingestion Build
+    - Under Pressure - Timed Python Build
+    - PR Reviews That Build Trust, Not Walls
+    - Write the Doc They'll Actually Read
+
+  [Backend Architecture]
+  Module: The Platform's Backend — Orders, Payments & Real-Time Systems
+  Type: Core | Duration: 1.75 Months
+  Classes Covered:
+    - Your First Production API
+    - Routing the First Request
+    - Making FastAPI Do the Heavy Lifting
+    - Consuming APIs Like a Professional
+    - Who Gets In - Auth Done Right with OAuth2 & JWT
+    - Locking Doors by Role - RBAC, OIDC & Multi-Tenant Auth
+    - The Order Lifecycle - State Machines in Production
+    - Money and Messages - Payments & Notifications
+    - The Contract Between Backend & Frontend
+    - Break the Contract, Break the Build
+    - Push, Don't Poll - WebSockets & Server-Sent Events
+    - Queues, Cache, Invalidate - Redis & Message Patterns
+    - See Everything - Observability & Tracing
+    - Beyond Rows - JSONB, Full-Text Search & Vector Storage
+    - Under the Hood - Why Your Query Is Slow
+    - The Warehouse Layer - dbt, DuckDB & Dimensional Modeling
+    - Orchestrating the Nightly Pipeline
+    - When Events Beat Requests - Kafka Fundamentals
+    - Pipeline Under Fire - Timed Debug Challenge
+    - Running the Room - API Reviews & Incident Updates
+
+  [Frontend for FDEs]
+  Module: The Client-Facing Layer — Frontend Engineering for FDEs
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - How the Web Works: From DOM to Dashboard
+    - Async, Typed and Connected: Talking to the Backend
+    - Thinking in Components: Building the Dashboard One Boundary at a Time
+    - Forms That Don’t Frustrate: Validation, Control and Reuse
+    - Wiring the Dashboard Live: APIs, Caching and Server State
+    - KPIs, Tables and Filters: The Dashboard Takes Shape
+    - Defending the Architecture: React Decisions and Next.js Awareness
+    - Gating the Dashboard: Authentication, Roles and Protected Routes
+    - When the Dashboard Comes Alive: Real-Time and AI-Ready Interfaces
+    - Fast, Reliable and Ready: Testing and Performance
+    - From Working Code to Leadership Confidence: Defending the Solution
+    - The Handover Moment: Walking the Ops Team Through Their Dashboard
+
+  [Enterprise RAG]
+  Module: The New Ask — Production RAG for Customer Support
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - The AI Landscape - Picking Your Weapons
+    - Your First System Prompt - And Why It'll Break
+    - Choosing How to Serve - APIs, Context & Parameters
+    - Prompts as Code - Versioning & Regression Testing
+    - Building the Knowledge Pipeline - RAG End to End
+    - Does It Actually Find the Right Answer?
+    - Does It Tell the Truth? - Generation Eval & RAGAS
+    - Guardrails That Actually Work - PII Leak Prevention
+    - Red Team Your Own Copilot
+    - Spend Less, Answer Faster
+    - Ship It - Timed RAG Build
+    - Explaining AI Risk Without Scaring the Room
+    - Making Eval Numbers Mean Something to the Board
+
+  [Agentic Integration]
+  Module: From Answering to Acting — Agents & Enterprise Integration
+  Type: Core | Duration: 1.25 Months
+  Classes Covered:
+    - From Chatbot to Coworker
+    - Giving the Agent Real Tools
+    - Orchestrating Agent Intelligence with LangGraph
+    - Production Agent Patterns
+    - When the Agent Breaks
+    - MCP - The Universal Tool Protocol
+    - The Agent Team - Multi-Agent & Human-in-the-Loop
+    - Mapping the Client's System Landscape
+    - Data Integration with Legacy Enterprise Systems
+    - Wiring It Together - API Connectors & Webhooks
+    - When the Integration Breaks
+    - Ship Day - The Full Agentic Copilot Goes Live
+    - Red-Team War Room
+    - Explaining What the Agent Will and Won't Do Alone
+    - Getting the Client's IT Team on Your Side
+
+  [System Scale]
+  Module: The Scale Question — System Design for Black Friday
+  Type: Core | Duration: 1.25 Months
+  Classes Covered:
+    - The System Design Playbook
+    - Spreading the Load
+    - Cache Everything
+    - Consistency vs Availability
+    - When One Database Isn't Enough
+    - Shard It and Build It
+    - When Your Table Hits 10TB
+    - The Event Backbone - Kafka at Scale
+    - Search That Scales
+    - Rate Limiting & Unique IDs
+    - Monolith or Microservices
+    - Distributed Transactions - Saga vs 2PC
+    - Whiteboarding With the Client's Architects
+    - System Design Under Pressure
+
+  [Enterprise AI Scale]
+  Module: Scaling the AI Layer — Enterprise AI Architecture
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Serving AI at Scale
+    - One Gateway, Many Models
+    - GPU Math - Capacity Planning
+    - When to Fine-Tune - And When Not To
+    - Embedding Pipelines at Scale
+    - Vector Search at Billion Scale
+    - Evals as Infrastructure
+    - Tracking Experiments - MLflow & Model Registries
+    - Ship Without Breaking - Canary Rollouts for AI
+    - Is the AI Drifting?
+    - Defend Your AI Architecture
+    - Selling the AI Stack to the Board
+
+  [DevOps & Linux]
+  Module: Prepping the Ground — Linux, Networking & Shell
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Your First Server
+    - Who Gets Access
+    - What's Running and Why
+    - Finding the Needle
+    - How Packets Flow
+    - Locking Down the Network
+    - TCP vs. UDP: Below the Surface
+    - Automate the Boring Stuff
+    - Scripts That Keep the Lights On
+    - The log parser
+    - Write the Runbook the 3AM Engineer Will Thank You For
+
+  [Containerization]
+  Module: Containerizing Meridian — Docker & Kubernetes
+  Type: Core | Duration: 1.25 Months
+  Classes Covered:
+    - Containers 101
+    - Slim, Fast and Secure Images in Production
+    - Containers Talking to Each Other
+    - Hardening Containers
+    - Why You Need an Orchestrator
+    - Deploy It
+    - Wiring Services Together
+    - Scale/Update Under Pressure
+    - Lock It Down
+    - Production K8s
+    - The Pod Won't Start
+    - Deploying AI Models on a Cluster
+    - GitOps- Declarative Deployments with ArgoCD
+    - Do We Really Need Kubernetes?
+    - Coordinating the Rollout
+
+  [Cloud Deployment]
+  Module: Going Live — AWS Production Deployment with Terraform
+  Type: Core / Elective | Duration: 2.25 Months
+  Classes Covered:
+    - Designing Your Cloud Network
+    - Compute on AWS
+    - Load Balancing Across AZs
+    - Store It, Serve It, Cache It
+    - Object Storage in the Cloud
+    - Understanding the networking
+    - SQL Database in the Cloud
+    - NoSQL Database in the Cloud
+    - Caching in cloud
+    - Locking Down the Cloud
+    - Breach Drill
+    - Kubernetes in Cloud - I
+    - Kubernetes in Cloud - II
+    - Kubernetes in Cloud - III
+    - Securing Meridian's cluster - I
+    - Securing Meridian's data
+    - Securing Meridian's application
+    - Cert Manager & Route 53 (SSL + DNS Management) for Meridian
+    - AWS Capstone Kickoff (Project Roadmap & Setup)
+    - EKS Capstone: Part 1 (Cluster Design & Deployment)
+    - EKS Capstone: Part 2 (Scaling & Production Readiness)
+    - Cloud Rosetta Stone (AWS ↔ GCP ↔ Azure Service Mapping)
+    - Boardroom Cloud Talk (Cost & Architecture Strategy)
+    - War-Room 101 (Real-Time Incident Response & Communication)
+    - IaC - Terraform Fundamentals
+    - Terraform in Action
+    - Creating a CI Pipeline
+    - Deploying the Docker Image into an EKS
+
+  [Reliability & DR]
+  Module: Making It Bulletproof — Reliability, HA & Disaster Recovery
+  Type: Core / Elective | Duration: 1 Month
+  Classes Covered:
+    - SRE - When 99.9% Isn't Enough
+    - Surviving Region Failure - HA Architecture
+    - The DR Plan Nobody Tests (Until It's Too Late)
+    - Sharding in Production - Not Just on a Whiteboard
+    - Breaking to ensure it doesn't break
+    - CRDs, Operators & Admission Webhooks in Kubernetes
+    - Advanced AWS Networking
+    - NoSQL & Caching on AWS
+    - Load Testing at Scale - Proving It Before Black Friday
+    - The Reliability Check
+    - Selling Reliability to the CFO
+
+  [Security & Compliance]
+  Module: Enterprise Sign-Off — Security Hardening & Incident Response
+  Type: Core / Elective | Duration: 0.75 Month
+  Classes Covered:
+    - Threat Modeling - Where Will They Attack?
+    - OWASP Top 10 - Hands-On Exploitation & Defence
+    - Securing the AI Layer
+    - Secrets, Keys & Certificates - The Lifecycle Nobody Gets Right
+    - Compliance Frameworks - SOC2, GDPR & What FDEs Actually Do
+    - Penetration Testing Your Own Platform
+    - The Incident Response Playbook
+    - Incident Simulation - Full Red Team Exercise
+    - The Security Briefing the Board Actually Needs
+
+  [Client Capstone]
+  Module: Capstone & Hiring Readiness — New Client, Full Simulation
+  Type: Core / Elective | Duration: 0.75 Month
+  Classes Covered:
+    - New Brief, Day One - The Capstone Kickoff
+    - Build Sprint 1 - Data & Backend
+    - Build Sprint 2 - Frontend & AI Feature
+    - Red Team Day - Classmates Break Your Build
+    - Portfolio Day - Packaging Meridian for Interviews
+    - System Design Interview Prep
+    - Behavioral & FDE Interview Prep
+    - Capstone Demo Day - Graduation
+
+
+--- Elective Modules Track ---
+
+
+  [Cloud Deployment]
+  Module: Going Live — AWS Production Deployment with Terraform
+  Type: Elective*** | Duration: 2.25 Months
+  Classes Covered:
+    - Designing Your Cloud Network
+    - Compute on AWS
+    - Load Balancing Across AZs
+    - Store It, Serve It, Cache It
+    - Object Storage in the Cloud
+    - Understanding the networking
+    - SQL Database in the Cloud
+    - NoSQL Database in the Cloud
+    - Caching in cloud
+    - Locking Down the Cloud
+    - Breach Drill
+    - Kubernetes in Cloud - I, II, III
+    - Securing Meridian's cluster, data & application
+    - Cert Manager & Route 53 (SSL + DNS)
+    - AWS Capstone Kickoff, EKS Capstone Part 1 & 2
+    - Cloud Rosetta Stone (AWS <-> GCP <-> Azure)
+    - Boardroom Cloud Talk
+    - War-Room 101
+    - IaC Terraform Fundamentals & in Action
+    - CI Pipeline & Deploy Docker into EKS
+
+  [Reliability & DR]
+  Module: Making It Bulletproof — Reliability, HA & Disaster Recovery
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - SRE 99.9%, Surviving Region Failure HA, DR Plan, Sharding in Production, Chaos Engineering, CRDs & Operators, Advanced AWS Networking, NoSQL & Caching, Load Testing at Scale, Selling Reliability to CFO
+
+  [Security & Compliance]
+  Module: Enterprise Sign-Off — Security Hardening & Incident Response
+  Type: Elective*** | Duration: 0.75 Month
+  Classes Covered:
+    - Threat Modeling, OWASP Top 10, Securing AI Layer, Secrets & Keys Lifecycle, SOC2 & GDPR Compliance, Penetration Testing, Incident Response Playbook, Red Team Incident Simulation, Security Briefing to Board
+
+  [Client Capstone]
+  Module: Capstone & Hiring Readiness — New Client, Full Simulation
+  Type: Elective*** | Duration: 0.75 Month
+  Classes Covered:
+    - New Brief Day One, Build Sprint 1 (Data/Backend), Build Sprint 2 (Frontend/AI), Red Team Day, Portfolio Day, System Design Interview Prep, Behavioral & FDE Prep, Capstone Demo Day Graduation
+
+
+
+---
+
+--------------------------------------------------------------------------------
+6. Program 5: Scaler AI / ML & Agentic AI
+-----------------------=== 6.1 Program Governance & Tracks ===
+
+- Tracks Available:
+  • Beginner Track Timeline: 14 to 24 Months
+  • Advanced Track Timeline: 9 to 15 Months
+- Governance Rules:
+  • Core: Mandatory for all learners in the program.
+  • Elective***: Optional; can take multiple, only after Core.
+  • Optional*: Custom pacing at learner level.
+
+---
+
+=== 6.2 AIML Course Outline — Beginner Track ===
+
+  [01. Generative AI]
+  Module: Generative AI
+  Module Type: Core
+  Sub Module: Generative AI
+  Duration: 2 Months
+
+  [02. Python Programming Fundamentals]
+  Module: Python Programming Fundamentals
+  Module Type: Core
+  Sub Module: Python Programming Fundamentals
+  Duration: 1 Month
+
+  [03. Data Foundations]
+  Module: Data Foundations
+  Module Type: Core
+  Sub Module: Data Foundations
+  Duration: 1 Month
+
+  [04. ML Coding (Applied AI-ML)] — Cluster Duration: 5 Months
+  Module: ML Coding (Applied AI-ML)
+  Module Type: Core
+  Sub Modules:
+    1. Supervised Learning (Core)
+    2. Unsupervised Learning, Time series & Recommender Systems (Core)
+    3. Neural Networks (Core)
+    4. Computer Vision and Natural Language Processing (Core)
+
+  [05. ML & Gen AI Engineering] — Cluster Duration: 7 Months
+  Module: ML & Gen AI Engineering
+  Module Type: Core
+  Sub Modules:
+    1. MLOPS (Core)
+    2. System Design (Core)
+    3. Foundations of AI Engineering & RAG Systems (Core)
+    4. Agentic Design Patterns & Multi-Agent Orchestration (Core)
+    5. Advanced Cognitive Architectures & Multimodal Intelligence (Core)
+    6. Fine tuning, LLMOPS and Security (Core)
+
+  [06. Advanced ML, Advanced Deep Learning, Advanced NLP]
+  Module: Advanced ML, Advanced Deep Learning, Advanced NLP
+  Module Type: Elective***
+  Sub Modules:
+    1. Advanced Machine Learning and Deep Learning 1
+    2. Advanced Machine Learning and Deep Learning 2
+  Duration: 2 Months
+
+  [07. DSA]
+  Module: DSA
+  Module Type: Optional*
+  Sub Module: DSA for Professionals
+  Duration: 4-6 Months
+
+  [08. Big Data (Recorded)]
+  Module: Big data (Recorded)
+  Module Type: Core
+  Sub Module: Big data (Recorded)
+  Duration: 1 Month
+
+  [09. Reinforcement Learning (Recorded)]
+  Module: Reinforcement learning (Recorded)
+  Module Type: Core
+  Sub Module: Reinforcement learning (Recorded)
+  Duration: 1 Month
+
+---
+
+=== 6.3 Curriculum Deep Dive — Beginner Track (Verbatim Class Mapping) ===
+
+  [01. Generative AI]
+  Module: AI Foundations (No Code)
+  Type: Core | Duration: 2 Months
+  Classes Covered:
+    - Generative AI Foundations & The LLM Landscape
+    - Prompt Engineering — From Anatomy to Advanced Patterns
+    - AI Reliability — Safety, Evaluation & Built-in Power Tools
+    - AI Ecosystems, Productivity & Meeting Intelligence
+    - Knowledge Management & RAG in Practice
+    - Web-Grounded Research & Citations
+    - Building No-Code AI Chatbots — Dify, Botpress & Voiceflow
+    - AI for Content Creation — Presentations, Documents & Visuals
+    - Multimodal GenAI — Images, Video & Voice
+    - Workflow Automation Essentials
+    - Automating with n8n — Real-World Workflows
+    - Automating with Zapier — Apps, AI Actions & SaaS Connections
+    - What Is an AI Agent? Concepts & Live Demos
+    - Tools, Memory & MCP — Agent Building Blocks
+    - Building Agents Without Code
+    - Personal Agents & Multi-Agent Systems
+    - No-Code Coding IDEs — Vibe Coding with Windsurf, Lovable & Google Antigravity
+    - Claude Ecosystem Deep-Dive — Skills, Artifacts, claude.md & skill.md
+    - Prompt Management as a Practice
+    - AI System Design, Evaluation & Observability
+    - Deploying AI Apps — Platforms, Hosting & Going Live
+    - AWS for AI Apps: Concepts & Architecture (Theory)
+    - AWS for AI Apps: Hands-On Deployment Lab
+
+  [02. Python Programming Fundamentals]
+  Module: Python Foundations
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Data Types, Variables, Input/Output
+    - Operators
+    - Control Statements
+    - Loops
+    - Functions
+    - Lists
+    - Strings
+    - Sets, Tuples, Dictionaries
+    - Functional Programming
+    - OOPS
+    - Regex
+    - File Handling and Modules
+
+    [03. Data Foundations]
+  Module: Data Foundations
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Food Delivery Data Exploration and analysis 1
+    - Food Delivery Data Exploration and analysis 2
+    - Food Delivery Data Exploration and analysis 3
+    - Food Delivery Data Exploration and analysis 4
+    - Food Delivery Data Exploration and analysis 5
+    - Amazon sales data analysis 1
+    - Amazon sales data analysis 2
+    - Amazon sales data analysis 3
+    - Amazon sales data analysis 4
+    - Analyzing Sachin Tendulkar's ODI Career Mathematical Foundations of AI
+
+  [04. ML Coding (Applied AI-ML)]
+  Module: ML Coding (Applied AI-ML)
+  Type: Core | Duration: 5 Months
+  Sub-Modules & Classes Covered:
+
+    -- Sub-Module: Supervised Learning --
+    - Intro to ML enginnering and Linear regression 1
+    - Linear regression 2
+    - Linear regression 3
+    - Linear regression 4
+    - Sklearn Pipelines
+    - Cross Validation in ML
+    - Logistc regression
+    - Classification metrics
+    - Model evaluation and Intro to KNN
+    - KNN based imputation and Decision Trees intro
+    - Decision Trees
+    - Ensemble methods
+    - Bagging
+    - Boosting
+    - Naive bayes
+
+    -- Sub-Module: Unsupervised Learning, Timeseries & Recommender Systems --
+    - Intro to clustering and K-means
+    - K-means and K-means ++ Clustering
+    - Hierarchical Clustering
+    - Gaussian Mixture Models
+    - DBSCAN
+    - Anamoly detection
+    - Principal Component Analysis
+    - t-SNE and UMAP
+    - Timeseries 1
+    - Timeseries 2
+    - Timeseries 3
+    - Timeseries 4
+    - Recommendation systems 1
+    - Recommendation systems 2
+    - Recommendation systems 3
+
+    -- Sub-Module: Neural Networks --
+    - Neural network 1
+    - Neural network 2
+    - PyTorch 1
+    - PyTorch 2
+    - PyTorch 3
+    - Neural network 3
+    - Auto Encoders
+
+    -- Sub-Module: Computer Vision & Natural Language Processing --
+    - Intro to CV and CNN Fundamentals
+    - Tackling Overfitting in CNN
+    - Transfer learning 1
+    - Image Similarity : Understanding Embeddings
+    - Object localization and detection 1
+    - Object localization and detection 2
+    - Object segmentation
+    - Siamese network
+    - GANs for Image Generation
+    - Text Pre-Processing (NLTK/spaCy)
+    - Word Embedding
+    - Lexicon-Based Sentiment & Topic Modeling
+    - RNN
+    - LSTM
+    - NER
+    - Attention
+    - Transformers
+    - Pre-trained Models (BERT)
+
+  [05. ML & Gen AI Engineering]
+  Module: ML & Gen AI Engineering
+  Type: Core | Duration: 7 Months
+  Sub-Modules & Classes Covered:
+
+    -- Sub-Module: MLOps --
+    - MLOps Foundations & Lifecycle
+    - Version Control for ML Teams
+    - Introduction to Steam lit and optuna
+    - End to end ML project
+    - MLflow for Experiment Management
+    - Advanced MLflow Workflows
+    - Containerizing ML Applications with Docker
+    - Deploying APIs on AWS using ECS
+    - Deploying on AWS, ci cd pipeline with github actions 1
+    - Deploying on AWS, ci cd pipeline with github actions 2
+    - Amazon SageMaker Fundamentals
+    - Advanced SageMaker Workflows
+    - Sagemaker canvas and feature store 1
+    - Sagemaker canvas and feature store 2
+    - Model registiry
+    - AWS Sagemaker Canvas
+
+    -- Sub-Module: AI Engineering - Module 1: Foundations of AI Engineering & RAG Systems --
+    - Introduction to AI Engineering & Modern Architectures
+    - Asynchronous Programming & Concurrency
+    - Data Validation & Type Safety with Pydantic
+    - Getting Started with LLM APIs
+    - Prompt Engineering Fundamentals
+    - Jailbreaks Injection & Guardrails
+    - Introduction to Retrieval-Augmented Generation
+    - Embeddings Deep Dive
+    - Multimodal & Tabular RAG
+    - Docker & Packaging for AI Applications
+    - Designing Evaluation Pipelines
+    - Monitoring & Observability with LangFuse
+
+    -- Sub-Module: AI Engineering - Module 2: Agentic Design Patterns & Multi-Agent Orchestration --
+    - Introduction to AI Agents & Tools
+    - Local LLMs & Model Context Protocol (MCP)
+    - LangChain & LangGraph Introduction
+    - ReAct Chain-of-Thought & Planning
+    - Advanced Agent Concepts: Reflection Loops
+    - Memory: Short-term Long-term & Episodic
+    - The Browser as a Tool: Playwright & Browser-Use
+    - LlamaIndex Workflows & Phidata
+    - Rapid Prototyping with LangFlow & Relevance AI
+    - Multi-Agent Patterns & Orchestration
+    - CrewAI & Microsoft Autogen
+    - Game Theory & Interoperability Protocols
+
+    -- Sub-Module: AI Engineering - Module 3: Advanced Cognitive Architectures & Multimodal Intelligence --
+    - BDI Architecture & Theory of Mind
+    - Interrupts Approval Flows & Human Oversight
+    - Advanced Generative Foundations
+    - Parsing Complex Documents: PDFs Tables Images
+    - Agentic RAG & GraphRAG
+    - Hybrid Search & Self-Correction RAG
+    - Multimodal AI: Vision (GPT-4V LlaVA) & Audio (Whisper)
+    - WebSockets WebRTC & Voice Coordination
+    - Building End-to-End VAPI Voice Agent
+
+    -- Sub-Module: AI Engineering - Module 4: Fine tuning, LLMOPS and Security --
+    - DSPy: Declarative Self-Improving Python
+    - LLM-as-a-Judge & Evaluation-Driven Development
+    - Introduction to Reinforcement Learning for Agents
+    - When & Why to Fine-Tune Models
+    - Parameter-Efficient Fine-Tuning (PEFT) & LoRA
+    - Model Distillation & Data Augmentation
+    - LLM Lifecycle & Token Economics
+    - Serving LLMs: vLLM TGI & Quantization
+    - Prompt Caching Batching & Semantic Caching
+    - AWS Bedrock & Azure AI Studio
+    - Production Engineering: K8s for AI
+    - Production Monitoring & Golden Datasets
+    - Guardrails Red Teaming & Security
+    - RBAC Data Leakage & Federated Learning
+    - Final Capstone: Autonomous Support Engineer
+
+    -- Sub-Module: ML System Design --
+    - Introduction to ML System Design
+    - Case Study: Recommendation System
+    - High-Level Design (HLD) Components
+    - Case Study: Fraud Detection
+    - Scaling ML Systems
+    - Cost Optimization
+    - Video Analytics System
+    - Trade-Offs Deep Dive
+
+  --- Specialisation & Electives ---
+
+  [06. Advanced ML & Deep Learning]
+  Module: Advanced Machine Learning and Deep Learning (Track 1 & 2)
+  Type: Elective*** | Duration: 2 Months
+  Classes Covered:
+    -- Track 1: Foundations, Optimization & Theory --
+    - Mathematical Foundations
+    - Probability & Statistics
+    - Optimization Theory
+    - Loss Functions
+    - Linear Models
+    - Logistic Regression
+    - Decision Trees & Forests
+    - Support Vector Machines
+    - Clustering Theory
+    - Dimensionality Reduction
+    - Statistical Learning Theory
+    - Bias-Variance Tradeoff
+    -- Track 2: Neural Networks & Model Interpretability --
+    - Neural Networks
+    - Backpropagation
+    - Advanced Topics
+    - Model Interpretability
+
+  [07. Big Data]
+  Module: Big Data
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - Introduction to Big Data & Ecosystem Overview
+    - Distributed Systems, Hadoop & Data Processing Basics
+    - Apache Spark Deep Dive
+    - Advanced Spark + Case Study + Visualization
+
+  [08. Reinforcement Learning]
+  Module: Reinforcement Learning (RL)
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - Class 1: Introduction to RL & MDPs
+    - Class 2: Dynamic Programming (DP) for RL
+    - Class 3: Monte Carlo & Temporal Difference Learning
+    - Class 4: Q-Learning and Deep Q-Networks (DQN)
+    - Class 5: Policy Gradients and A2C
+    - Class 6: PPO, SAC, and TD3
+    - Class 7: Model-Based RL & Imitation Learning
+    - Class 8: Multi-Agent RL, RLHF, and Applications
+
+  [09. DSA for AI Professionals]
+  Module: DSA
+  Type: Elective*** | Duration: 2 Months
+  Classes Covered:
+    - Time and Space Complexity Analysis
+    - Array Problem Solving Patterns (Prefix, Sliding Windows, Subarrays, Subsets, Subsequences)
+    - Bit Manipulation
+    - Maths for Problem Solving
+    - Recursion
+    - Backtracking
+    - Sorting
+    - Searching (Binary Search)
+    - Two Pointers
+    - Hashing
+    - String Problem Solving Patterns, String Pattern Matching
+    - Linked Lists
+    - Stacks
+    - Queues and Deques
+    - Trees and BST
+    - Tries
+    - Heaps
+    - Greedy
+    - Dynamic Programming
+    - Graphs
+
+
+=== 6.4 AIML Course Outline — Advanced Track ===
+
+  [01. Data Foundations]
+  Module: Data Foundations
+  Module Type: Core
+  Sub Module: Data Foundations
+  Duration: 1 Month
+
+  [02. ML Coding (Applied AI-ML)] — Cluster Duration: 5 Months
+  Module: ML Coding (Applied AI-ML)
+  Module Type: Core
+  Sub Modules:
+    1. Supervised Learning (Core)
+    2. Unsupervised Learning, Time series & Recommender Systems (Core)
+    3. Neural Networks (Core)
+    4. Computer Vision and Natural Language Processing (Core)
+
+  [03. ML & Gen AI Engineering] — Cluster Duration: 7 Months
+  Module: ML & Gen AI Engineering
+  Module Type: Core
+  Sub Modules:
+    1. MLOPS (Core)
+    2. System Design (Core)
+    3. Foundations of AI Engineering & RAG Systems (Core)
+    4. Agentic Design Patterns & Multi-Agent Orchestration (Core)
+    5. Advanced Cognitive Architectures & Multimodal Intelligence (Core)
+    6. Fine tuning, LLMOPS and Security (Core)
+
+  [04. Advanced ML, Advanced Deep Learning, Advanced NLP]
+  Module: Advanced ML, Advanced Deep Learning, Advanced NLP
+  Module Type: Elective***
+  Sub Modules:
+    1. Advanced Machine Learning and Deep Learning 1
+    2. Advanced Machine Learning and Deep Learning 2
+  Duration: 2 Months
+
+  [05. DSA]
+  Module: DSA
+  Module Type: Optional*
+  Sub Module: DSA for Professionals
+  Duration: 4-6 Months
+
+  [06. Big Data (Recorded)]
+  Module: Big data (Recorded)
+  Module Type: Core
+  Sub Module: Big data (Recorded)
+  Duration: 1 Month
+
+  [07. Reinforcement Learning (Recorded)]
+  Module: Reinforcement learning (Recorded)
+  Module Type: Core
+  Sub Module: Reinforcement learning (Recorded)
+  Duration: 1 Month
+
+---
+
+=== 6.5 Curriculum Deep Dive — Advanced Track (Verbatim Class Mapping) ===
+
+    [01. Data Foundations]
+  Module: Data Foundations
+  Type: Core | Duration: 1 Month
+  Classes Covered:
+    - Food Delivery Data Exploration and analysis 1
+    - Food Delivery Data Exploration and analysis 2
+    - Food Delivery Data Exploration and analysis 3
+    - Food Delivery Data Exploration and analysis 4
+    - Food Delivery Data Exploration and analysis 5
+    - Amazon sales data analysis 1
+    - Amazon sales data analysis 2
+    - Amazon sales data analysis 3
+    - Amazon sales data analysis 4
+    - Analyzing Sachin Tendulkar's ODI Career Mathematical Foundations of AI
+
+  [02. ML Coding (Applied AI-ML)]
+  Module: ML Coding (Applied AI-ML)
+  Type: Core | Duration: 5 Months
+  Sub-Modules & Classes Covered:
+
+    -- Sub-Module: Supervised Learning --
+    - Intro to ML enginnering and Linear regression 1
+    - Linear regression 2
+    - Linear regression 3
+    - Linear regression 4
+    - Sklearn Pipelines
+    - Cross Validation in ML
+    - Logistc regression
+    - Classification metrics
+    - Model evaluation and Intro to KNN
+    - KNN based imputation and Decision Trees intro
+    - Decision Trees
+    - Ensemble methods
+    - Bagging
+    - Boosting
+    - Naive bayes
+
+    -- Sub-Module: Unsupervised Learning, Timeseries & Recommender Systems --
+    - Intro to clustering and K-means
+    - K-means and K-means ++ Clustering
+    - Hierarchical Clustering
+    - Gaussian Mixture Models
+    - DBSCAN
+    - Anamoly detection
+    - Principal Component Analysis
+    - t-SNE and UMAP
+    - Timeseries 1
+    - Timeseries 2
+    - Timeseries 3
+    - Timeseries 4
+    - Recommendation systems 1
+    - Recommendation systems 2
+    - Recommendation systems 3
+
+    -- Sub-Module: Neural Networks --
+    - Neural network 1
+    - Neural network 2
+    - PyTorch 1
+    - PyTorch 2
+    - PyTorch 3
+    - Neural network 3
+    - Auto Encoders
+
+    -- Sub-Module: Computer Vision & Natural Language Processing --
+    - Intro to CV and CNN Fundamentals
+    - Tackling Overfitting in CNN
+    - Transfer learning 1
+    - Image Similarity : Understanding Embeddings
+    - Object localization and detection 1
+    - Object localization and detection 2
+    - Object segmentation
+    - Siamese network
+    - GANs for Image Generation
+    - Text Pre-Processing (NLTK/spaCy)
+    - Word Embedding
+    - Lexicon-Based Sentiment & Topic Modeling
+    - RNN
+    - LSTM
+    - NER
+    - Attention
+    - Transformers
+    - Pre-trained Models (BERT)
+
+  [03. ML & Gen AI Engineering]
+  Module: ML & Gen AI Engineering
+  Type: Core | Duration: 7 Months
+  Sub-Modules & Classes Covered:
+
+    -- Sub-Module: MLOps --
+    - MLOps Foundations & Lifecycle
+    - Version Control for ML Teams
+    - Introduction to Steam lit and optuna
+    - End to end ML project
+    - MLflow for Experiment Management
+    - Advanced MLflow Workflows
+    - Containerizing ML Applications with Docker
+    - Deploying APIs on AWS using ECS
+    - Deploying on AWS, ci cd pipeline with github actions 1
+    - Deploying on AWS, ci cd pipeline with github actions 2
+    - Amazon SageMaker Fundamentals
+    - Advanced SageMaker Workflows
+    - Sagemaker canvas and feature store 1
+    - Sagemaker canvas and feature store 2
+    - Model registiry
+    - AWS Sagemaker Canvas
+
+    -- Sub-Module: AI Engineering - Module 1: Foundations of AI Engineering & RAG Systems --
+    - Introduction to AI Engineering & Modern Architectures
+    - Asynchronous Programming & Concurrency
+    - Data Validation & Type Safety with Pydantic
+    - Getting Started with LLM APIs
+    - Prompt Engineering Fundamentals
+    - Jailbreaks Injection & Guardrails
+    - Introduction to Retrieval-Augmented Generation
+    - Embeddings Deep Dive
+    - Multimodal & Tabular RAG
+    - Docker & Packaging for AI Applications
+    - Designing Evaluation Pipelines
+    - Monitoring & Observability with LangFuse
+
+    -- Sub-Module: AI Engineering - Module 2: Agentic Design Patterns & Multi-Agent Orchestration --
+    - Introduction to AI Agents & Tools
+    - Local LLMs & Model Context Protocol (MCP)
+    - LangChain & LangGraph Introduction
+    - ReAct Chain-of-Thought & Planning
+    - Advanced Agent Concepts: Reflection Loops
+    - Memory: Short-term Long-term & Episodic
+    - The Browser as a Tool: Playwright & Browser-Use
+    - LlamaIndex Workflows & Phidata
+    - Rapid Prototyping with LangFlow & Relevance AI
+    - Multi-Agent Patterns & Orchestration
+    - CrewAI & Microsoft Autogen
+    - Game Theory & Interoperability Protocols
+
+    -- Sub-Module: AI Engineering - Module 3: Advanced Cognitive Architectures & Multimodal Intelligence --
+    - BDI Architecture & Theory of Mind
+    - Interrupts Approval Flows & Human Oversight
+    - Advanced Generative Foundations
+    - Parsing Complex Documents: PDFs Tables Images
+    - Agentic RAG & GraphRAG
+    - Hybrid Search & Self-Correction RAG
+    - Multimodal AI: Vision (GPT-4V LlaVA) & Audio (Whisper)
+    - WebSockets WebRTC & Voice Coordination
+    - Building End-to-End VAPI Voice Agent
+
+    -- Sub-Module: AI Engineering - Module 4: Fine tuning, LLMOPS and Security --
+    - DSPy: Declarative Self-Improving Python
+    - LLM-as-a-Judge & Evaluation-Driven Development
+    - Introduction to Reinforcement Learning for Agents
+    - When & Why to Fine-Tune Models
+    - Parameter-Efficient Fine-Tuning (PEFT) & LoRA
+    - Model Distillation & Data Augmentation
+    - LLM Lifecycle & Token Economics
+    - Serving LLMs: vLLM TGI & Quantization
+    - Prompt Caching Batching & Semantic Caching
+    - AWS Bedrock & Azure AI Studio
+    - Production Engineering: K8s for AI
+    - Production Monitoring & Golden Datasets
+    - Guardrails Red Teaming & Security
+    - RBAC Data Leakage & Federated Learning
+    - Final Capstone: Autonomous Support Engineer
+
+    -- Sub-Module: ML System Design --
+    - Introduction to ML System Design
+    - Case Study: Recommendation System
+    - High-Level Design (HLD) Components
+    - Case Study: Fraud Detection
+    - Scaling ML Systems
+    - Cost Optimization
+    - Video Analytics System
+    - Trade-Offs Deep Dive
+
+  --- Specialisation & Electives ---
+
+  [04. Advanced ML & Deep Learning]
+  Module: Advanced Machine Learning and Deep Learning (Track 1 & 2)
+  Type: Elective*** | Duration: 2 Months
+  Classes Covered:
+    -- Track 1: Foundations, Optimization & Theory --
+    - Mathematical Foundations
+    - Probability & Statistics
+    - Optimization Theory
+    - Loss Functions
+    - Linear Models
+    - Logistic Regression
+    - Decision Trees & Forests
+    - Support Vector Machines
+    - Clustering Theory
+    - Dimensionality Reduction
+    - Statistical Learning Theory
+    - Bias-Variance Tradeoff
+    -- Track 2: Neural Networks & Model Interpretability --
+    - Neural Networks
+    - Backpropagation
+    - Advanced Topics
+    - Model Interpretability
+
+  [05. Big Data]
+  Module: Big Data
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - Introduction to Big Data & Ecosystem Overview
+    - Distributed Systems, Hadoop & Data Processing Basics
+    - Apache Spark Deep Dive
+    - Advanced Spark + Case Study + Visualization
+
+  [06. Reinforcement Learning]
+  Module: Reinforcement Learning (RL)
+  Type: Elective*** | Duration: 1 Month
+  Classes Covered:
+    - Class 1: Introduction to RL & MDPs
+    - Class 2: Dynamic Programming (DP) for RL
+    - Class 3: Monte Carlo & Temporal Difference Learning
+    - Class 4: Q-Learning and Deep Q-Networks (DQN)
+    - Class 5: Policy Gradients and A2C
+    - Class 6: PPO, SAC, and TD3
+    - Class 7: Model-Based RL & Imitation Learning
+    - Class 8: Multi-Agent RL, RLHF, and Applications
+
+  [07. DSA for AI Professionals]
+  Module: DSA
+  Type: Elective*** | Duration: 2 Months
+  Classes Covered:
+    - Time and Space Complexity Analysis
+    - Array Problem Solving Patterns (Prefix, Sliding Windows, Subarrays, Subsets, Subsequences)
+    - Bit Manipulation
+    - Maths for Problem Solving
+    - Recursion
+    - Backtracking
+    - Sorting
+    - Searching (Binary Search)
+    - Two Pointers
+    - Hashing
+    - String Problem Solving Patterns, String Pattern Matching
+    - Linked Lists
+    - Stacks
+    - Queues and Deques
+    - Trees and BST
+    - Tries
+    - Heaps
+    - Greedy
+    - Dynamic Programming
+    - Graphs
+

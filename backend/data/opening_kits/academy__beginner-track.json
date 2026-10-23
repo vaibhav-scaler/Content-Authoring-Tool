@@ -1,0 +1,51 @@
+{
+  "program": "Academy",
+  "track": "Beginner Track",
+  "status": "Extracted from the HackMD script by the authoring assistant. The Module Owner must verify every number, time and link before relying on it.",
+  "source": "https://hackmd.io/@topics/SJlfzhavGe",
+  "facts": {
+    "welcome": "Welcome learners to their first session at Scaler. Ask them to introduce themselves in chat in two lines. The instructor then introduces themselves.",
+    "psp": "PSP is the Problem Solving Percentage: solved assignment problems divided by total open assignment problems. Aim to keep it at 85% or more. Additional problems do not count towards it but are recommended.",
+    "attendance": "Maintain at least 75% attendance, through live classes or recordings. Live attendance is recommended. Report an absence to the instructor with the reason.",
+    "contests": "Every module has a contest of 1.5 hours, followed by a discussion. Aim for at least 60%. Re-attempts exist, but joining live helps learners understand their mistakes.",
+    "getting_help": "Ask for help in the WhatsApp or Slack group, and reach out early when struggling.",
+    "notes_and_assignments": "Notes are uploaded after class. Assignments unlock when the class ends and have no deadline.",
+    "chat_norms": "Ask questions in the public chat and address the instructor by name. Do not discuss topics that have not been covered yet in the public chat, so that other learners are not alarmed.",
+    "session_flow": "Evening batch: starts at 9:05 PM, with a break of 5 to 10 minutes, and a doubt session at 11:30 PM. Morning batch: starts at 7:05 AM, with a break, and a doubt session at 9:30 AM. Attendance is optional during doubt sessions.",
+    "module_poll": "Poll the learners on their coding experience: they know coding but not Java, they know Java and want to revise, or they are entirely new.",
+    "module_description": "Most learners are new, so the pace is set for beginners and starts from the basics. The module teaches programming constructs using Java as a medium, not Java for software development. Learners who only need revision should consider the Intermediate Refresher Batch. Topics: data types, operators, if-else, loops, patterns, functions, strings, arrays (1D and 2D), memory visualization, math basics, and two contests.",
+    "dashboard_walkthrough": "Play the recorded dashboard walkthrough video in class, then invite questions.",
+    "dashboard_video": "https://www.loom.com/share/d853cd739c8244499b817ffd9f02c736?sid=afaaa5db-42dd-4f22-bae6-fdd0f4b73169",
+    "support_email": "support@scaler.com",
+    "online_ide": "https://www.interviewbit.com/online-cpp-compiler",
+    "ai_message": "AI does not replace developers. It replaces developers who refuse to learn it.",
+    "ai_coding_and_probing": "Instructor note near the end: introduce the four AI Coding modes (explain, debug, optimise, implement) and AI Probing, a follow-up check learners can run after submitting. Learners should know both before moving on.",
+    "ai_awareness_block": "A run of short conversational cards about AI, near the end of the class. (1) Ask first: let learners say how they already use AI before you teach. (2) History repeats: calculators, Excel and Google each looked scary and then became ordinary tools; AI does not replace developers, it replaces developers who refuse to learn it. (3) What AI is good at (writing code, explaining, drafting) and where it fails (vague requirements, subtle bugs, accountability). (4) How real developers use AI: writing features, debugging, learning, test cases, refactoring, translation, pair programming. (5) Why fundamentals matter more now: show that AI can give inconsistent answers, for example asking for the middle value of [10, 20, 30, 40] and getting 25 once and 20 another time, so you need the fundamentals to judge it. (6) How the course uses AI: struggle first, then ask peers, then ask AI for hints, and only then ask for a full answer."
+  },
+  "existing_animations": [
+    {
+      "topic": "Why a computer needs exact instructions",
+      "url": "https://scaler-mk.github.io/algo-visualizer/01_computer_is_dumb.html"
+    },
+    {
+      "topic": "Compiler flow",
+      "url": "https://scaler-mk.github.io/algo-visualizer/02_compiler_flow.html"
+    },
+    {
+      "topic": "Syntax rules",
+      "url": "https://scaler-mk.github.io/algo-visualizer/03_syntax_rules.html"
+    },
+    {
+      "topic": "print versus println",
+      "url": "https://scaler-mk.github.io/algo-visualizer/04_print_vs_println.html"
+    }
+  ],
+  "onboarding_cards": [
+    "Common terms: PSP, attendance, contests",
+    "Beginner module description and expectations",
+    "FAQs: notes, assignments, chat norms, session flow",
+    "Dashboard walkthrough",
+    "AI awareness cards",
+    "AI Coding and AI Probing instructor note"
+  ]
+}

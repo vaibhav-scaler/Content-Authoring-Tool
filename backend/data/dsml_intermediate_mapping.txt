@@ -1,0 +1,227 @@
+# Scaler DSML / Intermediate Track: official module and class mapping.
+# Format: "## <module> || <segment> || <duration in months>" starts a module (segment and duration optional);
+# "<class title> | <junction number> | <type>" is one class. In the source table the junction number is the
+# last column and the type comes before it; here they are written in the usual order.
+# Type is Live, Inverted, Lab, To be planned, Recorded, or "-" when the source leaves it blank.
+# The source gives no segments or durations for this track, so none are stored.
+# Two Live rows in the first module have no title in the source and are left out.
+# "Domain Analytics" has no classes in the source.
+
+## Advanced Analytics with Python, Pandas & AI Workflows
+Time & Space Complexity | | Live
+Object Oriented Programming 1 | 1 | Live
+Object Oriented Programming 2 | | Live
+Object Oriented Programming 3 | | Live
+Regex | | Live
+NumPy 1 | 2 | Live
+NumPy 2 | | Live
+NumPy 3 | | Live
+Advanced Visualizations | 3 | Live
+End to End Business case study | | Live
+
+## Statistics, Experimentation & AI for Data-Driven Decisions
+Statistics 1: Probability Foundations for Analytics | | -
+Statistics 2: Distributions (Normal, Binomial, Real-world Context) | | -
+Statistics 3: Sampling Techniques & Bias | | -
+Statistics 4: Central Limit Theorem (Intuition + Applications) | | -
+Statistics 5: Hypothesis Testing Fundamentals | | -
+Statistics 6: p-values, Confidence Intervals & Errors | | -
+Statistics 7: A/B Testing (Design & Setup) | | -
+Statistics 8: A/B Testing (Analysis & Interpretation) | | -
+Statistics 9: Experimentation Pitfalls (Bias, Peeking, Simpson’s Paradox) | | -
+Statistics 10: Metric Design for Experiments | | -
+Statistics 11: AI-Assisted Statistical Interpretation & Validation | | -
+Applied Experiment Lab: End-to-End A/B Test Case | | -
+
+## Advanced Product Analytics
+1: Advanced Funnel Analysis (Multi-step, Multi-channel) | | -
+2: Retention Models & Cohort Deep Dive | | -
+3: Customer Lifetime Value (LTV) Modeling | | -
+4: Customer Acquisition Cost (CAC) & Payback | | -
+5: Growth Loops & Product-Led Growth | | -
+6: Segmentation Strategies (Behavioral & Value-based) | | -
+7: Churn Analysis & Retention Strategies | | -
+8: Predictive Analytics (Intro for Product) | | -
+9: Recommendation Systems (Conceptual) | | -
+10: Decision Frameworks for Product Teams | | -
+11: AI for Product Strategy & Insights | | -
+Applied Product Capstone: End-to-End Product Analytics Case | | -
+
+## Mathematical Foundations for AI
+Linear Algebra 1: The Math Behind ML | | -
+Linear Algebra 2: Dots, Lines & Hyperplanes | | -
+Linear Algebra 3: Sides, Spaces & Distance | 1 | -
+Linear Algebra 4: Drawing the Line on Loss | | -
+Linear Algebra 5: Let’s Solve Some ML Problems | | -
+Optimization 1: Why ML Needs Calculus | 2 | -
+Optimization 2: The Road to Gradient Descent | | -
+Optimization 3: Gradient Descent in Action | | -
+Optimization 4: When ML Has Rules to Follow | | -
+Optimization 5: PCA — Finding the Signal in the Noise | | -
+
+## Machine Learning with AI Workflows
+Intro to Machine Learning: From Data to Learning | | -
+Linear Regression: Understanding the Learning Process | | -
+Linear Regression: Measuring and Minimising Error | | -
+Linear Regression: Finding the Best Fit | | -
+Linear Regression: Understanding Model Parameters | 1 | -
+Polynomial Regression: Balancing Fit and Complexity | | -
+Regularisation & Cross-Validation: Building Robust Models | 2 | -
+Logistic Regression: From Prediction to Classification | | -
+Logistic Regression: Understanding Decision Boundaries | | -
+Classification Metrics: Evaluating Model Performance | 3 | -
+Handling Imbalanced Data | | -
+
+## Cloud & Data Analytics on AWS
+Cloud 1: Introduction to Cloud & Modern Data Stack | | -
+Cloud 2: AWS Core Services for Data Professionals | | -
+Cloud 3: Data Storage with S3 (Data Lakes Concept) | | -
+Cloud 4: Querying Data with Amazon Athena | | -
+Cloud 5: Data Warehousing with Amazon Redshift | | -
+Cloud 6: ETL Basics with AWS Glue | | -
+Cloud 7: Designing End-to-End Data Pipelines | | -
+Cloud 8: Connecting Tableau to Cloud Data Sources | | -
+Cloud 9: Cloud Performance & Cost Optimization | | -
+Cloud 10: Intro to Databricks & Lakehouse Concept | | -
+Cloud 11: Real-world Architecture for Data Analytics | | -
+Applied Cloud Lab: Building a Production Data Pipeline | | -
+
+## Domain Analytics
+
+## AI For everyone
+Evaluating and Comparing AI Tools | | -
+Model Selection: Matching AI to Your Needs | | -
+AI Failure Modes and Risk Mitigation | | -
+Voice-Driven Analytical Workflows | | -
+No-Code Automation for Data Workflows | | -
+AI Integration with Org Data & Knowledge Bases | | -
+Building a Reusable Prompt Library | | -
+Task Decomposition for AI Execution | | -
+AI Collaboration: Delegation vs. Augmentation | | -
+Workflow Mapping: The Three-Tier Framework | | -
+No-Code Prototyping: From Reports to Tools | | -
+Applied No-Code: Building Data Tools | | -
+Structured Prototyping: Avoiding Pitfalls | | -
+Visual Design for AI-Built Prototypes | | -
+Prototype Handoff & Capstone Planning | | -
+Autonomous AI: Architecture & Boundaries | | -
+Orchestrating Multi-Step AI Pipelines | | -
+Applied Agent Dev: Data-Monitoring Workflow | | -
+From Analysis to Narrative | | -
+Turning Analysis into Business Narratives | | -
+Communicating AI-Assisted Work Responsibly | | -
+
+## Supervised Machine Learning with AI
+k-Nearest Neighbors: Learning from Nearby Data | | -
+k-Nearest Neighbors: Understanding Distance & Decisions | | -
+Decision Trees: Finding the Best Splits | | -
+Decision Trees: How to decide what to Split | | -
+Bagging & Random Forests: Strength in Numbers | 1 | -
+Boosting: Learning from Model Mistakes | | -
+Boosting: Building Stronger Predictive Models | | -
+Ensemble Techniques: Combining Models for Better Predictions | 2 | -
+Naive Bayes: Learning from Probability | | -
+Naive Bayes: Turning Evidence into Predictions | | -
+Support Vector Machines: Finding the Optimal Boundary | 3 | -
+Support Vector Machines: Handling Complex Boundaries | | -
+
+## Un-supervised Machine Learning with AI
+PCA: Finding Structure in High-Dimensional Data | | -
+t-SNE: Visualising High-Dimensional Data | | -
+t-SNE & UMAP: Exploring Data in Lower Dimensions | | -
+K-Means Clustering: Finding Natural Groups in Data | 1 | -
+K-Means++: Smarter Initialization for Better Clusters | | -
+Gaussian Mixture Models: Clustering with Probability | 2 | -
+Hierarchical Clustering: Building Data Relationships | | -
+DBSCAN: Discovering Clusters of Any Shape | | -
+Anomaly Detection: Finding the Unusual in Data | 3 | -
+End-to-End ML: From Business Problem to Model Part1 | | -
+End-to-End ML: From Business Problem to Model 2 | | -
+
+## Time Series and Recommender Systems with AI Workflows
+Time Travels — An Introduction to Time Series & Forecasting | | -
+Reading the Rhythm — Time Series Analysis I | | -
+Finding Patterns in Time — Time Series Analysis II | 1 | -
+Forecasting the Future — Time Series Analysis III | | -
+When Trends Get Tricky — Time Series Analysis IV | | -
+Mastering the Timeline — Time Series Analysis V | | -
+So, What Should You Pick? — Recommender Systems I | 2 | -
+Learning What You Like — Recommender Systems II | | -
+From Users to Recommendations — Recommender Systems III | | -
+The Art of the Next Best Pick — Recommender Systems IV | | -
+Building Smarter Recommendations — Recommender Systems V | | -
+From Data to Decisions — An End-to-End ML Practical | | -
+
+## MLOps & AI Deployment
+Git & GitHub: Setup for MLOps | | -
+Building Cars24 ML tool using Streamlit | | -
+Develop Web APIs using Flask | | -
+Containerization - Docker & DockerHub | | -
+Deploying APIs on AWS using ECS | | -
+GitHub Actions - Setting up CI pipelines | | -
+GitHub Actions - Setting up CD pipelines | | -
+Experiment Tracking & Data Management using MLFlow | | -
+ML System Design - 1 | | -
+ML System Design - 2 | | -
+Building ML pipelines with AWS Sagemaker | | -
+Processing large scale data using Apache Spark | | -
+
+## Deep Learning & Neural Networks
+Neural Networks: Building the Foundations of DL | | -
+Forward & Backward propagation: How NNs Learn | | -
+N-Layer Neural Networks: Building Deeper Models | | -
+N-Layer Neural Networks: Learning Complex Patterns | | -
+Deep Backpropagation: Training Multi-Layer Networks | 1 | -
+PyTorch 1: Building Your First Neural Network | | -
+PyTorch 2: Training NNs in Practice | | -
+Optimizers: Steering NNs Towards Better Learning | 2 | -
+Hyperparameter Tuning: Finding Better NN | | -
+Autoencoders: Learning to Compress and Reconstruct | | -
+Designing & Debugging MLPs: From Architecture to Training | 3 | -
+Model Interpretability: Understanding Neural Network Decisions | | -
+
+## AI for Computer Vision
+Computer Vision: Teaching Machines to See | | -
+CNNs: Tackling Overfitting for Better Generalisation | | -
+CNNs Under the Hood: Understanding Feature Learning | | -
+Transfer Learning: Building on What Models Already Know | 1 | -
+Image Embeddings: Measuring Similarity Beyond Pixels | | -
+CNNs in Healthcare: From Images to Diagnosis | | -
+Object Detection: Finding and Locating Objects in Images | 2 | -
+Object Detection: From Bounding Boxes to Predictions | | -
+Image Segmentation: Understanding Objects Pixel by Pixel | | -
+Siamese Networks: Learning Visual Similarity | 3 | -
+Generative Models: Teaching Machines to Create | | -
+
+## AI for Natural Language Processing
+NLP: Teaching Machines to Understand Language | | -
+Text Representation: Turning Language into Data | | -
+Word2Vec: Learning Meaning from Context | 1 | -
+Language Models: Predicting What Comes Next | | -
+Topic Modeling: Discovering Hidden Themes in Text | | -
+RNNs: Learning from Sequential Language | 2 | -
+LSTMs: Remembering What Matters in a Sequence | | -
+Named Entity Recognition: Finding Meaningful Entities in Text | | -
+Attention: Learning What Matters in Language | 3 | -
+Transformers: Rethinking How Machines Process Language | | -
+BERT: Understanding Language from Both Directions | | -
+
+## AI engineering and Agentic AI
+Introduction to AI Engineering | | -
+Refresher: Modern Text & Image AI Model Architectures | | -
+Getting started with Text Generation LLM APIs (OpenAI API) | | -
+Designing Eval Pipelines for AI Apps and Observability | | -
+Prompt Engineering: Introduction | | -
+Retrieval-Augmented Generation (RAG) Introduction | | -
+Embeddings Deep Dive | | -
+Multimodal & Tabular RAG | | -
+Prompt Engineering: Security | | -
+Agents: Foundations & Planning | | -
+Advanced Agent Concepts | | -
+Agent: Frameworks and Protocols | | -
+Fine Tuning Existing Models | | -
+Audio, Image, Video, Expressions: AI Modalities | | -
+Scaling AI Applications | | -
+Model Quantization Techniques | | -
+Advanced Fine Tuning Techniques | | -
+Dataset Engineering && Inference Optimization | | -

@@ -1,0 +1,332 @@
+# Scaler DevOps & Cloud / Core & Electives Track: official module and class mapping.
+# Format: "## <module> || <segment> || <duration in months>" starts a module (segment and duration optional);
+# "<class title> | <junction number> | <type>" is one class. The source table has no junction numbers.
+# Type is Live, Inverted, Lab, To be planned, or "-" when the source leaves it blank.
+# The source's Track column (DSA / Full Stack on a few rows) is not used: DevOps has a single track.
+# Segments are the labels the app already showed for these modules.
+
+## Beginner Python || Programming || 1
+Refresher : Introduction To Python and Data Types & AI Awareness | | Live
+Refresher : Operators and Control Statements | | Live
+Refresher : Iteration : Loops & Iteration Analysis by AI | | Live
+Refresher : Lab Session on Iteration | | Inverted
+Refresher : Functions & Modularity: Designing Code with AI | | Live
+Refresher : 1D List | | Live
+Refresher : 2D List | | Live
+Refresher : Lab Session on List | | Inverted
+Refresher : Tuples + Strings | | Live
+Refresher : Sets and Dictionaries | | Live
+File & Exception Handling | | Live
+Interview Problems | | Live
+
+## Linux Shell Scripting and Computer Systems 1 || Linux & Systems || 1
+Introduction to Linux | | Live
+File Management in Linux | | Live
+User Management & Permissions in Linux | | Live
+Process Management in Linux | | Live
+Text Processing in Linux | | Live
+Advanced Text Processing & Scheduling in Linux | | Live
+Introduction To Networking | | -
+OSI Model in Networking | | -
+Networking Devices | | -
+Networking in Linux | | Live
+Advanced Networking (DevSecOps) | | -
+
+## Linux Shell Scripting and Computer Systems 2 || Linux & Systems || 1
+Shell scripting introduction | | Live
+Fundamentals of Shell Scripting | | Live
+Shell scripting walk through | | Live
+Shell scripting for DevOps - file management | | Live
+Shell scripting for DevOps - process management | | Live
+Shell scripting for DevOps - filesystem management | | Live
+Shell scripting for DevOps - backup | | Live
+Shell scripting for DevOps - Networking | | Live
+Mock interview Demo by instructor | | Live
+Ai Assisted Scripting | | -
+Git introduction | | Live
+Git in DevOps - GitHook, PR, Branching | | Live
+Git in DevOps 2 | | -
+
+## DevOps Tools 1 || CI/CD & Containers || 3
+Docker introduction | | Live
+Docker image and Docker containers | | Live
+Building your own Docker image | | Live
+Image and Containers Deep Dive | | Live
+Docker volume | | Live
+Docker networking deep dive | | Live
+Hardening the Docker env. (DevSecOps) | | Live
+Demo of implementing industry standard implementation (e.g. in image hardening and other security standards) | | Live
+Introduction to Orchestration | | Live
+Kubernetes architecture | | Live
+Kubernetes Pod deep dive | | Live
+Kubernetes ReplicaSet and Deployment | | Live
+Kubernetes networking | | Live
+Scaling options in kubernetes - HPA, CA and VPA - compare with Karpentor | | Live
+Introduction to scaling in kubernets, Network policies | | Live
+Kubernetes security - RBAC (DevSecOps) | | Live
+Kubernetes volumes | | Live
+Kubernetes ingress | | Live
+Init Containers, Static Pods, Scheduling | | Live
+Kubernetes Jobs, Probes, admission controllers | | Live
+CRD, CNI | | Live
+Config maps and secrets (DevSecOps) | | Live
+Troubleshooting | | Live
+Deploying a hugging face model on K8s | | -
+Introduction to Observability. Prometheus and Grafana setup | | Live
+Prometheus Monitoring Configuration | | Live
+PromQL Querying and Data Exploration | | Live
+Getting Started with Grafana | | Live
+Variables, Data Sources, and Persistent Dashboards in Grafana | | Live
+Scaling Grafana: Best Practices, Real-World Use Cases, and Performance Tuning | | Live
+Advanced Monitoring Techniques | | Live
+Advanced observability using Newrelic | | Live
+Deploying a microservice in Kubernetes cluster project 1 | | Live
+Deploying a microservice in Kubernetes cluster project 2 | | Live
+
+## DevOps Tools 2 || Kubernetes & IaC || 2
+Introduction to DevOps | | Live
+Introduction to CI/CD | | Live
+Jenkins introduction, architecture, jobs | | Live
+Project: CI/CD on Jenkins using simple job | | Live
+Jenkins pipeline syntaxt walk through | | Live
+Project: CI/CD on Jenkins using pipelines | | Live
+Jenkins advanced - add nodes, RBAC | | Live
+Project by engineers on Jenkins end to cicd in industry standard. | | Live
+Introduction to GitHub Actions | | Live
+Secrets, Events, and Workflow Optimization (DevSecOps) | | Live
+Advanced Techniques and Best Practices (DevSecOps) | | Live
+Efficient Workflows and Security Practices (DevSecOps) | | Live
+Project by engineers on GitHub actions end to cicd in industry standard. | | Live
+Advanced ArgoCD Usage and Configuration | | Live
+Advanced Features and Integration | | Live
+ArgoCD-Jenkins Integration | | Live
+Project Demo | | Live
+IaC fundamentatls and Ansible Fundamentals | | Live
+Ansible Playbooks & Modules | | Live
+Templates, Variables & Facts | | Live
+Roles & Advanced Topics | | Live
+Ansible Vault & Best Practices (DevSecOps) | | Live
+Introduction to SRE concepts | | Live
+Ansible Project | | Live
+
+## AWS 1 || Cloud Infrastructure || 1.5
+Cloud Basics & Evolution | | Live
+AWS Compute & EC2 Intro | | Live
+EC2 Deep Dive | | Live
+EC2 Hosting & Load Balancing | | Live
+AWS IAM Basics | | Live
+AWS Storage & CloudFront | | Live
+S3 Deep Dive | | Live
+AWS CLI & Boto Intro | | Live
+AWS VPC & Networking Basics | | Live
+Advanced AWS Networking | | Live
+AWS Observability & CloudWatch | | Live
+CloudWatch & CloudTrail Advanced (DevSecOps) | | Live
+Docker App on EC2 Project | | Live
+AWS Lambda & API Gateway | | Live
+End-to-End Project day1 | | Live
+End-to-End Project day2 | | Live
+End-to-End Project day3 | | Live
+
+## AWS 2 || Cloud Infrastructure || 3
+AWS ECS & ECR Intro | | Live
+ECS Fundamental | | Live
+EKS Basics | | Live
+EKS Advanced | | Live
+EKS Security & Operations | | Live
+Route 53 and Cert Manager | | -
+Microservices on AWS Project | | Live
+Microservices Project – Phase 2 | | -
+AWS CI/CD & Pipelines | | Live
+AWS CI/CD & Pipelines 2 | | Live
+AWS Queuing Service | | Live
+AWS Cloud Formation | | Live
+AWS Security: Identity & Network (DevSecOps) | | Live
+AWS Security: Data & Detection (DevSecOps) | | Live
+AWS Security Hands-on (DevSecOps) | | Live
+AWS RDS (SQL Databases) | | Live
+DynamoDB (NoSQL) | | Live
+AWS Data Migration | | Live
+AWS Data Engineering (Glue & Athena) | | Live
+FinOps in AWS | | Live
+AWS Sagemaker | | Live
+Generative AI on AWS | | Live
+AWS Services Deep Dive | | Live
+Project Architecture Review | | Live
+Kubernetes AI Project 1 | | Live
+Kubernetes AI Project 2 | | Live
+AWS Backup | | Live
+DevOps Cert Discussion 1 | | -
+DevOps Cert Discussion 2 | | -
+DevOps Cert Discussion 3 | | Live
+Terraform & IaC Intro | | Live
+Terraform Language Deep Dive | | Live
+Terraform State & Modules | | Live
+Terraform Dependencies | | Live
+Advanced Terraform Workspaces | | Live
+Terraform Cluster Project | | Live
+Deploying an app - Project | | Live
+Deploying an app - Project Day 2 | | Live
+
+## Observability, Security & Responsible Systems || SRE & Security || 1
+Introduction to Observability, Security & Responsible Systems | | -
+Observability for AI and Operations | | -
+Designing ML-Ready Pipelines | | -
+Machine-Readable Observability Layer | | -
+Anomaly Detection Systems | | -
+Feature Engineering & Alerting | | -
+Behavioral Fingerprinting | | -
+Predictive Operations & Failure Prevention | | -
+Forecasting & Early Warning | | -
+Security Foundations for AI & Automation | | -
+Guardrails & Access Control | | -
+Zero-Trust & Audit | | -
+AI Threat Models | | -
+PII & Model Integrity | | -
+Prompt Injection & Testing | | -
+Governance and Responsible AI | | -
+Audit, Compliance & Ethics | | -
+
+## ML Systems, MLOps & DataOps || MLOps || 1
+Introduction to ML Systems and DataOps | | -
+AI Observability and Model Health | | -
+Drift Detection & Monitoring | | -
+Model Health & Retraining | | -
+ML-Driven Optimization | | -
+Autoscaling & Cost Engineering | | -
+MLOps on Kubernetes | | -
+Inference & GPU Operations | | -
+End-to-End MLOps Build | | -
+Dataset Operations (DataOps) | | -
+Data Quality & Governance | | -
+
+## Generative AI & Agentic Systems || GenAI & Agents || 1
+Introduction to Gen AI | | -
+Generative AI for Engineers | | -
+IaC Generation & Validation | | -
+Safe GenAI in Production | | -
+Retrieval-Augmented Generation (RAG) | | -
+Building RAG Systems | | -
+RAG Quality & Strategy | | -
+Agentic AI Systems | | -
+Multi-Agent Architecture | | -
+Agent Testing & Human-in-the-Loop | | -
+LLM Gateway and Proxy Patterns | | -
+Caching, Filtering & Cost Control | | -
+
+## AI & Agents: From Talking to AI to Building One || GenAI & Agents || 1
+GenAI World & LLM Landscape | | -
+Prompt Engineering Basics | | -
+Advanced Prompting & AI Safety Basics | | -
+LLM Built-in Power Tools | | -
+RAG | | -
+n8n Automation Workflow | | -
+What Is an AI Agent? | | -
+Building Agents with n8n | | -
+OpenClaw: Personal 24/7 AI Agent | | -
+Multi-Agent Systems | | -
+MindStudio: Building AI Apps Visually | | -
+
+## Intermediate DSA : AI Assisted Problem Solving || DSA & Problem Solving || 1
+Intermediate DSA: Time Complexity | | -
+Intermediate DSA: Introduction to Arrays & Basics of AI | | -
+Intermediate DSA: Lab Session on TC, SC, Output & Debugging | | -
+Intermediate DSA: Arrays: Prefix Sum & Carry Forward with AI-Assisted Problem Solving | | -
+Intermediate DSA: Lab Session on Prefix Sum & Carry Forward | | -
+Intermediate DSA: Arrays: Arrays techniques & smart prompting | | -
+Intermediate DSA: Lab Session on Memory Management & Sorting Basics | | -
+Intermediate DSA: Bit Manipulations Basics | | -
+Intermediate DSA: Lab Session on 2D Matrices | | -
+Intermediate DSA : Strings & Immutability visualisations through AI | | -
+Intermediate DSA: Lab on Matrix & Strings using AI | | -
+Intermediate DSA: Contest & Contest discussion | | -
+
+## Advanced DSA: Foundations:Core Techniques & Optimization || DSA & Problem Solving || 1
+DSA: Time Complexity | | -
+DSA: Arrays Techniques | | -
+DSA: Arrays 1: One Dimensional | | -
+DSA: Arrays 2: Two Dimensional | | -
+DSA: Lab Session on Arrays | | -
+DSA: Bit Manipulation | | -
+DSA: Lab Session on Bit Manipulation | | -
+DSA: Recursion | | -
+DSA: Lab Session on Recursion | | -
+DSA: Maths: Modular Arithmetic & GCD | | -
+DSA: Hashing | | -
+DSA: Lab Session on Hashing | | -
+DSA: Sorting 1: Count Sort & Merge Sort | | -
+DSA: Sorting 2: Quick Sort & Comparator Problems | | -
+DSA: Sample Contest: Dual Camera Proctoring | | -
+DSA Contest 1: Arrays, Bit Manipulation, Recursion, Math, Hashing & Sorting & Contest discussion | | -
+
+## Advanced DSA: Linear & Non-Linear Data Structures || DSA & Problem Solving || 1
+DSA: Searching 1: Binary Search on Array | | -
+DSA: Searching 2: Binary Search on Answer | | -
+DSA: Lab Session on Searching | | -
+DSA: Classes, Objects & Linked List Introduction | | -
+DSA: Linked List: Basic Problems | | -
+DSA: Stacks | | -
+DSA: Lab Session on Stacks | | -
+DSA: Queues: Implementation & Problems | | -
+DSA: Trees 1: Structure & Traversal | | -
+DSA: Trees 2: BST | | -
+DSA: Lab Session on Binary Trees | | -
+DSA: Revision of DSA 1 & 2 | | -
+DSA: Break | | -
+DSA Contest 2: Searching, Linked List, Stacks, Queues & Trees & Contest discussion | | -
+
+## Advanced DSA: Backtracking & Advanced Trees || DSA & Problem Solving || 1
+DSA: Maths: Combinatorics Basics & Prime Numbers | | -
+DSA: Lab Session on Prime Numbers & 2 Pointers | | -
+DSA: Lab Session on Maths & 2 Pointers | | -
+DSA: Backtracking | | -
+DSA: Lab Session on Backtracking | | -
+DSA: Linked List: Sorting and Problems | | -
+DSA: Linked List: Doubly Linked List & Detecting Loop | | -
+DSA: Trees 4: Morris Inorder Traversal + LCA | | -
+DSA: Lab Session on Binary Trees 2 | | -
+DSA: Hashing 3: Internal Implementation & Problems | | -
+DSA Contest 3: Math, Two Pointers, Backtracking, Linked List & Trees & Contest discussion | | -
+
+## Advanced DSA: DP, Heaps & Graphs — Crack It with AI Edge || DSA & Problem Solving || 1.5
+DSA: Heaps: Introduction | | -
+DSA: Heap Sort & Greedy | | -
+DSA: Lab Session on Heaps & Greedy | | -
+DSA: Lab Session on Interview Problems 1 | | -
+DSA: DP 1: One Dimensional | | -
+DSA: DP 2: Two Dimensional | | -
+DSA: DP 3: Knapsack | | -
+DSA: Lab Session on Applications of Knapsack | | -
+DSA: Graphs 1: Introduction, DFS & Cycle Detection | | -
+DSA: Graphs 2: BFS & MST | | -
+DSA: Graphs 3: Dijkstra Algo & Topological Sort | | -
+DSA: Lab Session on Interview Problems 2 | | -
+DSA: Revision of DSA 3 & 4 | | -
+DSA Contest 4: Heaps, Greedy, DP & Graphs & Contest discussion | | -
+Mandatory Skill Evaluation Test: DSA | | -
+Skill Evaluation Test Discussion + How to ace DSA Interview | | -
+DSA : Real World Project 1 (Social Network Analyzer) | | -
+DSA : Real world Project 2 ( Invoice Merger ) | | -
+
+## Distributed System Design & AI-Integrated Architectures || System Design
+System Design Foundations & Modern Infrastructure | | -
+Load Balancing, Consistent Hashing & Traffic Routing at Scale | | -
+Caching Systems: CDN, Backend Caches, Cache Invalidation | | -
+Case Study: Caching at Scale (Scaler Code Judge and Contest Leaderboards + AI Workloads) | | -
+Case Study: Caching Facebook News Feed | | -
+CAP / PACELC theorem + Master Slave Replication | | -
+SQL vs NoSQL + Sharding | | -
+Database Orchestration & Shard Creation | | -
+Case study: Google Typeahead (How to approach System Design Problems) | | -
+Case Study: Google Typeahead (Design and Optimizations) | | -
+NoSQL Internals - LSM Tree and Multi Master | | -
+Case Study: Messaging Apps (FB Messenger, Whatsapp, Slack) | | -
+Messaging Queues - Apache Kafka & Zookeeper | | -
+Case Study: ElasticSearch (Full Text Search) | | -
+Case Study: S3, HDFS (Large File Storage) | | -
+Case Study: Uber (Nearest Neighbor Search) | | -
+Case Study: Rate Limiter + Unique ID Generator (Infra) | | -
+Case Study: OTT Platform (OTT) | | -
+Microservices - 1 | | -
+Microservices - 2 | | -
+Case Study: Ecommerce Platform (Microservices) | | -

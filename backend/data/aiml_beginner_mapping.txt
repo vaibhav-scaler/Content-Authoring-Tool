@@ -1,0 +1,273 @@
+# Scaler AI / ML & Agentic AI / Beginner Track: official module and class mapping.
+# Format: "## <module> || <segment> || <duration in months>" starts a module (segment and duration optional);
+# "<class title> | <junction number> | <type>" is one class. The source table has no junction numbers.
+# Type is Live, Inverted, Lab, To be planned, Recorded, or "-" when the source leaves it blank.
+# In the source table the module name sometimes sits in the Track column (MLOps, Big Data, RL, DSA,
+# Advanced ML & DL 1 and 2); it is used as the module name there. The segment is the source's Track label.
+
+## AI Foundations (No Code) || Generative AI
+Generative AI Foundations & The LLM Landscape | | Live
+Prompt Engineering — From Anatomy to Advanced Patterns | | Live
+AI Reliability — Safety, Evaluation & Built-in Power Tools | | Live
+AI Ecosystems, Productivity & Meeting Intelligence | | Live
+Knowledge Management & RAG in Practice | | Live
+Web-Grounded Research & Citations | | Live
+Building No-Code AI Chatbots — Dify, Botpress & Voiceflow | | Live
+AI for Content Creation — Presentations, Documents & Visuals | | Live
+Multimodal GenAI — Images, Video & Voice | | Live
+Workflow Automation Essentials | | Live
+Automating with n8n — Real-World Workflows | | Live
+Automating with Zapier — Apps, AI Actions & SaaS Connections | | Live
+What Is an AI Agent? Concepts & Live Demos | | Live
+Tools, Memory & MCP — Agent Building Blocks | | Live
+Building Agents Without Code | | Live
+Personal Agents & Multi-Agent Systems | | Live
+No-Code Coding IDEs — Vibe Coding with Windsurf, Lovable & Google Antigravity | | Live
+Claude Ecosystem Deep-Dive — Skills, Artifacts, claude.md & skill.md | | Live
+Prompt Management as a Practice | | Live
+AI System Design, Evaluation & Observability | | Live
+Deploying AI Apps — Platforms, Hosting & Going Live | | Live
+AWS for AI Apps: Concepts & Architecture (Theory) | | Live
+AWS for AI Apps: Hands-On Deployment Lab | | Live
+
+## Python Foundations || Python
+Data Types, Variables, Input/Output | | Live
+Operators | | Live
+Control Statements | | Live
+Loops | | Live
+Functions | | Live
+Lists | | Live
+Strings | | Live
+Sets, Tuples, Dictionaries | | Live
+Functional Programming | | Live
+OOPS | | Live
+Regex | | Live
+File Handling and Modules | | Live
+
+## Data Foundations || DF
+Food Delivery Data Exploration and analysis 1 | | Live
+Food Delivery Data Exploration and analysis 2 | | Live
+Food Delivery Data Exploration and analysis 3 | | Live
+Food Delivery Data Exploration and analysis 4 | | Live
+Food Delivery Data Exploration and analysis 5 | | Live
+Amazon sales data analysis 1 | | Live
+Amazon sales data analysis 2 | | Live
+Amazon sales data analysis 3 | | Live
+Amazon sales data analysis 4 | | Live
+Analyzing Sachin Tendulkar's ODI Career | | Live
+
+## Mathematical Foundations of AI || Maths for ML
+Linear Algebra 1 | | Live
+Linear Algebra 2 | | Live
+Linear Algebra 3 | | Live
+Linear Algebra 4 | | Live
+Linear Algebra problem solving | | Live
+Calculus 1 | | Live
+Calculus 2 | | Live
+Optimization and Gradient Descent 1 | | Live
+Optimization and Gradient Descent 2 | | Live
+
+## ML Coding: Supervised Learning || ML Coding (Applied AI-ML)
+Intro to ML enginnering and Linear regression 1 | | Live
+Linear regression 2 | | Live
+Linear regression 3 | | Live
+Linear regression 4 | | Live
+Sklearn Pipelines | | Live
+Cross Validation in ML | | Live
+Logistc regression | | Live
+Classification metrics | | Live
+Model evaluation and Intro to KNN | | Live
+KNN based imputation and Decision Trees intro | | Live
+Decision Trees | | Live
+Ensemble methods | | Live
+Bagging | | -
+Boosting | | Live
+Naive bayes | | Live
+
+## ML Coding: Unsupervised Learning, Timeseries & Recommender Systems || ML Coding (Applied AI-ML)
+Intro to clustering and K-means | | Live
+K-means and K-means ++ Clustering | | Live
+Hierarchical Clustering | | Live
+Gaussian Mixture Models | | Live
+DBSCAN | | Live
+Anamoly detection | | Live
+Principal Component Analysis | | Live
+t-SNE and UMAP | | Live
+Timeseries 1 | | Live
+Timeseries 2 | | Live
+Timeseries 3 | | Live
+Timeseries 4 | | Live
+Recommendation systems 1 | | Live
+Recommendation systems 2 | | Live
+Recommendation systems 3 | | Live
+
+## ML Coding: Neural Networks || ML Coding (Applied AI-ML)
+Neural network 1 | | Live
+Neural network 2 | | Live
+PyTorch 1 | | Live
+PyTorch 2 | | Live
+PyTorch 3 | | Live
+Neural network 3 | | Live
+Auto Encoders | | Live
+
+## ML Coding: Computer Vision & Natural Language Processing || ML Coding (Applied AI-ML)
+Intro to CV and CNN Fundamentals | | Live
+Tackling Overfitting in CNN | | Live
+Transfer learning 1 | | Live
+Image Similarity : Understanding Embeddings | | Live
+Object localization and detection 1 | | Live
+Object localization and detection 2 | | Live
+Object segmentation | | Live
+Siamese network | | Live
+GANs for Image Generation | | Live
+Text Pre-Processing (NLTK/spaCy) | | Live
+Word Embedding | | Live
+Lexicon-Based Sentiment & Topic Modeling | | Live
+RNN | | Live
+LSTM | | Live
+NER | | Live
+Attention | | Live
+Transformers | | Live
+Pre-trained Models (BERT) | | Live
+
+## MLOps || MLOps
+MLOps Foundations & Lifecycle | | Live
+Version Control for ML Teams | | Live
+Introduction to Steam lit and optuna | | Live
+End to end ML project | | Live
+MLflow for Experiment Management | | Live
+Advanced MLflow Workflows | | Live
+Containerizing ML Applications with Docker | | Live
+Deploying APIs on AWS using ECS | | Live
+Deploying on AWS, ci cd pipeline with github actions 1 | | Live
+Deploying on AWS, ci cd pipeline with github actions 2 | | Live
+Amazon SageMaker Fundamentals | | Live
+Advanced SageMaker Workflows | | Live
+Sagemaker canvas and feature store 1 | | Live
+Sagemaker canvas and feature store 2 | | Live
+Model registiry | | Live
+AWS Sagemaker Canvas | | Live
+
+## Module 1: Foundations of AI Engineering & RAG Systems || AI Engineering
+Introduction to AI Engineering & Modern Architectures | | Live
+Asynchronous Programming & Concurrency | | Live
+Data Validation & Type Safety with Pydantic | | Live
+Getting Started with LLM APIs | | Live
+Prompt Engineering Fundamentals | | Live
+Jailbreaks Injection & Guardrails | | Live
+Introduction to Retrieval-Augmented Generation | | Live
+Embeddings Deep Dive | | Live
+Multimodal & Tabular RAG | | Live
+Docker & Packaging for AI Applications | | Live
+Designing Evaluation Pipelines | | Live
+Monitoring & Observability with LangFuse | | Live
+
+## Module 2: Agentic Design Patterns & Multi-Agent Orchestration || AI Engineering
+Introduction to AI Agents & Tools | | Live
+Local LLMs & Model Context Protocol (MCP) | | Live
+LangChain & LangGraph Introduction | | Live
+ReAct Chain-of-Thought & Planning | | Live
+Advanced Agent Concepts: Reflection Loops | | Live
+Memory: Short-term Long-term & Episodic | | Live
+The Browser as a Tool: Playwright & Browser-Use | | Live
+LlamaIndex Workflows & Phidata | | Live
+Rapid Prototyping with LangFlow & Relevance AI | | Live
+Multi-Agent Patterns & Orchestration | | Live
+CrewAI & Microsoft Autogen | | Live
+Game Theory & Interoperability Protocols | | Live
+
+## Module 3: Advanced Cognitive Architectures & Multimodal Intelligence || AI Engineering
+BDI Architecture & Theory of Mind | | Live
+Interrupts Approval Flows & Human Oversight | | Live
+Advanced Generative Foundations | | Live
+Parsing Complex Documents: PDFs Tables Images | | Live
+Agentic RAG & GraphRAG | | Live
+Hybrid Search & Self-Correction RAG | | Live
+Multimodal AI: Vision (GPT-4V LlaVA) & Audio (Whisper) | | Live
+WebSockets WebRTC & Voice Coordination | | Live
+Building End-to-End VAPI Voice Agent | | Live
+
+## Module 4: Fine tuning, LLMOPS and Security || AI Engineering
+DSPy: Declarative Self-Improving Python | | Live
+LLM-as-a-Judge & Evaluation-Driven Development | | Live
+Introduction to Reinforcement Learning for Agents | | Live
+When & Why to Fine-Tune Models | | Live
+Parameter-Efficient Fine-Tuning (PEFT) & LoRA | | Live
+Model Distillation & Data Augmentation | | Live
+LLM Lifecycle & Token Economics | | Live
+Serving LLMs: vLLM TGI & Quantization | | Live
+Prompt Caching Batching & Semantic Caching | | Live
+AWS Bedrock & Azure AI Studio | | Live
+Production Engineering: K8s for AI | | Live
+Production Monitoring & Golden Datasets | | Live
+Guardrails Red Teaming & Security | | Live
+RBAC Data Leakage & Federated Learning | | Live
+Final Capstone: Autonomous Support Engineer | | Live
+
+## ML System Design || ML System Design
+Introduction to ML System Design | | -
+Case Study: Recommendation System | | -
+High-Level Design (HLD) Components | | -
+Case Study: Fraud Detection | | -
+Scaling ML Systems | | -
+Cost Optimization | | -
+Video Analytics System | | -
+Trade-Offs Deep Dive | | -
+
+## Advanced Machine Learning and Deep Learning 1 || Advanced Machine Learning and Deep Learning
+Mathematical Foundations | | -
+Probability & Statistics | | -
+Optimization Theory | | -
+Loss Functions | | -
+Linear Models | | -
+Logistic Regression | | -
+Decision Trees & Forests | | -
+Support Vector Machines | | -
+Clustering Theory | | -
+Dimensionality Reduction | | -
+Statistical Learning Theory | | -
+Bias-Variance Tradeoff | | -
+
+## Advanced Machine Learning and Deep Learning 2 || Advanced Machine Learning and Deep Learning
+Neural Networks | | -
+Backpropagation | | -
+Advanced Topics | | -
+Model Interpretability | | -
+
+## Big Data || Big Data
+Introduction to Big Data & Ecosystem Overview | | Recorded
+Distributed Systems, Hadoop & Data Processing Basics | | Recorded
+Apache Spark Deep Dive | | Recorded
+Advanced Spark + Case Study + Visualization | | Recorded
+
+## RL || RL
+Class 1: Introduction to RL & MDPs | | Recorded
+Class 2: Dynamic Programming (DP) for RL | | Recorded
+Class 3: Monte Carlo & Temporal Difference Learning | | Recorded
+Class 4: Q-Learning and Deep Q-Networks (DQN) | | Recorded
+Class 5: Policy Gradients and A2C | | Recorded
+Class 6: PPO, SAC, and TD3 | | Recorded
+Class 7: Model-Based RL & Imitation Learning | | Recorded
+Class 8: Multi-Agent RL, RLHF, and Applications | | Recorded
+
+## DSA || DSA
+Time and Space Complexity Analysis | | -
+Array Problem Solving Patterns (Prefix, Sliding Windows, Subarrays, Subsets, Subsequences) | | -
+Bit Manipulation | | -
+Maths for Problem Solving | | -
+Recursion | | -
+Backtracking | | -
+Sorting | | -
+Searching (Binary Search) | | -
+Two Pointers | | -
+Hashing | | -
+String Problem Solving Patterns, String Pattern Matching | | -
+Linked Lists | | -
+Stacks | | -
+Queues and Deques | | -
+Trees and BST | | -
+Tries | | -
+Heaps | | -
+Greedy | | -
+Dynamic Programming | | -
+Graphs | | -

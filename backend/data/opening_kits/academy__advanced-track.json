@@ -1,0 +1,30 @@
+{
+  "program": "Academy",
+  "track": "Advanced Track",
+  "status": "Extracted from the notebook Class_1.ipynb (shared by the Module Owner) by the authoring assistant. The Module Owner must verify it.",
+  "source": "https://colab.research.google.com/drive/1GbZQDzqZcCCnlOE4TmEN4VPgUNLV2Pec",
+  "facts": {
+    "class_title_and_tools": "Class 1: Runway to the AI World and the LLM Landscape. Tools: Google Colab, a web browser, a terminal.",
+    "setting_expectations": "The class is intentionally light and introductory: no heavy coding, no difficult theory, no overwhelming jargon. Frame it as entering a new city for the first time: learn what exists, what things are called and how they connect, not build skyscrapers. The goal is that AI feels less mysterious by the end.",
+    "by_the_end_learners_can": "Use the terms AI, LLM, GenAI, AI Agent and Agentic AI correctly; navigate Google Colab (run cells, edit code, restart runtimes); explain what an API is and why AI tools depend on it; read a basic JSON response; feel comfortable when terminal commands or GitHub appear later; explain how frontend, backend, database and APIs fit together in an AI application.",
+    "what_this_class_is_not": "A runway, not the flight. Not covered today: prompt engineering, API keys, system prompts, AI agents in depth, production deployments, advanced workflows. Each gets a dedicated session later.",
+    "teaching_style": "Very conversational: stories, analogies, demos, intuition and practical examples. The goal is to feel at home in the AI world, not to memorise definitions.",
+    "section_pattern": "For each term or tool: a plain-English definition, one everyday example, one picture or diagram, then a one-question checkpoint quiz with the answer and a spoken explanation of why the other options fail.",
+    "analogies_used": "AI as an umbrella: transportation, then motor vehicles, then electric vehicles, then a Tesla for an LLM. An LLM as autocomplete. An API as a vending machine. A context window as the model's desk. Temperature as a creativity dial. Choosing an LLM like choosing a programming language. The LLM landscape like the cloud providers AWS, GCP and Azure.",
+    "tooling_cells": "Short runnable Colab cells marked TRY IT NOW (Shift + Enter), for example a cell that prints a confirmation, then one the learner edits and runs.",
+    "first_prompt_demo": "Give the same prompt to three chat tools (free tiers), and ask learners to compare length, structure, confidence, depth, personality and extras. There is no right answer; the point is to build a sense of each model's personality.",
+    "accounts_checklist": "Learners set up the AI accounts the course needs (some need email verification and a payment method). The exact list is [[FROM_SME: accounts learners must set up before class]]. If they hit issues they flag them and the instructor troubleshoots together.",
+    "interaction_note": "The source script opens with a show of hands. Online, use a chat poll instead (rule E3).",
+    "closing": "A decision framework for choosing a model, a one-table summary of every term and tool covered, and a list of key links.",
+    "resource_links": "ChatGPT https://chat.openai.com ; Claude https://claude.ai ; Google AI Studio https://aistudio.google.com ; OpenAI Tokenizer https://platform.openai.com/tokenizer ; Anthropic Console https://console.anthropic.com ; Groq https://groq.com ; Chatbot Arena Leaderboard https://chat.lmsys.org ; tiktoken https://github.com/openai/tiktoken ; Context Window Visualizer https://context-windows.damien-henry.com/ ; Temperature Visualizer https://andreban.github.io/temperature-topk-visualizer/"
+  },
+  "existing_animations": [],
+  "onboarding_cards": [
+    "Opening and setting expectations",
+    "What this class is NOT",
+    "Vocabulary sections, each with a checkpoint quiz",
+    "Tooling comfort with TRY IT NOW cells",
+    "Account setup checklist",
+    "Wrap-up: decision framework, summary and key links"
+  ]
+}

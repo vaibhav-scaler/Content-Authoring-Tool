@@ -1,0 +1,234 @@
+# Scaler AI Forward Deployed Engineer / Enterprise Deployment Track: official module and class mapping.
+# Format: "## <module> || <segment> || <duration in months>" starts a module (segment and duration optional);
+# "<class title> | <junction number> | <type>" is one class.
+# Source: the FDE brochure text, taken from the catalog's FDE section (section 5.2), whose titles match the
+# pasted brochure text character for character. The brochure paste has its page layout scrambled (module
+# titles and wrapped lines out of order); the catalog copy is the clean version of the same list.
+# The brochure gives no class types or junction numbers, so every type is "-" (Unspecified).
+# Durations (months) come from the catalog. The last four modules are the elective ones; the module type
+# (Core / Elective) is not stored here.
+
+## The FDE Launchpad — Role, SQL & the Legacy Data Problem ||  || 1.25
+Your Playbook for Every Client Room | | -
+The Artifact Toolkit That Runs Every Engagement | | -
+Meet the Schema - From Entities to Queries | | -
+Reporting Views That Run the Dashboard | | -
+Find the Bottleneck, Fix the Query | | -
+No Half-Measures - Atomic Updates That Don't Corrupt | | -
+Designing a Schema the Client Won't Outgrow | | -
+Building Meridian's Full Data Model | | -
+Lock It Down - PII, Encryption & Audit Trails | | -
+Reaching Across the Firewall - Legacy Data Access | | -
+Picking the Right Engine for the Job | | -
+Quick Diagnostics Before the Pipeline Exists | | -
+Designing the Pipeline - ETL Thinking | | -
+Explaining Your Schema to the VP Who Signs Off | | -
+Turning Query Results into Client-Ready Insight | | -
+
+## The Ingestion Pipeline — Production Python ||  || 1.25
+Your Workbench - Python Toolchain Done Right | | -
+Stream It, Don't Load It | | -
+Reusable Building Blocks - Decorators & Context Managers | | -
+Modeling the Real World in Code | | -
+Make It Fast - Concurrency & Async | | -
+When the Data Fights Back - Error Handling & Resilience | | -
+Validate Everything, Log Everything | | -
+Prove It Works - Testing & CI | | -
+Code That Survives the Next Engineer | | -
+PySpark - When Python Meets Big Data | | -
+Pipeline Day - Full PySpark Ingestion Build | | -
+Under Pressure - Timed Python Build | | -
+PR Reviews That Build Trust, Not Walls | | -
+Write the Doc They'll Actually Read | | -
+
+## The Platform's Backend — Orders, Payments & Real-Time Systems ||  || 1.75
+Your First Production API | | -
+Routing the First Request | | -
+Making FastAPI Do the Heavy Lifting | | -
+Consuming APIs Like a Professional | | -
+Who Gets In - Auth Done Right with OAuth2 & JWT | | -
+Locking Doors by Role - RBAC, OIDC & Multi-Tenant Auth | | -
+The Order Lifecycle - State Machines in Production | | -
+Money and Messages - Payments & Notifications | | -
+The Contract Between Backend & Frontend | | -
+Break the Contract, Break the Build | | -
+Push, Don't Poll - WebSockets & Server-Sent Events | | -
+Queues, Cache, Invalidate - Redis & Message Patterns | | -
+See Everything - Observability & Tracing | | -
+Beyond Rows - JSONB, Full-Text Search & Vector Storage | | -
+Under the Hood - Why Your Query Is Slow | | -
+The Warehouse Layer - dbt, DuckDB & Dimensional Modeling | | -
+Orchestrating the Nightly Pipeline | | -
+When Events Beat Requests - Kafka Fundamentals | | -
+Pipeline Under Fire - Timed Debug Challenge | | -
+Running the Room - API Reviews & Incident Updates | | -
+
+## The Client-Facing Layer — Frontend Engineering for FDEs ||  || 1
+How the Web Works: From DOM to Dashboard | | -
+Async, Typed and Connected: Talking to the Backend | | -
+Thinking in Components: Building the Dashboard One Boundary at a Time | | -
+Forms That Don’t Frustrate: Validation, Control and Reuse | | -
+Wiring the Dashboard Live: APIs, Caching and Server State | | -
+KPIs, Tables and Filters: The Dashboard Takes Shape | | -
+Defending the Architecture: React Decisions and Next.js Awareness | | -
+Gating the Dashboard: Authentication, Roles and Protected Routes | | -
+When the Dashboard Comes Alive: Real-Time and AI-Ready Interfaces | | -
+Fast, Reliable and Ready: Testing and Performance | | -
+From Working Code to Leadership Confidence: Defending the Solution | | -
+The Handover Moment: Walking the Ops Team Through Their Dashboard | | -
+
+## The New Ask — Production RAG for Customer Support ||  || 1
+The AI Landscape - Picking Your Weapons | | -
+Your First System Prompt - And Why It'll Break | | -
+Choosing How to Serve - APIs, Context & Parameters | | -
+Prompts as Code - Versioning & Regression Testing | | -
+Building the Knowledge Pipeline - RAG End to End | | -
+Does It Actually Find the Right Answer? | | -
+Does It Tell the Truth? - Generation Eval & RAGAS | | -
+Guardrails That Actually Work - PII Leak Prevention | | -
+Red Team Your Own Copilot | | -
+Spend Less, Answer Faster | | -
+Ship It - Timed RAG Build | | -
+Explaining AI Risk Without Scaring the Room | | -
+Making Eval Numbers Mean Something to the Board | | -
+
+## From Answering to Acting — Agents & Enterprise Integration ||  || 1.25
+From Chatbot to Coworker | | -
+Giving the Agent Real Tools | | -
+Orchestrating Agent Intelligence with LangGraph | | -
+Production Agent Patterns | | -
+When the Agent Breaks | | -
+MCP - The Universal Tool Protocol | | -
+The Agent Team - Multi-Agent & Human-in-the-Loop | | -
+Mapping the Client's System Landscape | | -
+Data Integration with Legacy Enterprise Systems | | -
+Wiring It Together - API Connectors & Webhooks | | -
+When the Integration Breaks | | -
+Ship Day - The Full Agentic Copilot Goes Live | | -
+Red-Team War Room | | -
+Explaining What the Agent Will and Won't Do Alone | | -
+Getting the Client's IT Team on Your Side | | -
+
+## The Scale Question — System Design for Black Friday ||  || 1.25
+The System Design Playbook | | -
+Spreading the Load | | -
+Cache Everything | | -
+Consistency vs Availability | | -
+When One Database Isn't Enough | | -
+Shard It and Build It | | -
+When Your Table Hits 10TB | | -
+The Event Backbone - Kafka at Scale | | -
+Search That Scales | | -
+Rate Limiting & Unique IDs | | -
+Monolith or Microservices | | -
+Distributed Transactions - Saga vs 2PC | | -
+Whiteboarding With the Client's Architects | | -
+System Design Under Pressure | | -
+
+## Scaling the AI Layer — Enterprise AI Architecture ||  || 1
+Serving AI at Scale | | -
+One Gateway, Many Models | | -
+GPU Math - Capacity Planning | | -
+When to Fine-Tune - And When Not To | | -
+Embedding Pipelines at Scale | | -
+Vector Search at Billion Scale | | -
+Evals as Infrastructure | | -
+Tracking Experiments - MLflow & Model Registries | | -
+Ship Without Breaking - Canary Rollouts for AI | | -
+Is the AI Drifting? | | -
+Defend Your AI Architecture | | -
+Selling the AI Stack to the Board | | -
+
+## Prepping the Ground — Linux, Networking & Shell ||  || 1
+Your First Server | | -
+Who Gets Access | | -
+What's Running and Why | | -
+Finding the Needle | | -
+How Packets Flow | | -
+Locking Down the Network | | -
+TCP vs. UDP: Below the Surface | | -
+Automate the Boring Stuff | | -
+Scripts That Keep the Lights On | | -
+The log parser | | -
+Write the Runbook the 3AM Engineer Will Thank You For | | -
+
+## Containerizing Meridian — Docker & Kubernetes ||  || 1.25
+Containers 101 | | -
+Slim, Fast and Secure Images in Production | | -
+Containers Talking to Each Other | | -
+Hardening Containers | | -
+Why You Need an Orchestrator | | -
+Deploy It | | -
+Wiring Services Together | | -
+Scale/Update Under Pressure | | -
+Lock It Down | | -
+Production K8s | | -
+The Pod Won't Start | | -
+Deploying AI Models on a Cluster | | -
+GitOps- Declarative Deployments with ArgoCD | | -
+Do We Really Need Kubernetes? | | -
+Coordinating the Rollout | | -
+
+## Going Live — AWS Production Deployment with Terraform ||  || 2.25
+Designing Your Cloud Network | | -
+Compute on AWS | | -
+Load Balancing Across AZs | | -
+Store It, Serve It, Cache It | | -
+Object Storage in the Cloud | | -
+Understanding the networking | | -
+SQL Database in the Cloud | | -
+NoSQL Database in the Cloud | | -
+Caching in cloud | | -
+Locking Down the Cloud | | -
+Breach Drill | | -
+Kubernetes in Cloud - I | | -
+Kubernetes in Cloud - II | | -
+Kubernetes in Cloud - III | | -
+Securing Meridian's cluster - I | | -
+Securing Meridian's data | | -
+Securing Meridian's application | | -
+Cert Manager & Route 53 (SSL + DNS Management) for Meridian | | -
+AWS Capstone Kickoff (Project Roadmap & Setup) | | -
+EKS Capstone: Part 1 (Cluster Design & Deployment) | | -
+EKS Capstone: Part 2 (Scaling & Production Readiness) | | -
+Cloud Rosetta Stone (AWS ↔ GCP ↔ Azure Service Mapping) | | -
+Boardroom Cloud Talk (Cost & Architecture Strategy) | | -
+War-Room 101 (Real-Time Incident Response & Communication) | | -
+IaC - Terraform Fundamentals | | -
+Terraform in Action | | -
+Creating a CI Pipeline | | -
+Deploying the Docker Image into an EKS | | -
+
+## Making It Bulletproof — Reliability, HA & Disaster Recovery ||  || 1
+SRE - When 99.9% Isn't Enough | | -
+Surviving Region Failure - HA Architecture | | -
+The DR Plan Nobody Tests (Until It's Too Late) | | -
+Sharding in Production - Not Just on a Whiteboard | | -
+Breaking to ensure it doesn't break | | -
+CRDs, Operators & Admission Webhooks in Kubernetes | | -
+Advanced AWS Networking | | -
+NoSQL & Caching on AWS | | -
+Load Testing at Scale - Proving It Before Black Friday | | -
+The Reliability Check | | -
+Selling Reliability to the CFO | | -
+
+## Enterprise Sign-Off — Security Hardening & Incident Response ||  || 0.75
+Threat Modeling - Where Will They Attack? | | -
+OWASP Top 10 - Hands-On Exploitation & Defence | | -
+Securing the AI Layer | | -
+Secrets, Keys & Certificates - The Lifecycle Nobody Gets Right | | -
+Compliance Frameworks - SOC2, GDPR & What FDEs Actually Do | | -
+Penetration Testing Your Own Platform | | -
+The Incident Response Playbook | | -
+Incident Simulation - Full Red Team Exercise | | -
+The Security Briefing the Board Actually Needs | | -
+
+## Capstone & Hiring Readiness — New Client, Full Simulation ||  || 0.75
+New Brief, Day One - The Capstone Kickoff | | -
+Build Sprint 1 - Data & Backend | | -
+Build Sprint 2 - Frontend & AI Feature | | -
+Red Team Day - Classmates Break Your Build | | -
+Portfolio Day - Packaging Meridian for Interviews | | -
+System Design Interview Prep | | -
+Behavioral & FDE Interview Prep | | -
+Capstone Demo Day - Graduation | | -

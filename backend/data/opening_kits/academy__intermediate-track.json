@@ -1,0 +1,21 @@
+{
+  "program": "Academy",
+  "track": "Intermediate Track",
+  "status": "Extracted from the HackMD script by the authoring assistant. The Module Owner must verify it. That script has no onboarding material (no PSP, attendance, FAQs or dashboard walkthrough), so none is listed here.",
+  "source": "https://hackmd.io/@topics/ByAIQn6Pze",
+  "facts": {
+    "pre_lecture_message": "A short WhatsApp message sent before class: it names today's topic and says the class starts in 5 minutes, so learners should be set up and ready to join.",
+    "module_description_note": "An instructor note that lists the module's topics, kept ready on the iPad. Use the module topics from the curriculum position in the context.",
+    "hook_style": "A story-led hook from a relatable company, for example a food-delivery backend at Friday 8 PM peak load, shown in numbers before any definition.",
+    "teaching_pattern": "Intuition, then the brute-force way with a pseudocode block and a prediction, then its cost in numbers (about 10^8 simple steps per second on a server), then the optimisation, then the edge case. Quiz after each idea, each with a separate worked explanation. Pseudocode in C++-style syntax; say so once.",
+    "ai_coding_and_probing": "Instructor note near the end: introduce the four AI Coding modes (explain, debug, optimise, implement) and AI Probing, a follow-up check learners can run after submitting. Learners should know both before moving on."
+  },
+  "existing_animations": [],
+  "onboarding_cards": [
+    "Pre-lecture message",
+    "Module topics instructor note",
+    "Story-led hook",
+    "Agenda",
+    "AI Coding and AI Probing instructor note"
+  ]
+}

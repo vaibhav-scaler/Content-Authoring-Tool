@@ -1,0 +1,109 @@
+# ==============================================================================
+# SECRETS, CREDENTIALS & SENSITIVE KEYS (STRICTLY PROHIBITED)
+# ==============================================================================
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+*.key
+*.pem
+*.token
+
+# ==============================================================================
+# PYTHON RUNTIME, VIRTUAL ENVIRONMENTS & COMPILATION ARTIFACTS
+# ==============================================================================
+__pycache__/
+*/__pycache__/
+*/*/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ==============================================================================
+# LOCAL DATABASE RUNTIME, LOCKS, LOGS & TEMPORARY BACKUPS
+# ==============================================================================
+# SQLite dynamic locks and journals
+backend/*.db-shm
+backend/*.db-wal
+backend/*.db.bak*
+backend/scripts.db.bak*
+backend/script_generator.db
+
+# ==============================================================================
+# LOCAL SCRATCH, AUDITS, BROCHURES, JUPYTER TEST FILES & DIAGNOSTIC LOGS
+# ==============================================================================
+scratch/
+Documents/
+*.ipynb
+*.log
+.system_generated/
+*.tmp
+*~
+
+# Local audit txt logs and comparison notes
+brochure_missing_and_changes.txt
+curriculum_brochure_vs_live_audit.txt
+backend/check_mo.py
+
+# Local architectural design docs & reference transcripts
+Beginner_Lecture_Script_Programming_Foundations.txt
+Beginner_Scaffolding_And_Code_Pacing_Engine.md
+Complete_Master_Specification_Document.md
+Contextual_Memory_And_Brevity_Engine.md
+Dynamic_Hook_And_Custom_Time_Engine.md
+Golden_Script_Example_Backend_Architecture.md
+Golden_Script_Example_Intro_DBMS.md
+PRD_Analysis.md
+Previous_Tool_Audit_And_Engineering_Fixes.md
+Scaler_Official_Curriculum_And_Course_Catalog.md
+Simulation_Feedback_Analysis_And_Solutions.md
+System_Architecture_And_Workflow.md
+Time_series_1.ipynb
+
+# ==============================================================================
+# IDE & SYSTEM ARTIFACTS
+# ==============================================================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# pictures made by the image model
+backend/generated/
+
+# fetched documentation pages (a cache)
+backend/cache/
+
+# ==============================================================================
+# TESTS & TEST SUITES
+# ==============================================================================
+tests/
+test/
+backend/tests/
+*test*.py
+
+
+# the live database (users, scripts): never committed
+backend/scripts.db

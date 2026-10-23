@@ -1,0 +1,132 @@
+{
+  "_note": "Extra criteria each reviewer applies for one program. A program is matched when its name contains one of the words in 'match'. Edit the text to tune a lens for a program. 'default_level' gives the level of a program whose tracks have none in their name (DevOps and Cloud, and the Forward Deployed Engineer program are beginner-level).",
+  "programs": [
+    {
+      "name": "Academy (programming fundamentals, Java and DSA)",
+      "match": [
+        "academy"
+      ],
+      "lenses": {
+        "technical_accuracy": [
+          "P1: Java code compiles and runs on the stated JDK version. Every DSA solution states its time and space complexity, and edge cases (empty input, one element, duplicates) are traced.",
+          "P2: Program output shown in the card is exactly what the code prints."
+        ],
+        "learner_clarity": [
+          "P3: Every keyword, symbol and method in code is explained the first time it appears (public, static, void, main, braces, semicolons)."
+        ],
+        "intermediate_clarity": [
+          "P4: The card connects a new DSA idea to one the learner already used, and names when to choose it over the simpler approach."
+        ],
+        "advanced_depth": [
+          "P5: DSA topics compare at least two approaches with their complexity and say which one wins and when."
+        ],
+        "syllabus_and_rules": [
+          "P6: The class stays inside the module's programming or DSA topics, and a Java class never needs a concept the learners have not met."
+        ]
+      }
+    },
+    {
+      "name": "Data Science and Machine Learning",
+      "match": [
+        "dsml",
+        "data science",
+        "machine learning (dsml"
+      ],
+      "lenses": {
+        "technical_accuracy": [
+          "P1: Python, pandas, NumPy, scikit-learn and SQL calls use real, current functions and arguments for the stated versions. Datasets are small, runnable and realistic.",
+          "P2: Statistics and maths claims name their assumptions (sample size, distribution, independence)."
+        ],
+        "learner_clarity": [
+          "P3: Maths and statistics terms are explained in plain words, with a number, before they are used."
+        ],
+        "intermediate_clarity": [
+          "P4: The card says why a technique is used in practice, and what a working analyst does when the data is messy."
+        ],
+        "advanced_depth": [
+          "P5: Model evaluation matches the problem: the metric fits, leakage and overfitting are named, and numbers are shown."
+        ],
+        "syllabus_and_rules": [
+          "P6: Each example uses the module's dataset or a small stand-in, and a model is never trained on data it is tested on."
+        ]
+      }
+    },
+    {
+      "name": "AI, ML and Agentic AI",
+      "match": [
+        "agentic",
+        "ai / ml",
+        "aiml"
+      ],
+      "lenses": {
+        "technical_accuracy": [
+          "P1: Claims about LLMs and agents name the model or version, its limits, its cost and its latency. No claim promises guaranteed accuracy.",
+          "P2: SDK, prompt and tool-calling snippets use current names, and say what to run and what success looks like."
+        ],
+        "learner_clarity": [
+          "P3: Terms such as token, context window, embedding and tool call are explained with an everyday comparison before use."
+        ],
+        "intermediate_clarity": [
+          "P4: The card shows one realistic failure (a wrong answer, a tool error) and how a builder would notice it."
+        ],
+        "advanced_depth": [
+          "P5: Evaluation, failure modes (hallucination, tool errors, prompt injection) and cost or latency numbers are covered, not only the happy path."
+        ],
+        "syllabus_and_rules": [
+          "P6: Safety and responsible-use points that the module lists are covered where they apply."
+        ]
+      }
+    },
+    {
+      "name": "DevOps and Cloud",
+      "match": [
+        "devops",
+        "cloud"
+      ],
+      "lenses": {
+        "technical_accuracy": [
+          "P1: Commands, flags and config files are exact for the stated tool and version. Cloud service names, limits and prices are current.",
+          "P2: A command that deletes or changes shared state carries a warning and a safe way to try it."
+        ],
+        "learner_clarity": [
+          "P3: Every command is explained piece by piece, and the learner is told what they should see when it works."
+        ],
+        "intermediate_clarity": [
+          "P4: The card says what usually goes wrong with this tool in a real team and how to read the error."
+        ],
+        "advanced_depth": [
+          "P5: Failure modes are covered: rollbacks, secrets, permissions, quotas and cost surprises."
+        ],
+        "syllabus_and_rules": [
+          "P6: Hands-on steps can be done on the free tier or a local setup the class names."
+        ]
+      },
+      "default_level": "beginner"
+    },
+    {
+      "name": "AI Forward Deployed Engineer",
+      "match": [
+        "forward deployed",
+        "fde"
+      ],
+      "lenses": {
+        "technical_accuracy": [
+          "P1: Integration code, SQL and API calls are correct for the stated versions, and production concerns (data privacy, limits, observability) are not skipped."
+        ],
+        "learner_clarity": [
+          "P2: Each step says what the client or user would see, in plain words, before the technical detail."
+        ],
+        "intermediate_clarity": [
+          "P3: The card ties the technique to a real client situation and says what to ask the client first."
+        ],
+        "advanced_depth": [
+          "P4: Trade-offs are named with numbers (latency, cost, risk), and the legacy-data or messy-input case is covered."
+        ],
+        "syllabus_and_rules": [
+          "P5: Examples stay on the module's client scenario, and nothing assumes access the learner would not have."
+        ]
+      },
+      "default_level": "beginner"
+    }
+  ]
+}

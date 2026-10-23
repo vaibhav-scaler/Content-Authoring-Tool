@@ -1,0 +1,32 @@
+{
+  "program": "AI / ML & Agentic AI",
+  "track": "Advanced Track",
+  "status": "Extracted from the notebook Food Delivery Data Exploration and analysis 1.ipynb by the authoring assistant. The Module Owner must verify it.",
+  "source": "https://colab.research.google.com/drive/1D4pPITC2zdrXTPlzmdRePecIbUAUVzI6",
+  "facts": {
+    "class_title": "Food Delivery Data Exploration and analysis 1.",
+    "agenda_as_given": "What is machine learning; introduction to data analysis and visualization (DAV); the dataset and business context; Python lists versus NumPy arrays (why NumPy); dimensions and shape; type conversion with astype; indexing and slicing.",
+    "opening_question": "Ask learners in chat: what is the difference between learning from experience and learning from rules? State the aim: not just to run code but to understand how data is represented, cleaned and accessed before deeper analysis.",
+    "ml_story": "Machine learning is a machine learning from experience, history and patterns, like humans do. The bank loan story: a bank must give a 20 lakh rupee loan to Candidate 1 (earns 5 lakh a month) or Candidate 2 (earns 5 lakh a year). Most pick Candidate 1 on capacity. Then reveal that Candidate 1 is Vijay Mallya, and the decision changes: decisions rest on historical patterns such as fraud history, not just current capacity. ML models flag unusual transactions by learning from millions of past ones. Then salary prediction: 1 year of experience is 10k, 2 years 20k, 3 years 30k; ask what 6 years pays.",
+    "eda": "Exploratory data analysis means exploring every feature of a dataset before deciding. Movie example: you check ratings, reviews, cast, director, genre and price before watching. Industry example: Zomato launched Pure Veg deliveries after analysing what people like, from comments, reviews and average cost for two.",
+    "dataset_and_business_context": "A food delivery platform like Zomato. For now a small dummy dataset of 10 restaurants with votes (customer ratings received) and costs (average cost for two, in rupees); later the module uses the real Zomato dataset. Business objectives: optimise offerings and online presence, enhance customer experience, increase revenue by targeting high-vote and premium-price locations, and leverage popular cuisines.",
+    "python_ecosystem": "PyPI is the app store of Python, with about 700,000 projects. This module uses only 4 libraries, NumPy, Pandas, Matplotlib and Seaborn, the rock-solid base for deep learning, generative AI and agentic AI. Google Colab is the coding environment: used in industry for proofs of concept and demos, free GPUs and TPUs, built-in NumPy, Pandas and Matplotlib.",
+    "technical_order": "Python basics (print, variables, lists, mixed-type lists), then NumPy (arrays, vectorised operations such as votes times 2, why NumPy is faster than lists), dimensions and shape (shape, a 2D array from votes and costs), type conversion (astype to float, strings cannot convert), then indexing and slicing (single index, fancy indexing, slices, negative index, the End plus 1 rule: the end index is excluded).",
+    "ai_in_colab": "Show the Colab AI assistant (powered by Gemini): the Generate button (Ctrl+Shift+Space) writes code in a cell, Explain this explains highlighted code, and the chat at the bottom answers questions about the notebook. Demo prompts: 'What is data exploration. Return the output in 5 pointers.' and 'I have a NumPy array called votes. Show me 3 useful operations I can do on it beyond multiplication, with one-line examples.' Practice prompt for learners: 'Give me a small practice exercise on NumPy 2D array slicing. Include a sample array and 3 slicing questions with expected outputs.' The instructor walks through the generated output.",
+    "quiz_style": "A question, a small code snippet, four short options with the correct one marked, and one line of explanation. Example: which converts a float array to integers (arr.astype(int)); in an (m, n) array, arr[:, 0] returns shape (m,) because selecting one column collapses to 1D.",
+    "instructor_notes_style": "Short labelled blocks: [Ask Learners] for a question to the class and [Note to Instructor] for a delivery hint, for example emphasise the End plus 1 rule.",
+    "psp_note": "If the batch solves a high percentage of the mandatory problems (PSP), the instructor shares optional industry case studies, for example Bitcoin and Microsoft datasets.",
+    "interaction_note": "Questions go to learners in chat (rule E3)."
+  },
+  "existing_animations": [],
+  "onboarding_cards": [
+    "Opening question and aim",
+    "What is machine learning: the bank loan story and salary prediction",
+    "What is EDA",
+    "Dataset and business context",
+    "PyPI and Colab",
+    "Colab AI assistant demo",
+    "NumPy basics with quizzes",
+    "Practice with AI-generated questions"
+  ]
+}
