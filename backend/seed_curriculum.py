@@ -2,9 +2,34 @@ import os
 import re
 import json
 from database import sync_engine, Base, SyncSessionLocal
-from models import Program, Track, Module, Class
+from models import Program, Track, Module, Class, User
 
 CATALOG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Scaler_Official_Curriculum_And_Course_Catalog.txt")
+
+def seed_default_users(session):
+    """Ensure standard demo and admin users exist for login."""
+    users_data = [
+        {"name": "Ankit Sharma", "email": "ankit.sme@scaler.com", "role": "sme", "program_slugs": ["scaler-academy", "scaler-dsml", "scaler-ai-fde"]},
+        {"name": "Ruchira Mukherjee", "email": "ruchira.sme@scaler.com", "role": "sme", "program_slugs": ["scaler-devops-cloud", "scaler-ai-fde", "scaler-aiml-agentic-ai"]},
+        {"name": "Rohan Gupta", "email": "rohan.mo@scaler.com", "role": "mo", "program_slugs": ["scaler-academy", "scaler-dsml"]},
+        {"name": "Suresh Patil", "email": "suresh.mo@scaler.com", "role": "mo", "program_slugs": ["scaler-devops-cloud", "scaler-dsml", "scaler-aiml-agentic-ai", "scaler-academy", "scaler-ai-fde"]},
+        {"name": "Priya Sharma", "email": "priya.pm@scaler.com", "role": "pm", "program_slugs": ["scaler-academy", "scaler-dsml", "scaler-devops-cloud", "scaler-ai-fde", "scaler-aiml-agentic-ai"]},
+        {"name": "System Administrator", "email": "admin@scaler.com", "role": "admin", "program_slugs": ["scaler-academy", "scaler-dsml", "scaler-devops-cloud", "scaler-ai-fde", "scaler-aiml-agentic-ai"]}
+    ]
+    programs_by_slug = {p.slug: p for p in session.query(Program).all()}
+    for u_info in users_data:
+        user = session.query(User).filter_by(email=u_info["email"]).first()
+        if not user:
+            user = User(name=u_info["name"], email=u_info["email"], role=u_info["role"])
+            session.add(user)
+            session.flush()
+        # Ensure user programs
+        current_progs = {p.slug for p in user.programs}
+        for slug in u_info["program_slugs"]:
+            if slug in programs_by_slug and slug not in current_progs:
+                user.programs.append(programs_by_slug[slug])
+    session.commit()
+    print("Default users seeded successfully.")
 
 def slugify(text: str) -> str:
     text = text.lower().strip()
@@ -21,6 +46,7 @@ def seed_database():
         existing_programs = session.query(Program).count()
         if existing_programs >= 5:
             print(f"Database already seeded with {existing_programs} programs.")
+            seed_default_users(session)
             class_count = session.query(Class).count()
             print(f"Total Classes in DB: {class_count}")
             return
@@ -180,6 +206,8 @@ def seed_database():
 
             if not line:
                 in_classes_block = False
+
+        seed_default_users(session)
 
         total_progs = session.query(Program).count()
         total_tracks = session.query(Track).count()
