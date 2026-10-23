@@ -781,6 +781,12 @@ function showAccessStep(step) {
   ["role", "waiting", "rejected"].forEach(k => document.getElementById(`hp${k[0].toUpperCase()}${k.slice(1)}Step`)?.classList.toggle("hidden", k !== step));
   const who = accessUser ? `${accessUser.name || ""} \u00b7 ${accessUser.email}` : "";
   const w = document.getElementById("hpAccessWho"); if (w) w.textContent = who;
+  if (step === "waiting") {                                         // say back what was asked for, so the person can see it went through as intended
+    const n = document.getElementById("hpWaitingNote");
+    const role = accessUser && ROLE_NAMES[accessUser.requested_role];
+    const progs = accessUser && (accessUser.requested_program_names || []);
+    if (n) n.textContent = role ? `You asked for the ${role} role${progs.length ? ` in ${progs.join(", ")}` : " across all programs"}. An administrator will check it, and you can open the workspace once it is approved.` : "An administrator will check your request. You can open the workspace once it is approved.";
+  }
   if (step === "rejected") { const n = document.getElementById("hpRejectedNote"); if (n) n.textContent = "An administrator did not approve this request. You can ask again with a different role or program."; }
   if (step === "role") loadProgramsForRequest();
 }
@@ -793,7 +799,9 @@ async function loadProgramsForRequest() {
     const list = res.ok ? await res.json() : [];
     box.innerHTML = list.map(p => `<label class="hp-prog-opt"><input type="checkbox" name="hpProg" value="${p.id}"><span>${escapeHtml(p.name)}</span></label>`).join("") || "No programs yet.";
   } catch (e) { box.textContent = "Could not load the programs. Reload the page."; }
-  document.querySelectorAll('input[name="hpRole"]').forEach(r => { r.onchange = () => { const pm = document.querySelector('input[name="hpRole"]:checked')?.value === "pm"; document.getElementById("hpProgramsBox")?.classList.toggle("hidden", pm); }; });
+  const syncRole = () => { const pm = document.querySelector('input[name="hpRole"]:checked')?.value === "pm"; document.getElementById("hpProgramsBox")?.classList.toggle("hidden", pm); document.getElementById("hpPmNote")?.classList.toggle("hidden", !pm); };
+  document.querySelectorAll('input[name="hpRole"]').forEach(r => { r.onchange = syncRole; });
+  syncRole();
 }
 
 async function submitAccessRequest() {
@@ -856,8 +864,8 @@ async function loadAccessRequests() {
     document.getElementById("adminAccessList").innerHTML = rows.map(r => `
       <div class="ar-row" data-id="${r.id}">
         <div class="ar-who"><strong>${escapeHtml(r.name)}</strong><span>${escapeHtml(r.email)}</span></div>
-        <div class="ar-progs">${r.program_names.length ? r.program_names.map(escapeHtml).join(", ") : "All programs"}</div>
-        <select class="form-control ar-role" aria-label="Role for ${escapeHtml(r.name)}">${role("sme", r.requested_role)}${role("mo", r.requested_role)}${role("pm", r.requested_role)}</select>
+        <div class="ar-progs"><small>Programs asked for</small>${r.program_names.length ? r.program_names.map(escapeHtml).join(", ") : "All programs"}</div>
+        <label class="ar-role-box"><small>Role asked for</small><select class="form-control ar-role" aria-label="Role for ${escapeHtml(r.name)}">${role("sme", r.requested_role)}${role("mo", r.requested_role)}${role("pm", r.requested_role)}</select></label>
         <button class="btn btn-primary" onclick="decideAccess(${r.id}, true)">Approve</button>
         <button class="btn btn-secondary" onclick="decideAccess(${r.id}, false)">Reject</button>
       </div>`).join("");

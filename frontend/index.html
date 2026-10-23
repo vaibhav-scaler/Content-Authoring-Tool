@@ -14,7 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <!-- Marked.js for Markdown Rendering -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <link rel="stylesheet" href="styles.css?v=40.9">
+  <link rel="stylesheet" href="styles.css?v=41.1">
   <style>
     .studio-subnav-btn {
       display: inline-flex !important;
@@ -148,8 +148,9 @@
           </div>
           <div id="hpAccessState" class="hidden">
             <div id="hpRoleStep" class="hidden">
-              <h2>Choose your role</h2>
+              <h2>Ask for access</h2>
               <p class="hp-card-note" id="hpAccessWho"></p>
+              <p class="hp-step-label">1. Your role</p>
               <form id="hpRoleForm" onsubmit="event.preventDefault(); submitAccessRequest();" novalidate>
                 <div class="hp-roles-pick" role="radiogroup" aria-label="Your role">
                   <label class="hp-role-opt"><input type="radio" name="hpRole" value="sme" checked><span><strong>Author</strong><small>Write and manage scripts</small></span></label>
@@ -157,9 +158,10 @@
                   <label class="hp-role-opt"><input type="radio" name="hpRole" value="pm"><span><strong>Program Manager</strong><small>See progress across programs</small></span></label>
                 </div>
                 <div id="hpProgramsBox">
-                  <label class="hp-pick-label">Programs you work on</label>
+                  <p class="hp-step-label">2. Your programs <small>Tick every program you need access to</small></p>
                   <div id="hpProgramList" class="hp-program-list">Loading programs...</div>
                 </div>
+                <p id="hpPmNote" class="hp-card-note hidden">Program Managers see every program, so there is nothing to choose.</p>
                 <div id="hpAccessError" class="hp-error hidden" role="alert"></div>
                 <button type="submit" id="hpAccessSubmit" class="hp-button">Send request</button>
                 <button type="button" class="hp-button hp-button-quiet" onclick="leaveAccessState()">Sign out</button>
@@ -1787,7 +1789,7 @@
   </div>
 
   <script src="code_trace.js?v=2.0"></script>
-  <script src="app.js?v=68.1"></script>
+  <script src="app.js?v=68.2"></script>
 </body>
 
 </html>

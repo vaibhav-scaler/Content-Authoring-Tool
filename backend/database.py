@@ -5,7 +5,14 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 load_dotenv()
 
-DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scripts.db")
+def database_file() -> str:
+    """DATABASE_PATH puts the database somewhere else, for example on a persistent disk when the app is deployed (otherwise it is lost on every redeploy)."""
+    path = os.path.abspath(os.getenv("DATABASE_PATH") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "scripts.db"))
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    return path
+
+
+DB_FILE = database_file()
 DATABASE_URL = f"sqlite:///{DB_FILE}"
 
 # Standard SQLite engine with multi-thread check disabled for FastAPI

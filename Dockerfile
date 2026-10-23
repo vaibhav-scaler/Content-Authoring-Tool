@@ -22,6 +22,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy backend and frontend
 COPY backend/ /app/backend/
 COPY frontend/ /app/frontend/
+# the curriculum catalog the first start reads to create programs, modules and classes (seed_curriculum.py looks for it next to backend/)
+COPY Scaler_Official_Curriculum_And_Course_Catalog.txt /app/Scaler_Official_Curriculum_And_Course_Catalog.txt
 
 # Expose port (Railway dynamically injects $PORT)
 EXPOSE 8000

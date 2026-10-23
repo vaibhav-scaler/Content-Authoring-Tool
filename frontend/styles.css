@@ -5044,3 +5044,14 @@ body.dark-theme .logo-badge .app-logo, body.dark-theme .hp-logo { background: #f
 .hp-google-signin { display: inline-flex; align-items: center; justify-content: center; gap: 12px; width: 100%; background: #fff; color: #1f2937; border: 1px solid #cbd5e1; box-shadow: 0 1px 2px rgba(15, 23, 42, .06); }
 .hp-google-signin:hover:not(:disabled) { background: #f8fafc; }
 body.dark-theme .hp-google-signin { background: #fff; color: #1f2937; }
+
+/* the request form can be taller than a short window: it scrolls instead of being cut off at the top and bottom */
+#homeDashboardView .hp-signin { overflow-y: auto; align-items: safe center; }
+.hp-step-label { margin: 14px 0 8px; font-weight: 700; color: var(--text-primary); font-size: 1.02rem; }
+.hp-step-label small { display: block; margin-top: 2px; font-weight: 400; color: var(--text-secondary); font-size: .88rem; }
+.hp-role-opt { padding: 10px 14px; }
+.hp-program-list { max-height: 220px; }
+.ar-progs small, .ar-role-box small { display: block; color: var(--text-secondary); font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
+.ar-role-box { display: block; margin: 0; }
+.hp-role-opt input[type="radio"], .hp-prog-opt input[type="checkbox"] { width: auto; flex: none; margin: 0; }
+.hp-role-opt > span { display: block; text-align: left; }

@@ -194,7 +194,19 @@ def _out(user: User) -> dict:
     data = main._user_out(user).model_dump()
     data["status"] = user.status or "active"
     data["requested_role"] = user.requested_role
+    ids = json.loads(user.requested_program_ids or "[]")
+    data["requested_program_ids"] = ids
+    data["requested_program_names"] = [p.name for p in main_programs(ids)] if ids else []
     return data
+
+
+def main_programs(ids: List[int]) -> List[Program]:
+    db = SyncSessionLocal()
+    try:
+        by_id = {p.id: p for p in db.query(Program).filter(Program.id.in_(ids)).all()}
+        return [by_id[i] for i in ids if i in by_id]
+    finally:
+        db.close()
 
 
 def _log(db: Session, who: str, role: Optional[str], action: str, text: str):
