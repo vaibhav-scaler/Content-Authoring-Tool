@@ -349,6 +349,13 @@ def login_by_email(payload: LoginRequest, db: Session = Depends(get_db)):
     """Looks up one account by company email, so the browser never has to download the user directory."""
     email = (payload.email or "").strip().lower()
     u = db.query(User).filter(func.lower(User.email) == email).first() if email else None
+    if not u and email:
+        try:
+            from seed_curriculum import seed_default_users
+            seed_default_users(db)
+            u = db.query(User).filter(func.lower(User.email) == email).first()
+        except Exception:
+            pass
     if not u:
         raise HTTPException(status_code=404, detail="No account found for that email.")
     return _user_out(u)
