@@ -94,6 +94,16 @@ def _migrate_module_columns():
 
 _migrate_module_columns()
 
+# Automatically seed programs, modules, classes, and users if database is empty/new
+def _ensure_initial_curriculum_seeded():
+    try:
+        from seed_curriculum import seed_database
+        seed_database()
+    except Exception as e:
+        print(f"Warning: automatic curriculum seed encountered: {e}")
+
+_ensure_initial_curriculum_seeded()
+
 from fastapi.responses import JSONResponse
 from agents.llm import LLMUnavailable, bind_usage_script, call_llm_chat, call_llm_json, llm_configured
 
