@@ -430,7 +430,8 @@ def _claude(messages: List[Dict[str, str]], system: Optional[str], max_tokens: i
     except Exception as e:
         low = str(e).lower()
         # a model that does not take a temperature setting: ask again without it
-        if "temperature" in low and any(k in low for k in ("deprecated", "not supported", "invalid")):
+        # (a newer SDK that no longer has the argument says "unexpected keyword argument": that is the same case)
+        if "temperature" in low and any(k in low for k in ("deprecated", "not supported", "invalid", "unexpected keyword")):
             kwargs.pop("temperature", None)
             response = client.messages.create(**kwargs)
         else:
