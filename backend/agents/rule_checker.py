@@ -1172,7 +1172,9 @@ def check_outline(outline: Dict[str, Any], target_minutes: int, agendas: Optiona
     animations = sum(1 for v in visuals if v.get("kind") == "animation")
     if min_animations and animations < min_animations:
         out.append({"level": "major", "problem": f"{animations} animation(s) planned; a beginner track needs at least {min_animations}."})
-    scope_words = words(" ".join(list(agendas or []) + split_items(outcomes) + [class_title]))
+    # the scope is what the author asked for plus what the cards themselves name (their agenda items and outcomes, already checked against the author's list above)
+    card_items = [str(x) for c in cards for x in list(c.get("agenda_items") or []) + list(c.get("outcomes") or [])]
+    scope_words = words(" ".join(list(agendas or []) + split_items(outcomes) + [class_title] + card_items))
     for v in visuals:
         serves = " ".join(list(v.get("serves_agenda_items") or []) + list(v.get("serves_outcomes") or []) + [v.get("prompt") or "", v.get("title") or ""])
         if scope_words and not (words(serves) & scope_words):
