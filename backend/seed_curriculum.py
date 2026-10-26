@@ -39,6 +39,41 @@ def slugify(text: str) -> str:
     text = re.sub(r'[\s_-]+', '-', text)
     return text.strip('-')[:100]
 
+SNAPSHOT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "curriculum_snapshot.json.gz")
+
+
+def load_snapshot(session) -> bool:
+    """Fill an empty database from data/curriculum_snapshot.json.gz (written by export_curriculum.py), so a new deployment has the same programs, tracks,
+    modules and classes as the app they were edited in. Returns False when there is no snapshot, and the raw catalog file is used instead."""
+    import datetime
+    import gzip
+    import json
+    from sqlalchemy import text as _text
+    if not os.path.exists(SNAPSHOT_PATH):
+        return False
+    with gzip.open(SNAPSHOT_PATH, "rt", encoding="utf-8") as fh:
+        data = json.load(fh)
+    for name, model in (("programs", Program), ("tracks", Track), ("modules", Module), ("classes", Class)):
+        datetime_cols = {c.name for c in model.__table__.columns if str(c.type).upper().startswith("DATETIME")}
+        rows = []
+        for row in data.get(name, []):
+            row = dict(row)
+            for col in datetime_cols:
+                if isinstance(row.get(col), str):
+                    row[col] = datetime.datetime.fromisoformat(row[col])
+            rows.append(row)
+        if rows:
+            session.bulk_insert_mappings(model, rows)
+        session.flush()
+    session.commit()
+    if session.bind.dialect.name == "postgresql":              # rows were given their ids, so the id counters are moved past them
+        for table in ("programs", "tracks", "modules", "classes"):
+            session.execute(_text(f"SELECT setval(pg_get_serial_sequence('{table}', 'id'), (SELECT COALESCE(MAX(id), 1) FROM {table}))"))
+        session.commit()
+    print("Curriculum loaded from the snapshot: " + ", ".join(f"{len(data.get(n, []))} {n}" for n in ("programs", "tracks", "modules", "classes")))
+    return True
+
+
 def seed_database():
     print(f"Creating all database tables...")
     Base.metadata.create_all(bind=sync_engine)
@@ -51,6 +86,10 @@ def seed_database():
             seed_default_users(session)
             class_count = session.query(Class).count()
             print(f"Total Classes in DB: {class_count}")
+            return
+
+        if existing_programs == 0 and load_snapshot(session):
+            seed_default_users(session)
             return
 
         if not os.path.exists(CATALOG_PATH):
