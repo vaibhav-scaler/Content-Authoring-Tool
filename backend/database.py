@@ -12,23 +12,41 @@ def database_file() -> str:
     return path
 
 
-DB_FILE = database_file()
-DATABASE_URL = f"sqlite:///{DB_FILE}"
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    DB_FILE = database_file()
+    DATABASE_URL = f"sqlite:///{DB_FILE}"
 
-# Standard SQLite engine with multi-thread check disabled for FastAPI
-sync_engine = create_engine(
-    DATABASE_URL,
-    echo=False,
-    connect_args={"check_same_thread": False, "timeout": 30}
-)
+# Fix postgres:// -> postgresql:// for SQLAlchemy compatibility if needed
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-# Enable WAL (Write-Ahead Logging) mode to handle 20+ concurrent users seamlessly
-@event.listens_for(sync_engine, "connect")
-def set_sqlite_pragma(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA journal_mode=WAL;")
-    cursor.execute("PRAGMA synchronous=NORMAL;")
-    cursor.close()
+is_sqlite = DATABASE_URL.startswith("sqlite")
+
+# Engine initialization
+if is_sqlite:
+    sync_engine = create_engine(
+        DATABASE_URL,
+        echo=False,
+        connect_args={"check_same_thread": False, "timeout": 30}
+    )
+
+    # Enable WAL mode for SQLite
+    @event.listens_for(sync_engine, "connect")
+    def set_sqlite_pragma(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL;")
+        cursor.execute("PRAGMA synchronous=NORMAL;")
+        cursor.close()
+else:
+    # PostgreSQL / Supabase with connection pooling
+    sync_engine = create_engine(
+        DATABASE_URL,
+        echo=False,
+        pool_pre_ping=True,
+        pool_size=10,
+        max_overflow=20
+    )
 
 SyncSessionLocal = sessionmaker(
     bind=sync_engine,

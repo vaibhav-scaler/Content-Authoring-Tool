@@ -9,9 +9,11 @@ ENV PORT=8000
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies (build-essential and curl if needed)
+# Install system dependencies (build-essential, curl, nodejs for code runner)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    curl \
+    nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install

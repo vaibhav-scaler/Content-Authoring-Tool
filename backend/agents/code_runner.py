@@ -378,6 +378,10 @@ def _run_python(code: str, expected_error: Optional[str]) -> Dict[str, Any]:
     return result
 
 
+def _node_available() -> bool:
+    return bool(shutil.which("node"))
+
+
 def _run_javascript(code: str, expected_error: Optional[str]) -> Dict[str, Any]:
     node = shutil.which("node")
     if not node:

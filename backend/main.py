@@ -36,7 +36,10 @@ Base.metadata.create_all(bind=sync_engine)
 
 # Lightweight migration for FR-3/4/6 module columns
 def _migrate_module_columns():
-    from sqlalchemy import text
+    from sqlalchemy import text, inspect
+    from database import is_sqlite
+    if not is_sqlite:
+        return  # On fresh PostgreSQL/Supabase create_all() already builds the full schema accurately
     with sync_engine.begin() as conn:
         existing = {row[1] for row in conn.execute(text("PRAGMA table_info(modules)"))}
         for col, ddl in [
