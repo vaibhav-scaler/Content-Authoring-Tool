@@ -690,13 +690,107 @@ def ensure_topic_quizzes(outline: Dict[str, Any], agendas: Optional[List[str]], 
     return outline
 
 
-def finalize_plan(outline: Dict[str, Any], beginner_pct: Optional[int], code_ratio: Optional[int], reorder: bool = True, agendas: Optional[List[str]] = None) -> Dict[str, Any]:
+def _short_topic(title: str) -> str:
+    """The first part of a card title, before a colon, a dash or a bracket: "AI Awareness — Your Coding Co-Pilot (and Its Limits)" gives "AI Awareness"."""
+    head = re.split(r"\s+[\u2014\u2013-]\s+|:\s+|\s*\(", title or "", maxsplit=1)[0].strip()
+    return head or (title or "").strip()
+
+
+def fit_outline_to_rules(outline: Dict[str, Any], target_minutes: int, agendas: Optional[List[str]] = None, kit_topics: Optional[List[str]] = None) -> Dict[str, Any]:
+    """Repair, by code, the outline problems that have one right answer, so the author does not have to: logistics cards that cannot fit under 14% of the class are
+    merged into one another; opening-kit topics no card names are added to the logistics card; logistics cards are cut to 14% of the class and quizzes to 20%, a recap
+    is held to about 6 minutes, the freed minutes go to the teaching cards, and the total is brought back to exactly the class length with every card inside its range;
+    a quiz named after an agenda item gets a question title. No model call."""
+    from agents.rule_checker import covered, words
+    cards = _cards_in_order(outline)
+    if not cards or not target_minutes:
+        return outline
+    sections = outline.get("sections") or []
+    lo_hi = {"teach": LIMITS["teaching_card_minutes"], "quiz": LIMITS["quiz_card_minutes"]}
+    secs = lambda c: int(c.get("duration_sec") or 0)
+    changed = False
+    # 1. more logistics cards than the class can afford at their minimum length: the last ones are folded into the one before
+    logistics = [c for c in cards if is_logistics(c)]
+    cap_logistics = int(0.14 * target_minutes * 60)
+    while len(logistics) > 2 and len(logistics) * lo_hi["teach"][0] * 60 > cap_logistics:
+        host, gone = logistics[-2], logistics[-1]
+        host["agenda_items"] = list(dict.fromkeys(list(host.get("agenda_items") or []) + list(gone.get("agenda_items") or [])))
+        note = (host.get("teaching_shape_note") or "").rstrip(". ")
+        host["teaching_shape_note"] = ((note + ". " if note else "") + "Also cover: " + (gone.get("title") or "").rstrip("."))[:600]
+        host["duration_sec"] = secs(host) + secs(gone)
+        for s_ in sections:
+            if gone in s_.get("cards", []):
+                s_["cards"].remove(gone)
+        logistics.remove(gone)
+        cards = _cards_in_order(outline)
+        changed = True
+    # 2. kit topics no card names go onto the logistics card that suits them
+    if kit_topics and logistics:
+        text = [" ".join([c.get("title") or "", c.get("teaching_shape_note") or ""] + [str(x) for x in (c.get("agenda_items") or [])]) for c in cards]
+        missing = [t for t in kit_topics if not covered(t, text, threshold=0.5)]
+        if missing:
+            host = next((c for c in logistics if c.get("card_type") == "faq"), logistics[0])
+            note = (host.get("teaching_shape_note") or "").rstrip(". ")
+            host["teaching_shape_note"] = (note + ". Also cover: " + "; ".join(t.rstrip(".") for t in missing))[:600].lstrip(". ")
+    # 3. a quiz is a question, not an agenda item: it asks about the topic of the card it comes before
+    for k, q in enumerate(cards):
+        if q.get("card_type") != "quiz":
+            continue
+        asked = re.sub(r"^\s*(predict|quiz)\s*:\s*", "", q.get("title") or "", flags=re.I).strip()
+        if asked and any(words(asked) and len(words(asked) & words(a)) / len(words(asked)) >= 0.8 for a in (agendas or [])):
+            nxt = next((c for c in cards[k + 1:] if c.get("card_type") in ("concept", "problem", "walkthrough")), None)
+            topic = _short_topic(nxt.get("title")) if nxt else " ".join(asked.split()[:5])
+            q["title"] = f"Predict: What Do You Already Know About {topic}?"[:120]
+    # 4. minutes: caps first, then the total
+    quizzes = [c for c in cards if c.get("card_type") == "quiz"]
+    step = 6
+    for group, cap_share, floor in ((logistics, 0.14, lo_hi["teach"][0]), (quizzes, 0.20, lo_hi["quiz"][0])):
+        cap = int(cap_share * target_minutes * 60)
+        for _ in range(5000):
+            if sum(secs(c) for c in group) <= cap:
+                break
+            big = max((c for c in group if secs(c) - step >= floor * 60), key=secs, default=None)
+            if big is None:
+                break
+            big["duration_sec"] = secs(big) - step
+            changed = True
+    for c in cards:                                                          # a recap is a recap: about 6 minutes, the rest goes to teaching
+        if c.get("card_type") == "recap" and secs(c) > int(6.5 * 60):
+            c["duration_sec"] = 6 * 60
+            changed = True
+    if not changed:
+        outline["total_duration_sec"] = sum(secs(c) for c in cards)
+        return outline                      # nothing needed repair, so the author's minutes stay as they are
+    receivers = [c for c in cards if c.get("card_type") in ("concept", "problem", "walkthrough") and c not in logistics]
+    want = int(round(target_minutes * 60))
+    for _ in range(20000):
+        diff = want - sum(secs(c) for c in cards)
+        if abs(diff) < step // 2 + 1 or not receivers:
+            break
+        if diff > 0:
+            pick = min((c for c in receivers if secs(c) + step <= lo_hi["teach"][1] * 60), key=secs, default=None)
+            if pick is None:
+                break
+            pick["duration_sec"] = secs(pick) + step
+        else:
+            pick = max((c for c in receivers if secs(c) - step >= lo_hi["teach"][0] * 60), key=secs, default=None)
+            if pick is None:
+                break
+            pick["duration_sec"] = secs(pick) - step
+    outline["total_duration_sec"] = sum(secs(c) for c in cards)
+    return outline
+
+
+def finalize_plan(outline: Dict[str, Any], beginner_pct: Optional[int], code_ratio: Optional[int], reorder: bool = True, agendas: Optional[List[str]] = None,
+                  target_minutes: Optional[int] = None, kit_topics: Optional[List[str]] = None) -> Dict[str, Any]:
     """Apply the SME's beginner/advanced split and code ratio to the finished outline. Run it after the card list is final (after any merge or edit).
     `reorder` puts each quiz before the topic it tests; turn it off when cards are already written."""
     if not isinstance(outline, dict) or not outline.get("sections"):
         return outline
     if reorder:
         quiz_before_topic(outline, agendas)
+    if target_minutes:
+        fit_outline_to_rules(outline, int(target_minutes), agendas, kit_topics)
     plan_levels(outline, beginner_pct)
     plan_code(outline, code_ratio)
     cards = _cards_in_order(outline)

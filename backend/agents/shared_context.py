@@ -160,6 +160,8 @@ RULES: List[Rule] = [
          "The last card ends the class by telling the learners what the next class covers, taken from the next class's own agenda. When that agenda is not written yet, name the class and say nothing about its topics."),
     Rule("R15", "READABILITY", "auto",
          "Do not claim how learners usually answer or behave (\"the most common wrong pick\", \"both are common\"): nobody measured it. Say \"a tempting wrong answer\"."),
+    Rule("N3", "ACCURACY", "auto",
+         "A company or app is not a place. Write \"a cinema hall booked through a BookMyShow-style app\", never \"the BookMyShow hall\" or \"BookMyShow venue\"."),
     Rule("L3", "ACCURACY", "auto",
          "When the text says what the code prints (\"it prints 16\"), that must be the number the code really printed when it was run."),
     Rule("L2", "ACCURACY", "auto",

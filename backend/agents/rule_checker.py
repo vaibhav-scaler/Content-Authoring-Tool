@@ -457,6 +457,7 @@ def check_script(
                                     "Write or extend a card so it covers this."))
     out.extend(check_script_craft(cards, running_example))
     out.extend(check_cited_lines(cards))
+    out.extend(check_company_as_place(cards))
     out.extend(check_numbers_match_output(cards))
     out.extend(check_term_order(cards))
     # ---- K6 the last card tells the learners what the next class covers
@@ -493,6 +494,22 @@ def diagram_branches(mermaid: str) -> bool:
     for m in re.finditer(r"(?<![\w-])([A-Za-z_]\w*)(?:\s*[\[(\{>][^\]\)\}\n]*[\]\)\}]?)?\s*(?:-->|---|==>|-\.->)", src):
         out_counts[m.group(1)] = out_counts.get(m.group(1), 0) + 1
     return any(n >= 2 for n in out_counts.values())
+
+
+_COMPANY_AS_PLACE = re.compile(r"\b(BookMyShow|Swiggy|Zomato|Uber|Ola|Paytm|PhonePe|IRCTC|Flipkart|Amazon)(?:'s)?\s+(hall|venue|theatre|theater|cinema|restaurant|kitchen|warehouse|station)\b", re.I)
+
+
+def check_company_as_place(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """N3: "the BookMyShow hall" treats an app as a building. The example is a cinema hall booked through an app like it."""
+    out: List[Dict[str, Any]] = []
+    for c in cards:
+        for field in (c.get("title") or "", spoken_text(c.get("content_script")), c.get("code_snippet") or ""):
+            m = _COMPANY_AS_PLACE.search(field)
+            if m:
+                out.append(_finding(c.get("card_index"), "N3", "minor", f'"{m.group(0)}" treats an app or company as a place.',
+                                    'Say "a cinema hall booked through a BookMyShow-style app", or "our booking app".', m.group(0)))
+                break
+    return out
 
 
 def check_script_craft(cards: List[Dict[str, Any]], running_example: Optional[str] = None) -> List[Dict[str, Any]]:

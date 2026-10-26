@@ -2208,7 +2208,7 @@ def create_script_outline(script_id: int, _actor: User = Depends(script_guard(Tr
         outline_data = enforce_card_count(outline_data, int(script.duration_minutes))
         outline_data = ensure_animations(outline_data, min_animations_for(trk_name))
         from agents.outliner import finalize_plan
-        outline_data = finalize_plan(outline_data, script.content_mix_beginner, script.code_ratio, agendas=_script_scope(script)[1])    # the SME's split and code ratio, planned per card
+        outline_data = finalize_plan(outline_data, script.content_mix_beginner, script.code_ratio, agendas=_script_scope(script)[1], target_minutes=int(script.duration_minutes), kit_topics=_opening_kit_topics(script))    # the SME's split and code ratio, planned per card
 
     # Save outline JSON to database (stores sections, cards, and running example)
     script.outline_json = json.dumps(outline_data)
@@ -2613,7 +2613,7 @@ def _save_flat_edits(script, modified_cards):
         current = None
     if isinstance(current, dict) and current.get("sections"):
         from agents.outliner import finalize_plan
-        script.outline_json = json.dumps(finalize_plan(apply_flat_edits(current, edits), script.content_mix_beginner, script.code_ratio, reorder=not script.cards, agendas=_script_scope(script)[1]))
+        script.outline_json = json.dumps(finalize_plan(apply_flat_edits(current, edits), script.content_mix_beginner, script.code_ratio, reorder=not script.cards, agendas=_script_scope(script)[1], target_minutes=int(script.duration_minutes), kit_topics=_opening_kit_topics(script)))
     else:
         script.outline_json = json.dumps(edits)          # an older flat outline has no structure to keep
 
@@ -2730,7 +2730,7 @@ def handle_outline_action(script_id: int, payload: OutlineApprovalRequest, _acto
             outline_data = ensure_topic_quizzes(outline_data, _script_scope(script)[1], int(script.duration_minutes))
             outline_data = ensure_animations(enforce_card_count(outline_data, int(script.duration_minutes)), min_animations_for(trk_name))
             from agents.outliner import finalize_plan
-            outline_data = finalize_plan(outline_data, script.content_mix_beginner, script.code_ratio, agendas=_script_scope(script)[1])
+            outline_data = finalize_plan(outline_data, script.content_mix_beginner, script.code_ratio, agendas=_script_scope(script)[1], target_minutes=int(script.duration_minutes), kit_topics=_opening_kit_topics(script))
             if (payload.revision_feedback or "").strip():             # remembered, so the next ReThink keeps honouring what was already asked
                 outline_data["sme_feedback"] = (((_old_outline or {}).get("sme_feedback") if isinstance(_old_outline, dict) else None) or [])[-4:] + [payload.revision_feedback.strip()]
         script.outline_json = json.dumps(outline_data)
@@ -3029,7 +3029,7 @@ def generate_section(
     outline_raw = json.loads(script.outline_json)
     if isinstance(outline_raw, dict) and outline_raw.get("sections") and any("has_code" not in c for _s, c in _outline_card_list(outline_raw)):
         from agents.outliner import finalize_plan          # an outline made before the plan existed gets its levels and code plan now
-        outline_raw = finalize_plan(outline_raw, script.content_mix_beginner, script.code_ratio, reorder=not script.cards, agendas=_script_scope(script)[1])
+        outline_raw = finalize_plan(outline_raw, script.content_mix_beginner, script.code_ratio, reorder=not script.cards, agendas=_script_scope(script)[1], target_minutes=int(script.duration_minutes), kit_topics=_opening_kit_topics(script))
         script.outline_json = json.dumps(outline_raw)
         db.commit()
     try:
@@ -5086,6 +5086,21 @@ def fill_sme_item(script_id: int, payload: SmeFillRequest, _actor: User = Depend
 # 9. EXPORTS & ASSIGNMENTS GENERATION (PRD FR-23)
 # ==============================================================================
 
+def _markdown_with_blocks(spoken: str, visual_md: str, code_md: str) -> str:
+    """A card's text with its diagram and its code placed where the text puts their markers; with no marker they follow the text. Leftover markers are removed."""
+    vis_marker, code_marker = re.compile(r"\[\[\s*VISUAL\s*:\s*[^\]]*\]\]"), re.compile(r"\[\[\s*CODE\s*\]\]", re.I)
+    spoken, after = spoken or "", []
+    for block, marker in ((visual_md, vis_marker), (code_md, code_marker)):
+        if not block:
+            continue
+        if marker.search(spoken):
+            spoken = marker.sub(lambda m: "\n" + block + "\n", spoken, count=1)
+        else:
+            after.append(block)
+    spoken = code_marker.sub("", vis_marker.sub("", spoken))
+    return "\n".join([spoken] + after)
+
+
 def _without_code_marker(body: Optional[str]) -> str:
     """[[CODE]] only says where the page shows the code box; a downloaded file lists the code after the text."""
     return re.sub(r"\[\[CODE\]\]\s*", "", body or "")
@@ -5124,33 +5139,36 @@ def export_script_markdown(script_id: int, _actor: User = Depends(script_guard(F
         if c.stage_directions:
             md_lines.append(f"> **Stage Direction:** {c.stage_directions}\n")
         
-        md_lines.append(f"### Spoken Script:\n{_without_code_marker(c.content_script)}\n")
-
+        visual_md = ""
         if c.visual_asset_json:
             try:
                 vis = json.loads(c.visual_asset_json)
                 if vis.get("type") == "mermaid":
-                    md_lines.append(f"```mermaid\n{vis.get('content')}\n```\n*{vis.get('caption')}*\n")
+                    visual_md = f"```mermaid\n{vis.get('content')}\n```\n*{vis.get('caption')}*\n"
                 elif vis.get("type") == "image":
-                    md_lines.append(f"![{vis.get('caption')}]({vis.get('content')})\n*{vis.get('caption')}*\n")
+                    visual_md = f"![{vis.get('caption')}]({vis.get('content')})\n*{vis.get('caption')}*\n"
                 elif vis.get("type") == "animation":
-                    md_lines.append(f"*[Interactive animation: {vis.get('caption') or 'see the script page'}. It plays in the web page version of this script (Download, Web page).]*\n")
-            except:
+                    visual_md = f"*[Interactive animation: {vis.get('caption') or 'see the script page'}. It plays in the web page version of this script (Download, Web page).]*\n"
+            except Exception:
                 pass
 
+        code_md = ""
         if c.code_snippet:
-            md_lines.append(f"```{c.code_language or 'text'}\n{c.code_snippet}\n```\n")
+            code_md = f"```{c.code_language or 'text'}\n{c.code_snippet}\n```\n"
             if c.code_run_json:
                 try:
                     run = json.loads(c.code_run_json)
                     shown = (run.get("stdout") or "").strip() or (run.get("stderr") or "").strip()
                     label = {"passed": "Output", "failed": "Error when run", "timeout": "Stopped after the time limit", "skipped": "Not run"}.get(run.get("status"), "Result")
                     if shown:
-                        md_lines.append(f"**{label}:**\n```text\n{shown[:2000]}\n```\n")
+                        code_md += f"**{label}:**\n```text\n{shown[:2000]}\n```\n"
                     elif run.get("reason"):
-                        md_lines.append(f"*{label}: {run['reason']}*\n")
+                        code_md += f"*{label}: {run['reason']}*\n"
                 except ValueError:
                     pass
+
+        # the diagram, the animation note and the code sit where the text puts their markers; with no marker they follow the text
+        md_lines.append(f"### Spoken Script:\n{_markdown_with_blocks(c.content_script, visual_md, code_md)}\n")
 
         if c.quiz_json:
             try:
@@ -5238,20 +5256,18 @@ def share_script_to_hackmd(script_id: int, payload_body: dict = Body(default={})
             if c.stage_directions:
                 md_lines.append(f"> **Instructor Note:** {c.stage_directions}\n")
             
-            md_lines.append(f"{_without_code_marker(c.content_script)}\n")
-
+            visual_md = ""
             if c.visual_asset_json:
                 try:
                     vis = json.loads(c.visual_asset_json)
                     if vis.get("type") == "mermaid":
-                        md_lines.append(f"```mermaid\n{vis.get('content')}\n```\n*{vis.get('caption', '')}*\n")
+                        visual_md = f"```mermaid\n{vis.get('content')}\n```\n*{vis.get('caption', '')}*\n"
                     elif vis.get("type") == "image":
-                        md_lines.append(f"![{vis.get('caption', '')}]({vis.get('content')})\n")
-                except:
+                        visual_md = f"![{vis.get('caption', '')}]({vis.get('content')})\n"
+                except Exception:
                     pass
-
-            if c.code_snippet:
-                md_lines.append(f"```{c.code_language or 'python'}\n{c.code_snippet}\n```\n")
+            code_md = f"```{c.code_language or 'python'}\n{c.code_snippet}\n```\n" if c.code_snippet else ""
+            md_lines.append(_markdown_with_blocks(c.content_script, visual_md, code_md) + "\n")
 
             if c.quiz_json:
                 try:
@@ -5429,7 +5445,9 @@ def _render_shared_script_html(detail: ScriptDetailResponse) -> str:
     cards_html = []
     for c in detail.cards:
         # Dialogue paragraphs (escaped; only bold, italics and inline code are allowed back in)
-        paras_html = format_card_text(c.content_script, c.sources)
+        # the diagram, the animation and the code box sit where the text puts their markers, as on the script page
+        marked = re.sub(r"\[\[\s*CODE\s*\]\]", "\n\n@@CODE@@\n\n", re.sub(r"\[\[\s*VISUAL\s*:\s*[^\]]*\]\]", "\n\n@@VISUAL@@\n\n", c.content_script or ""), flags=re.I)
+        paras_html = format_card_text(marked, c.sources)
 
         # Stage directions cue
         stage_cue_html = ""
@@ -5471,6 +5489,13 @@ def _render_shared_script_html(detail: ScriptDetailResponse) -> str:
 
         # Visuals: diagrams are escaped text, animations run only inside a sandboxed frame, pictures are plain <img>
         vis_html = visual_html(c.visual_type, c.visual_content, c.visual_caption or "Conceptual Diagram", frame_id=str(c.card_index))
+
+        placed_vis = placed_code = False
+        if vis_html and "@@VISUAL@@" in paras_html:
+            paras_html, placed_vis = re.sub(r"<p[^>]*>\s*@@VISUAL@@\s*</p>", lambda m: vis_html, paras_html, count=1), True
+        if code_html and "@@CODE@@" in paras_html:
+            paras_html, placed_code = re.sub(r"<p[^>]*>\s*@@CODE@@\s*</p>", lambda m: code_html, paras_html, count=1), True
+        paras_html = re.sub(r"<p[^>]*>\s*@@(?:VISUAL|CODE)@@\s*</p>", "", paras_html)      # a marker with nothing to show
 
         # Quiz: the same view as the script page (options A to D, the right one marked, why each wrong one is wrong)
         from agents.quiz_format import quiz_html
@@ -5515,8 +5540,8 @@ def _render_shared_script_html(detail: ScriptDetailResponse) -> str:
             <div class="card-body">
                 {paras_html}
             </div>
-            {vis_html}
-            {code_html}
+            {"" if placed_vis else vis_html}
+            {"" if placed_code else code_html}
             {quiz_html_out}
             {sources_html}
         </article>
