@@ -17,9 +17,11 @@ if not DATABASE_URL:
     DB_FILE = database_file()
     DATABASE_URL = f"sqlite:///{DB_FILE}"
 
-# Fix postgres:// -> postgresql:// for SQLAlchemy compatibility if needed
+# SQLAlchemy 2.0 defaults postgresql:// to 'psycopg' (psycopg3). Explicitly use psycopg2 driver.
 if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
+elif DATABASE_URL.startswith("postgresql://") and not DATABASE_URL.startswith("postgresql+"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
 
 is_sqlite = DATABASE_URL.startswith("sqlite")
 
