@@ -13,6 +13,8 @@ def database_file() -> str:
 
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.strip()
 if not DATABASE_URL:
     DB_FILE = database_file()
     DATABASE_URL = f"sqlite:///{DB_FILE}"
@@ -22,6 +24,11 @@ if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
 elif DATABASE_URL.startswith("postgresql://") and not DATABASE_URL.startswith("postgresql+"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
+
+# Ensure sslmode=require for Supabase / remote postgres if not already present
+if not DATABASE_URL.startswith("sqlite") and "sslmode=" not in DATABASE_URL:
+    sep = "&" if "?" in DATABASE_URL else "?"
+    DATABASE_URL = f"{DATABASE_URL}{sep}sslmode=require"
 
 is_sqlite = DATABASE_URL.startswith("sqlite")
 
