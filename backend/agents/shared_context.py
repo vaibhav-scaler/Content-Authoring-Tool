@@ -49,7 +49,7 @@ LIMITS = {
     "subheadings_per_teaching_card": (2, 4),
     "instructor_note_sentences": (1, 2),
     "words_per_minute": 90,              # spoken words a card holds per minute: live teaching has pauses, chat replies and screen time
-    "length_tolerance": (0.5, 1.15),     # a card may hold 50% to 115% of its word budget
+    "length_tolerance": (0.8, 1.15),     # a teaching card may hold 80% to 115% of its word budget; less than that means the time slot is not filled
 }
 
 TEACHING_CARD_TYPES = ("concept", "problem", "walkthrough", "faq", "recap")
@@ -63,6 +63,11 @@ def word_budget(duration_mins: float) -> Tuple[int, int]:
     """(target, most) spoken words for a card that runs this long. The card's time slot is the limit, not the topic's appetite."""
     target = LIMITS["words_per_minute"] * float(duration_mins or 0)
     return int(round(target / 5.0) * 5), int(round(target * LIMITS["length_tolerance"][1] / 5.0) * 5)
+
+
+def min_words(duration_mins: float) -> int:
+    """The fewest spoken words a teaching card of this length should hold."""
+    return int(round(LIMITS["words_per_minute"] * float(duration_mins or 0) * LIMITS["length_tolerance"][0] / 5.0) * 5)
 
 
 def cards_for_duration(duration_minutes: int) -> Tuple[int, int]:
@@ -94,7 +99,10 @@ RULES: List[Rule] = [
          f"A card's spoken words fit its time: about {LIMITS['words_per_minute']} words per minute of the card's duration, and never more than "
          f"{round(LIMITS['length_tolerance'][1] * 100)}% of that (a 5 minute card holds about {word_budget(5)[0]} words, at most {word_budget(5)[1]}). "
          f"Fit every agenda item and outcome the card serves into that space: one clear idea, one example, one check. Cut repeats, "
-         f"recaps inside a card, extra examples and restated points. Depth is not length."),
+         f"recaps inside a card, extra examples and restated points. Depth is not length. A teaching card also fills its time: at least "
+         f"{round(LIMITS['length_tolerance'][0] * 100)}% of its budget. If it is short, add teaching (a worked example, a check question, the reason behind a step), never padding."),
+    Rule("C1", "STRUCTURE", "review", "The cards agree with each other: the same names, rows, values and results from card to card, a trace that matches its code, a diagram that matches its text, "
+                                      "and a term means one thing. Use the class's shared data exactly; never invent other rows or numbers."),
     Rule("S5", "STRUCTURE", "review",
          "Cover every agenda item and learning outcome. Add nothing outside the agenda."),
     Rule("S6", "STRUCTURE", "review",
@@ -145,6 +153,19 @@ RULES: List[Rule] = [
          f"Keep paragraphs to {_p_lo} to {_p_hi} sentences."),
     Rule("R13", "READABILITY", "auto",
          f"A teaching card has {_h_lo} to {_h_hi} short sub-headings, so a learner can skim it."),
+    Rule("R14", "READABILITY", "auto",
+         "Write in simple English, as you would explain it to a friend: short sentences (about 15 words, none over 30), everyday words, one idea per sentence, no idioms or slang, "
+         "and explain every technical word the first time you use it."),
+    Rule("K6", "STRUCTURE", "auto",
+         "The last card ends the class by telling the learners what the next class covers, taken from the next class's own agenda. When that agenda is not written yet, name the class and say nothing about its topics."),
+    Rule("R15", "READABILITY", "auto",
+         "Do not claim how learners usually answer or behave (\"the most common wrong pick\", \"both are common\"): nobody measured it. Say \"a tempting wrong answer\"."),
+    Rule("L3", "ACCURACY", "auto",
+         "When the text says what the code prints (\"it prints 16\"), that must be the number the code really printed when it was run."),
+    Rule("L2", "ACCURACY", "auto",
+         "When the text points to a line of code (\"the loop on line 14\"), that must be the real line number of the code shown. Count them, or describe the line in words."),
+    Rule("C2", "STRUCTURE", "auto",
+         "A card does not open with a sentence the card before it ended on. A card ends by leading into the next; the next one starts with its own words."),
     Rule("R2", "READABILITY", "auto",
          f"Use callouts ({', '.join(CALLOUTS)}). Every teaching card has at least one Key callout."),
     Rule("R3", "READABILITY", "auto", "Bold a term only where it is defined."),
@@ -236,7 +257,8 @@ REVIEW_RULES: List[Rule] = [
     Rule("Q1", "QUESTIONS", "auto", "The quiz on screen is exactly the question and options the card text reads out, with the same right answer."),
     Rule("Q2", "QUESTIONS", "auto", "A quiz has exactly one keyed correct answer, and every option is different."),
     Rule("Q3", "QUESTIONS", "auto", "A quiz asks only about what this script teaches."),
-    Rule("Q4", "QUESTIONS", "review", "A quiz tests only what the script has taught by this card. Its keyed answer is right according to the script, and no other option is also right. "
+    Rule("Q4", "QUESTIONS", "review", "A quiz asks first and the cards after it answer it, so it tests only what this script teaches in the topic that follows (the quiz may come before the "
+                                       "teaching; never flag it for that). Its keyed answer is right according to the script, and no other option is also right. "
                                        "If you change the question or options in the card text, change the quiz to match, and the other way round."),
     Rule("L1", "REVIEWERS", "review", "Read as a BEGINNER and report every place you got lost: a term used before it is taught, a jump between ideas, a step with no reason, code that is not explained."),
     Rule("I1", "REVIEWERS", "review", "Read as an INTERMEDIATE learner and report every gap between the basics they know and the depth the card jumps to."),
@@ -437,6 +459,10 @@ def gather_block_a(
         previous_class = {"number": last.sequence_number, "title": last.title, "memory": memory if isinstance(memory, dict) else None,
                           "approved": approved is not None, "approved_by": approved.approved_by_name if approved is not None else None}
 
+    # ---- the same class taught earlier at a lower level: this one is its follow-up and must not teach it again
+    from agents.class_memory import earlier_version_of
+    earlier_version = earlier_version_of(db, cls)
+
     # ---- continuity: only what a real earlier class or module recorded, never a guess
     running_example = None
     cliffhanger = None
@@ -508,6 +534,7 @@ def gather_block_a(
         "stack": (api_docs or "").strip() or None,
         "past": past_out,
         "previous_class": previous_class,
+        "earlier_version": earlier_version,
         "upcoming": upcoming_out,
         "running_example": running_example,
         "cliffhanger": cliffhanger,
@@ -593,6 +620,9 @@ def render_block_a(d: Dict[str, Any], kit_focus: Optional[str] = None) -> str:
         out.append("This is the FIRST class of the module. Nothing from this module has been taught.")
         if d["module_bridge"]:
             out.append("Previous module: " + d["module_bridge"].get("bridge_directive", ""))
+    if d.get("earlier_version"):
+        from agents.class_memory import render_earlier_version
+        out.append(render_earlier_version(d["earlier_version"]))
     if d["upcoming"]:
         out.append("Planned next (do NOT teach these here; a one-line forward pointer is allowed):")
         for u in d["upcoming"]:
@@ -729,7 +759,13 @@ OPENING_WELCOME = (
 
 
 # Card 1 of every class. It is a note for the instructor, not spoken words, and the system writes it so it is always the same.
-INTRO_NOTE_CUE = "Prepare a one-minute introduction of yourself before you go live. You give it right after the welcome and the chat question."
+INTRO_NOTE_CUE = "Prepare a one-minute introduction of yourself before you go live. You give it right after the welcome and the chat question."      # a program's first class
+INTRO_NOTE_CUE_PLAIN = "Prepare a one-minute introduction of yourself before you go live. You give it right after the welcome."                        # every other class: its welcome asks no chat question
+
+
+def intro_note_cue(program_opening: bool) -> str:
+    """Only the welcome of a program's first class asks a first question in chat, so only that class's note mentions it."""
+    return INTRO_NOTE_CUE if program_opening else INTRO_NOTE_CUE_PLAIN
 INTRO_NOTE_BODY = ("Introduce yourself to the learners in about a minute: who you are, what you do, how long you have worked in this field, and why you teach this course.\n\n"
                    "[[FROM_SME: instructor name, current role, years of experience, and one line on why you teach this]]")
 

@@ -55,6 +55,110 @@ def covered(item: str, texts: List[str], threshold: float = 0.5) -> bool:
     return False
 
 
+# the verbs and filler every outcome starts with: a card teaches the topic, it does not have to say "identify" or "evaluate"
+_GENERIC_OUTCOME_WORDS = {"learner", "learners", "identify", "evaluate", "accurately", "derive", "explain", "apply", "understand", "design", "solution", "problem",
+                          "entry-level", "optimal", "common", "basic", "able", "can", "will", "using", "use"}
+
+
+# outcome words a card usually says another way
+_SAME_MEANING = {"performance": {"cost", "speed", "slow", "fast", "time"}, "production": {"real", "real-world", "checkout", "booking"},
+                 "inefficienci": {"slow", "bottleneck", "cost", "cheaper"}, "snippet": {"code"}, "efficient": {"fast", "cheaper", "cost"}}
+
+
+def covered_across(item: str, texts: List[str], threshold: float = 0.6) -> bool:
+    """An outcome is often taught by several cards together (the cause in one, the fix in the next). It is covered when the whole script's words hold
+    at least `threshold` of the item's significant words."""
+    need = words((item or "").replace(".", " ")) - _GENERIC_OUTCOME_WORDS      # "snippets." ending a sentence is the word "snippets"
+    if not need:
+        return True
+    have = set()
+    for t in texts:
+        have |= words((t or "").replace(".", " "))
+    got = sum(w in have or bool(_SAME_MEANING.get(w, set()) & have) for w in need)
+    return got / len(need) >= threshold
+
+
+_LINE_CUES = (("loop", r"\bfor\b|\bwhile\b"), ("for", r"\bfor\b"), ("def", r"\bdef\b"), ("function", r"\bdef\b"),
+              ("print", r"\bprint\b"), ("return", r"\breturn\b"), ("condition", r"\bif\b|\belif\b|\bwhile\b|\band\b|\bor\b|[=<>!]=?"))
+
+
+def check_cited_lines(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """L2: when the text says "the outer loop on line 14", line 14 of the code must be a line like that. Free and exact: it counts the real lines.
+    The code is the card's own, or the nearest earlier card's (a follow-up card often points back to the code it just showed)."""
+    out: List[Dict[str, Any]] = []
+    earlier = ""
+    for c in cards:
+        own = c.get("code_snippet") or ""
+        pools = [p.split("\n") for p in (own, earlier) if p.strip()]
+        if own.strip():
+            earlier = own
+        if not pools:
+            continue
+        for m in re.finditer(r"([^.\n]*?)\blines? (\d+)(?:\s*(?:and|to|-|,)\s*(\d+))?([^.\n]*)", spoken_text(c.get("content_script"))):
+            before = m.group(1).lower()                    # the words just before "line N" say what that line is
+            hits = [(mm.start(), rx) for word, rx in _LINE_CUES for mm in re.finditer(rf"\b{word}(?:s|es)?\b", before)]
+            cue = max(hits)[1] if hits else None
+            for g in (m.group(2), m.group(3)):
+                if not g:
+                    continue
+                n = int(g)
+                if not any(n <= len(lines) for lines in pools):
+                    out.append(_finding(c.get("card_index"), "L2", "major", f"The text points to line {n}, but the code has only {len(pools[0])} lines.",
+                                        "Use the real line number, or describe the line in words.", m.group(0).strip()))
+                elif cue and not any(n <= len(lines) and re.search(cue, lines[n - 1]) for lines in pools):
+                    shown = next(lines[n - 1] for lines in pools if n <= len(lines))
+                    out.append(_finding(c.get("card_index"), "L2", "major",
+                                        f"The text says line {n} is something the code's line {n} is not: it reads \"{shown.strip()[:60]}\".",
+                                        "Use the real line number from the code, or describe the line in words.", m.group(0).strip()))
+    return out
+
+
+_PRINT_CLAIM = re.compile(r"\b(?:prints?|printed|outputs?|returns?|shows?|gives?|displays?)\b[^.\n]{0,40}?(?<![\w.])(\d[\d,]*(?:\.\d+)?)\b", re.I)
+
+
+def check_numbers_match_output(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """L3: when the text says what the code prints ("it prints 16"), that number must be in what the code really printed. The run is the truth, so this is exact and free."""
+    out: List[Dict[str, Any]] = []
+    for c in cards:
+        run = c.get("code_run") or {}
+        shown = run.get("stdout") if isinstance(run, dict) else None
+        if not shown or run.get("status") not in (None, "passed"):
+            continue
+        printed = set(re.findall(r"\d+(?:\.\d+)?", shown.replace(",", "")))
+        for m in _PRINT_CLAIM.finditer(spoken_text(c.get("content_script"))):
+            num = m.group(1).replace(",", "")
+            if num not in printed and num not in re.findall(r"\d+(?:\.\d+)?", c.get("code_snippet") or ""):
+                out.append(_finding(c.get("card_index"), "L3", "major", f"The text says the code gives {num}, but the code printed: {shown.strip()[:80]!r}.",
+                                    "Use the number the code really prints.", m.group(0)))
+    return out
+
+
+_BOLD_TERM = re.compile(r"\*\*([A-Za-z][A-Za-z0-9 \-]{2,30})\*\*")
+
+
+def check_term_order(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """T6: a term a teaching card defines in bold should not be leaned on by an earlier teaching card. Quiz, welcome, agenda and note cards are left out
+    (a quiz may ask before it teaches). Minor, because an earlier mention is sometimes a deliberate preview."""
+    out: List[Dict[str, Any]] = []
+    first_bold: Dict[str, int] = {}
+    for c in cards:
+        if _kind(c) in ("concept", "problem", "walkthrough"):
+            for t in _BOLD_TERM.findall(c.get("content_script") or ""):
+                first_bold.setdefault(t.strip().lower(), c.get("card_index") or 0)
+    for term, home in first_bold.items():
+        if len(term) < 4 or term in ("note", "key", "remember", "mistake", "predict"):
+            continue
+        for c in cards:
+            idx = c.get("card_index") or 0
+            if idx >= home:
+                break
+            if _kind(c) in ("concept", "problem", "walkthrough") and re.search(rf"\b{re.escape(term)}\b", spoken_text(c.get("content_script")).lower()):
+                out.append(_finding(idx, "T6", "minor", f'"{term}" is used here, but it is first explained in card {home}.',
+                                    "Explain it here in one short sentence, or leave it for card " + str(home) + "."))
+                break
+    return out
+
+
 def _real_outcomes(outcomes):
     """The outcomes an author or Module Owner wrote. The generic text filled in when nobody gave any is not something a card has to cover."""
     from agents.shared_context import _PLACEHOLDER_OUTCOME_PREFIX
@@ -94,6 +198,7 @@ def mermaid_syntax_problem(code: str) -> Optional[str]:
 
 
 def _diagram_nodes(mermaid: str) -> int:
+    mermaid = re.sub(r'"[^"\n]*"|\|[^|\n]*\|', '""', mermaid or "")      # words inside labels, like T(n), are not nodes
     ids = set(re.findall(r"(?<![\w-])([A-Za-z_][\w]*)\s*(?:\[|\(\(|\(|\{|>)", mermaid or ""))
     ids |= set(re.findall(r"(?:-->|---|==>|-\.->)\s*(?:\|[^|]*\|)?\s*([A-Za-z_][\w]*)", mermaid or ""))
     return len(ids)
@@ -201,8 +306,11 @@ def check_script(
                                     f"Cut it to about {target} words by removing repeats, recaps and extra examples. Keep every agenda item and outcome the card serves, "
                                     f"and keep the quiz, code and callouts that teach them."))
             elif words_in_card < target * LIMITS["length_tolerance"][0] and kind in TEACHING_CARD_TYPES:
-                out.append(_finding(cid, "S8", "minor", f"The card has only {words_in_card} spoken words for {dur:g} minutes (about {target} fit).",
-                                    "Check that every agenda item and outcome this card serves is actually explained, then add what is missing."))
+                least = int(round(target * LIMITS["length_tolerance"][0] / 5.0) * 5)
+                out.append(_finding(cid, "S8", "major" if words_in_card < target * 0.6 else "minor",
+                                    f"The card has only {words_in_card} spoken words for {dur:g} minutes (about {target} fit, at least {least}), so part of its time would be empty.",
+                                    f"Add about {max(5, target - words_in_card)} words of teaching: a worked example using the class's own data, a check question for the learners, or the reason "
+                                    f"behind a step. Check every agenda item and outcome the card serves is explained. Do not repeat points or pad."))
 
         # ---- V1 the text is what the instructor says aloud: no directions to the instructor, no third person about learners
         # (a note card is a note by design: the instructor-introduction note and any other note are exempt)
@@ -233,7 +341,7 @@ def check_script(
                 out.append(_finding(cid, "R2", "minor", "A teaching card needs at least one Key callout.", "Add a Key callout."))
 
         # ---- E1 predict moments (Predict callout, then a line starting 'Reveal:')
-        if re.search(r"Predict", body) and re.search(r"^\W*Reveal\b", body, re.M | re.I):
+        if re.search(r"Predict", body) and re.search(r"^\W*(?:Reveal\b|The answer (?:is|was)\b)", body, re.M | re.I):      # the answer line may start "Reveal:" or "The answer is"
             predicts += 1
 
         # ---- E2 quiz must explain every wrong option
@@ -344,10 +452,23 @@ def check_script(
     texts = [f"{c.get('title') or ''} {c.get('content_script') or ''} {c.get('code_snippet') or ''}" for c in cards]
     for label, items in (("agenda item", agendas or []), ("learning outcome", split_items(_real_outcomes(outcomes)))):
         for item in items:
-            if not covered(item, texts):
+            if not covered(item, texts) and not covered_across(item, texts):
                 out.append(_finding("all", "S5", "blocker", f"The {label} \"{item[:90]}\" is not covered by any card.",
                                     "Write or extend a card so it covers this."))
     out.extend(check_script_craft(cards, running_example))
+    out.extend(check_cited_lines(cards))
+    out.extend(check_numbers_match_output(cards))
+    out.extend(check_term_order(cards))
+    # ---- K6 the last card tells the learners what the next class covers
+    if upcoming:
+        spoken = [c for c in cards if _kind(c) != "instructor_note" and (c.get("content_script") or "").strip()]
+        nxt = upcoming[0]
+        if spoken and nxt.get("title"):
+            tail = " ".join(_sentences(spoken_text(spoken[-1].get("content_script")))[-4:])
+            words = _topic_words(re.sub(r"^\s*[A-Za-z ]{1,25}:\s*", "", nxt["title"]))
+            if words and _ratio(words, _topic_words(tail)) < 0.5:
+                out.append(_finding(spoken[-1].get("card_index"), "K6", "minor", f"The last card does not say what the next class (\"{nxt['title']}\") covers.",
+                                    "End the class with one or two sentences about the next class" + (f": {'; '.join(nxt['items'][:4])}." if nxt.get("items") else ", by name only: its agenda is not written yet.")))
     return out
 
 
@@ -391,6 +512,18 @@ def check_script_craft(cards: List[Dict[str, Any]], running_example: Optional[st
                 if n > 4:
                     out.append(_finding(cid, "R1", "minor", f"A paragraph has {n} sentences; keep paragraphs to 2 to 4.", "Split it, or cut the repeats.", quote=p[:100]))
                     break
+        if kind in ("welcome", "agenda", "concept", "problem", "walkthrough", "quiz", "faq", "recap"):
+            # R14 simple English: no sentence over 30 words, and short sentences on the whole
+            sentences = [s_ for s_ in _sentences(re.sub(r"\[[^\]]*\]", " ", prose)) if len(s_.split()) >= 3]
+            lengths = [len(s_.split()) for s_ in sentences]
+            if lengths:
+                longest = max(lengths)
+                if longest > 30:
+                    out.append(_finding(cid, "R14", "minor", f"A sentence has {longest} words; keep sentences to about 15 words and none over 30.",
+                                        "Split it into two or three short sentences, or cut what the learner does not need.", quote=sentences[lengths.index(longest)][:100]))
+                elif len(lengths) >= 4 and sum(lengths) / len(lengths) > 22:
+                    out.append(_finding(cid, "R14", "minor", f"The sentences average {sum(lengths) / len(lengths):.0f} words; aim for about 15.",
+                                        "Use shorter sentences and everyday words."))
         if kind in ("concept", "problem", "walkthrough") and float(c.get("duration_mins") or 0) >= 4:
             # R10 two to four sub-headings on a teaching card
             heads = len(re.findall(r"^\s*#{1,6}\s+\S|^\s*\*\*[^*\n]{2,80}\*\*:?\s*$", prose, re.M))
@@ -475,10 +608,48 @@ def check_script_craft(cards: List[Dict[str, Any]], running_example: Optional[st
         if c.get("visual_type") == "animation" and not animation_is_complete(c.get("visual_content")):
             out.append(_finding(cid, "V3", "blocker", "The animation was cut off while it was being written, so it cannot play.", "Regenerate the animation."))
         # N2 generator plumbing must not reach the instructor
-        m = re.search(r"zero-based|option index|quiz json|\[Visual V\d+|not asked for, because", body, re.I)
+        m = re.search(r"(?:option|answer|quiz)[^.\n]{0,40}zero-based|zero-based[^.\n]{0,40}(?:option|answer|quiz)|option index|quiz json|\[Visual V\d+|not asked for, because", body, re.I)   # "index 2 (zero-based)" in a lesson on lists is teaching, not plumbing
         if m:
             out.append(_finding(cid, "N2", "minor", "Production wording from the generator is in the spoken text.", "Delete it; the instructor does not need it.", quote=body[max(0, m.start() - 30):m.end() + 60]))
+    out.extend(check_made_up_statistics(cards))
+    out.extend(check_repeated_lead_in(cards))
     out.extend(check_visuals_and_quizzes(cards))
+    return out
+
+
+# a claim about how learners usually answer or behave, which nobody measured
+_STATISTIC = re.compile(r"\b(?:most|more) common(?:ly)?\b|\bcommon(?:ly)? (?:wrong|mistake|slip|pick|answer)s?\b|\b(?:both|these|those|all) (?:are|is) common\b|\balmost always\b|"
+                        r"\b(?:most|many) (?:learners|students) (?:pick|choose|say|answer|get)\b|\blearners often (?:pick|choose|say|answer)\b", re.I)
+
+
+def check_made_up_statistics(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """R15. The staging cue and the reasons under a quiz's wrong options must not say how learners usually answer ("32 and 64 are the most common picks"): nobody
+    measured it, and the instructor will repeat it as a fact."""
+    out: List[Dict[str, Any]] = []
+    for c in cards:
+        quiz = c.get("quiz") if isinstance(c.get("quiz"), dict) else {}
+        places = [("staging cue", c.get("stage_directions") or "")] + [("reason for a wrong option", str(v)) for v in (quiz.get("distractor_explanations") or {}).values()]
+        for where, text in places:
+            m = _STATISTIC.search(text)
+            if m:
+                out.append(_finding(c.get("card_index"), "R15", "minor", f"The {where} says how learners usually answer (\"{m.group(0)}\"), but nobody measured that.",
+                                    "Say \"a tempting wrong answer\" instead, or cut the claim.", quote=text[:100]))
+                break
+    return out
+
+
+def check_repeated_lead_in(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """C2. A card that opens with a sentence the card before it just ended on. A card ends by leading into the next one; the next must not say it again."""
+    out: List[Dict[str, Any]] = []
+    norm = lambda s: re.sub(r"[^a-z0-9 ]", "", s.lower()).strip()
+    spoken = [c for c in sorted(cards, key=lambda x: x.get("card_index") or 0) if _kind(c) != "instructor_note" and (c.get("content_script") or "").strip()]
+    for before, c in zip(spoken, spoken[1:]):
+        last = {norm(s_) for s_ in _sentences(spoken_text(before.get("content_script")))[-3:] if len(s_.split()) >= 8}
+        first = [s_ for s_ in _sentences(spoken_text(c.get("content_script")))[:3] if len(s_.split()) >= 8]
+        hit = next((s_ for s_ in first if norm(s_) in last), None)
+        if hit:
+            out.append(_finding(c.get("card_index"), "C2", "minor", f"The card opens with a sentence card {before.get('card_index')} just ended on: \"{hit[:80]}\".",
+                                "Take the sentence out of one of the two cards, so the class does not hear it twice.", quote=hit[:100]))
     return out
 
 
@@ -668,6 +839,29 @@ def continuity_problem(body: str, previous: Dict[str, Any], spoken_before: bool 
     if len(prev_topic & _topic_words(first)) >= 2:
         return None
     return "The card starts cold: its opening does not connect to where the previous card stopped."
+
+
+def strip_duplicate_code(body: Optional[str], snippet: Optional[str]) -> str:
+    """A card shows its code in its own Live Code box. When the writer also pasted the same code into the spoken text, the learner sees it twice (three times with
+    the step-by-step player). Take that copy out of the text; any other code block (a trace table, an output sample) stays."""
+    body = body or ""
+    code = re.sub(r"\s+", " ", snippet or "").strip()
+    if not code:
+        return body
+
+    placed = "[[CODE]]" in body                      # the writer already said where the code box goes
+
+    def keep(match):
+        nonlocal placed
+        block = re.sub(r"\s+", " ", re.sub(r"^```[^\n]*\n|```\s*$", "", match.group(0))).strip()
+        if not (block and (block == code or code in block)):
+            return match.group(0)
+        if placed:
+            return ""
+        placed = True
+        return "\n\n[[CODE]]\n\n"                 # the code box is shown right here instead of a second copy of the code
+    cleaned = re.sub(r"```[^\n]*\n.*?```[ \t]*\n?", keep, body, flags=re.S)
+    return re.sub(r"\n{3,}", "\n\n", cleaned).strip("\n") if cleaned != body else body
 
 
 def spoken_words(body: str) -> int:
@@ -872,6 +1066,17 @@ def check_outline(outline: Dict[str, Any], target_minutes: int, agendas: Optiona
                 served = " ".join(list(c.get("agenda_items") or []) + list(c.get("outcomes") or []))
                 if not any(covered(item, [served], threshold=0.6) for item in scope_items):
                     out.append({"level": "major", "problem": f"Card \"{c.get('title')}\" serves nothing in this class's agenda or learning outcomes, so it is outside the scope."})
+
+    # an outcome alone is not enough: a teaching card must serve at least one agenda item the author wrote (a hook or a bridge nobody asked for serves only an outcome)
+    real_agendas = [a for a in (agendas or []) if str(a).strip()]
+    if real_agendas:
+        outcome_lines = {x.strip().lower() for x in split_items(_real_outcomes(outcomes))}
+        for c in cards:
+            if c.get("card_type") in ("concept", "problem", "walkthrough"):
+                served = " ".join(a for a in (c.get("agenda_items") or []) if str(a).strip().lower() not in outcome_lines)
+                if not any(covered(item, [served], threshold=0.6) for item in real_agendas):
+                    out.append({"level": "major", "problem": f"Card \"{c.get('title')}\" serves only a learning outcome and none of the agenda items, so it teaches something nobody asked for. "
+                                                        f"Attach it to an agenda item or take it out."})
 
     # the opening kit lists what an opening class must cover; most of it has to be planned as cards
     if required_topics:

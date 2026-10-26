@@ -238,7 +238,9 @@ def _generate_animation(
                 "- CONTROLS: Back, Play/Pause, Next and Replay buttons. It plays by itself, about 3 seconds per step, and stops on the last step.\n"
                 "- No external assets or CDN links. Light and dark mode (use prefers-color-scheme). Clean, modern, readable at a glance.\n"
                 "- BE COMPACT. The whole file must stay under about 3000 tokens: short shared CSS classes, no comments, no repeated rules, vanilla JS only. "
-                "A file that is cut off shows nothing, so finish it: the last thing in your answer is </html>.\n\n"
+                "A file that is cut off shows nothing, so finish it: the last thing in your answer is </html>.\n"
+                "- JAVASCRIPT TEXT: one wrong quote breaks the whole script and the animation shows nothing. Inside any text written between double quotes, never use another double quote: "
+                "write the inner text with single quotes, for example desc:\"We compare S1 with 'S3'.\". Check every text before you answer.\n\n"
                 "Return ONLY the HTML code, no markdown fences."
             )
 
@@ -250,11 +252,18 @@ def _generate_animation(
                     raw = raw.split("```")[1].split("```")[0].strip()
                 return raw
 
-            from agents.safe_html import animation_shows_steps
+            from agents.safe_html import animation_shows_steps, js_syntax_problem
             html_content = ask(prompt)
             if not animation_is_complete(html_content):
-                # the answer was cut off or came back empty: ask once more, for something much smaller
-                html_content = ask(prompt + "\n\nYOUR LAST ANSWER WAS CUT OFF AND SHOWED NOTHING. Write a much smaller version: 4 steps, minimal CSS, under 2000 tokens, and end with </html>.")
+                import re as _re
+                script_problem = next((p_ for p_ in (js_syntax_problem(x) for x in _re.findall(r"<script\b[^>]*>(.*?)</script>", html_content or "", flags=_re.S | _re.I)) if p_), None)
+                if script_problem:
+                    # the page was finished but its script is broken (usually a double quote inside a double-quoted text), so it shows nothing: ask again and name the mistake
+                    html_content = ask(prompt + f"\n\nYOUR LAST ANSWER'S JAVASCRIPT HAS A SYNTAX ERROR ({script_problem}), SO IT SHOWED NOTHING. Write the whole animation again. Inside any text written "
+                                       "between double quotes never use another double quote: use single quotes for the inner text, for example desc:\"We compare S1 with 'S3'.\".")
+                else:
+                    # the answer was cut off or came back empty: ask once more, for something much smaller
+                    html_content = ask(prompt + "\n\nYOUR LAST ANSWER WAS CUT OFF AND SHOWED NOTHING. Write a much smaller version: 4 steps, minimal CSS, under 2000 tokens, and end with </html>.")
             elif not animation_shows_steps(html_content):
                 # it plays but it does not say which step it is on: one more try, told exactly that
                 html_content = ask(prompt + "\n\nYOUR LAST ANSWER DID NOT SHOW WHICH STEP IT WAS ON. It must show every step as a numbered node in a flow, a panel reading "

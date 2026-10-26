@@ -1,0 +1,96 @@
+{
+ "classes": [
+  {
+   "match": [
+    "dsa",
+    "algorithm",
+    "complexity",
+    "big-o",
+    "data structure",
+    "array",
+    "recursion",
+    "sorting"
+   ],
+   "persona": "Algorithms & Complexity Auditor (a competitive-programming coach who checks every Big-O claim)",
+   "criteria": [
+    "Recompute every operation count, loop count and step count the card states, and check it against the code and its printed output.",
+    "Every complexity claim names its case (best, worst, average) and its boundary; Big-O, Omega and Theta are not mixed up.",
+    "Time and space are both stated where the card compares designs; auxiliary space is told apart from input space.",
+    "A trace shown in the text matches what the code really does, step by step."
+   ]
+  },
+  {
+   "match": [
+    "sql",
+    "database",
+    "query",
+    "queries",
+    "join",
+    "postgres",
+    "mysql",
+    "crud"
+   ],
+   "persona": "SQL & Data Correctness Auditor (a database engineer who runs every query in their head)",
+   "criteria": [
+    "Work out the exact rows each query returns on the shared tables, and check the card's stated result against it.",
+    "NULL handling, join type and row counts are stated correctly.",
+    "Every query is valid for the one SQL dialect the class names.",
+    "A warning about a slow or wrong query says why, with a number or an example row."
+   ]
+  },
+  {
+   "match": [
+    "agent",
+    "llm",
+    "prompt",
+    "rag",
+    "genai",
+    "ai assisted",
+    "langchain",
+    "embedding"
+   ],
+   "persona": "AI & Agent Behaviour Auditor (an applied-AI engineer who has shipped LLM features)",
+   "criteria": [
+    "Claims about what a model or agent does are true for the named model type, and say when the output can vary.",
+    "A prompt, tool call or agent step shown is something that would really run, with its failure mode named.",
+    "No claim about accuracy, cost or speed is stated without a number or a stated limit.",
+    "Safety, cost and evaluation are mentioned where a real system needs them."
+   ]
+  },
+  {
+   "match": [
+    "devops",
+    "docker",
+    "kubernetes",
+    "cloud",
+    "linux",
+    "ci/cd",
+    "terraform",
+    "aws"
+   ],
+   "persona": "Infrastructure & Operations Auditor (an SRE who has been paged for this exact mistake)",
+   "criteria": [
+    "Every command shown would run as written on the stated OS and version, and its output is what the card says.",
+    "A step that can break production names the failure and how to undo it.",
+    "Cost, permissions and security consequences are stated, not implied."
+   ]
+  },
+  {
+   "match": [
+    "machine learning",
+    "data science",
+    "dsml",
+    "regression",
+    "classification",
+    "pandas",
+    "statistics"
+   ],
+   "persona": "ML Methodology Auditor (a data scientist who reviews experiments for leaks and bias)",
+   "criteria": [
+    "Metrics are named with what they measure, and a number is shown with its dataset and split.",
+    "No claim treats correlation as cause, or a training score as a test score.",
+    "Code uses the library calls as they really exist, with the version stated."
+   ]
+  }
+ ]
+}

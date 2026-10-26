@@ -26,17 +26,24 @@ You check whether the diagrams, animations and quizzes of a lecture script say t
 SCOPE
 {scope}
 
-For each card below you get what the instructor says, then its quiz and its visual if it has them.
+THE SCRIPT TEACHES (every card, in order): {teaches}
+
+For each card below you get what the instructor says, then its quiz and its visual if it has them. This script asks FIRST and teaches after: a quiz usually comes before the
+cards that teach its topic, so the quiz may ask about something that is explained in the cards that follow it. That is the design, not a fault.
 Flag a VISUAL (rule V5) only when it shows something the card does not teach, uses names the script does not use, gets the order or the cause
 and effect wrong, or would mislead a learner.
-Flag a QUIZ (rule Q4) only when: it tests something the script has not taught by that card, the keyed answer is wrong according to the script, more than
-one option is also right, or the question cannot be answered from what was taught.
+Flag a QUIZ (rule Q4) only when: it tests something the script never teaches anywhere (use THE SCRIPT TEACHES above; a topic taught in a later card is fine), the keyed
+answer is wrong according to the script, more than one option is also right, or the question cannot be answered from what the script teaches.
+The reveal ("The answer is ...") is read after the learners have answered, so text under instructor_reveal_after_learners_answer is never a giveaway.
+Also flag a QUIZ (rule Q4) when the text under instructor_says_before_the_answer, or instructor_says when there is no reveal, already gives the answer away, for example by listing the steps or values that lead to it, or when the
+question tells the answer in its own words.
+Also flag, with severity "minor", a QUIZ whose wrong option is not tempting: it contradicts itself or the question's own setup, or no learner would ever pick it.
 Do not flag style. If a card is fine, leave it out. Quote the exact words that are wrong.
 
 CARDS
 {cards}
 
-Return ONLY JSON: {{"findings": [{{"card": int, "item": "visual" or "quiz", "problem": string, "fix": string, "quote": string}}]}}
+Return ONLY JSON: {{"findings": [{{"card": int, "item": "visual" or "quiz", "severity": "major" or "minor", "problem": string, "fix": string, "quote": string}}]}}
 """
 
 ALIGN_TASK = """\
@@ -69,7 +76,14 @@ def _card_view(c: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     visual, quiz = _visual_view(c), c.get("quiz") if isinstance(c.get("quiz"), dict) and c["quiz"].get("question") else None
     if not visual and not quiz:
         return None
-    out: Dict[str, Any] = {"card": c.get("card_index"), "title": c.get("title"), "instructor_says": spoken_text(c.get("content_script"))[:1100]}
+    out: Dict[str, Any] = {"card": c.get("card_index"), "title": c.get("title")}
+    spoken = spoken_text(c.get("content_script"))
+    reveal = re.search(r"\bThe answer is\b|\bReveal:", spoken) if quiz else None
+    if reveal:                              # the reveal is read AFTER the learners answer; only the part before it can give the answer away
+        out["instructor_says_before_the_answer"] = spoken[:reveal.start()][:1100]
+        out["instructor_reveal_after_learners_answer"] = spoken[reveal.start():][:600]
+    else:
+        out["instructor_says"] = spoken[:1100]
     if quiz:
         out["quiz"] = {"question": quiz.get("question"), "options": quiz.get("options"), "keyed_answer_index": quiz.get("correct_option_index")}
     if visual:
@@ -87,11 +101,12 @@ def judge_fit(cards: List[Dict[str, Any]], scope_digest: str = "", script_id: Op
     if not llm_configured():
         return [], "the AI is not configured"
     by_card = {c.get("card_index"): c for c in cards}
+    teaches = "; ".join(f"{c.get('card_index')}. {str(c.get('title') or '')[:70]}" for c in cards)[:2500]      # so a quiz that comes first is judged against what follows it
     out: List[Dict[str, Any]] = []
     problem = None
     for start in range(0, len(views), CARDS_PER_REQUEST):
         chunk = views[start:start + CARDS_PER_REQUEST]
-        prompt = JUDGE_TASK.format(scope=scope_digest or "(not given)", cards=json.dumps(chunk, separators=(",", ":"), ensure_ascii=False))
+        prompt = JUDGE_TASK.format(scope=scope_digest or "(not given)", teaches=teaches, cards=json.dumps(chunk, separators=(",", ":"), ensure_ascii=False))
         try:
             got = call_llm_json(messages=[{"role": "user", "content": prompt}], max_tokens=1800, temperature=0.0, agent="fit_checker", script_id=script_id)
         except LLMUnavailable as e:
@@ -112,7 +127,8 @@ def judge_fit(cards: List[Dict[str, Any]], scope_digest: str = "", script_id: Op
                 continue
             if item == "visual" and not _visual_view(by_card[card]) or item == "quiz" and not isinstance(by_card[card].get("quiz"), dict):
                 continue
-            out.append({"card_id": card, "rule": "Q4" if item == "quiz" else "V5", "severity": "major", "quote": str(f.get("quote") or "")[:120],
+            out.append({"card_id": card, "rule": "Q4" if item == "quiz" else "V5", "severity": "minor" if (item == "quiz" and str(f.get("severity")).lower() == "minor") else "major",
+                        "quote": str(f.get("quote") or "")[:120],
                         "problem": ("The quiz: " if item == "quiz" else "The " + str(by_card[card].get("visual_type")) + ": ") + str(f["problem"]).strip()[:260],
                         "suggested_fix": str(f.get("fix") or ("Rewrite the quiz so it tests what the script taught." if item == "quiz"
                                                               else "Regenerate it from this card's own steps and names."))[:260],

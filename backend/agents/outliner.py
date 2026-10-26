@@ -50,7 +50,8 @@ STEPS
    {t_lo} to {t_hi} minutes, quiz {q_lo} to {q_hi}, instructor_note and agenda {n_lo} to {n_hi}.
    card_type must be one of: instructor_note, agenda, concept, problem, walkthrough, quiz, faq, recap.
 7. QUIZ FIRST: a quiz card comes BEFORE the cards that teach its topic, never after. It asks the learner to think, and the next cards answer it.
-   Give a quiz the same agenda_items as the cards it comes before.
+   Give a quiz the same agenda_items as the cards it comes before. Plan one short quiz (2 to 3 minutes) before EACH agenda topic, so the instructor asks first and
+   then teaches every topic; put it right before that topic's first card, not stacked with other quizzes.
 8. SCOPE: teach only what the agenda and learning outcomes in the context ask for, and use the SME's additional
    resources and reference material where given. Every card names the agenda items and outcomes it serves, using their
    exact wording. Add nothing else. The class title, module name and track name are LABELS, not scope: a topic that is in the title
@@ -81,13 +82,46 @@ Visual cards are planned separately, so leave them out.
 """
 
 RETHINK_ADDENDUM = """\
-The SME chose ReThink.
-RETHINK FEEDBACK:
+SME INSTRUCTIONS FOR THIS OUTLINE. They come first: they override every default above, except the class scope, the card count and minutes, and the quiz-first rule.
 {rethink_feedback}
+{earlier}
+THE CURRENT OUTLINE (the one the SME is reacting to):
+{current}
 
-Produce a STRUCTURALLY DIFFERENT outline, not a reworded one.
-Change section grouping, card order, analogy, or running example.
+Apply the instructions exactly. Keep everything they do not mention exactly as it is now: the running example and analogy, the card order, the titles and the minutes.
+Change only what they ask for.
 """
+
+RETHINK_FRESH = """\
+The SME chose ReThink without saying what to change.
+Produce a STRUCTURALLY DIFFERENT outline, not a reworded one. Change section grouping, card order, analogy, or running example.
+"""
+
+
+def outline_digest(outline: Any) -> str:
+    """The current outline in a few lines, so a ReThink can change what was asked and keep the rest."""
+    if not isinstance(outline, dict):
+        return "(not available)"
+    lines = []
+    if outline.get("running_example"):
+        lines.append(f"Running example: {outline['running_example']}")
+    n = 0
+    for s_ in outline.get("sections", []):
+        for c in s_.get("cards", []):
+            n += 1
+            lines.append(f"{n}. [{c.get('card_type')}] {c.get('title')} ({round((c.get('duration_sec') or 0) / 60.0, 1)} min)"
+                         + (f" - serves: {'; '.join(str(a)[:60] for a in (c.get('agenda_items') or [])[:3])}" if c.get("agenda_items") else ""))
+    return "\n".join(lines)[:3500] or "(empty)"
+
+
+def rethink_addendum(feedback: Optional[str], current_outline: Any = None, earlier: Optional[List[str]] = None) -> str:
+    """The text added to the outline request when the SME asks for a ReThink. With words from the SME it is a targeted change of the current outline; without
+    words it is a fresh structure."""
+    if not (feedback or "").strip():
+        return RETHINK_FRESH
+    prior = [e for e in (earlier or []) if e and e.strip() and e.strip() != feedback.strip()]
+    return RETHINK_ADDENDUM.format(rethink_feedback=feedback.strip(), current=outline_digest(current_outline),
+                                   earlier=("EARLIER INSTRUCTIONS THAT STILL APPLY unless the new ones change them:\n" + "\n".join(f"- {e.strip()}" for e in prior[-4:])) if prior else "")
 
 EDIT_ADDENDUM = """\
 The SME chose Edit and returned the modified outline below.
@@ -123,6 +157,9 @@ def generate_outline(
     rethink_feedback: Optional[str] = None,
     edited_outline: Optional[str] = None,
     fix_problems: Optional[List[str]] = None,
+    rethink: bool = False,
+    current_outline: Any = None,
+    earlier_feedback: Optional[List[str]] = None,
     level: str = "intermediate",
     track: Optional[str] = None,
     script_id: Optional[int] = None
@@ -202,10 +239,8 @@ def generate_outline(
                             "(a step-by-step change over time that a learner watches), for example a query running or a request travelling.")
 
         # Append ReThink or Edit addendum if applicable
-        if rethink_feedback:
-            task_prompt += "\n\n" + RETHINK_ADDENDUM.format(
-                rethink_feedback=rethink_feedback
-            )
+        if rethink_feedback or rethink:
+            task_prompt = rethink_addendum(rethink_feedback, current_outline, earlier_feedback) + "\n\n" + task_prompt if (rethink_feedback or "").strip() else task_prompt + "\n\n" + RETHINK_FRESH
         elif edited_outline:
             task_prompt += "\n\n" + EDIT_ADDENDUM.format(
                 edited_outline=edited_outline
@@ -258,7 +293,7 @@ most one per card, and only where a picture teaches better than words. At least 
 should be a recap that shows the whole class as one mental model.
 - kind: "diagram" (flow, comparison or architecture), "animation" (a step-by-step change over time) or "image".
 - It serves an agenda item or outcome, written in the exact words above, and shows nothing outside the scope.
-- Use names from the running example. "prompt" is one or two sentences saying what to draw or animate.
+- Use names from the running example. "prompt" is one or two sentences saying what to draw or animate, under 40 words, so the whole answer stays short.
   "elements" lists at most {max_nodes} labels.
 - A "diagram" is drawn as a flowchart of boxes joined by arrows (at most {max_nodes} boxes in total, counting every box). It cannot draw axes, curves, grids, icons, markers
   or colours, so never ask for them; put the detail inside the text of the boxes. Anything that moves or changes over time is an "animation", not a diagram.
@@ -324,10 +359,17 @@ def ensure_visual_cards(outline: Dict[str, Any], agendas: Optional[List[str]], o
     if min_animations:
         prompt += f"\nThis is a beginner track: at least {min_animations} visual cards in total must be kind \"animation\"."
     try:
-        planned = call_llm_json(messages=[{"role": "user", "content": prompt}], max_tokens=1800, temperature=0.3, agent="visual_planner")
-    except Exception as e:           # the outline stays valid without them; its checks will say visuals are missing
-        print(f"Visual planner skipped: {e}")
-        return outline
+        planned = call_llm_json(messages=[{"role": "user", "content": prompt}], max_tokens=3000, temperature=0.3, agent="visual_planner")
+    except Exception as e:
+        # a long answer can be cut off or come back as broken JSON: ask once more, for the smallest answer that still does the job
+        print(f"Visual planner, first try failed ({e}); asking for a shorter answer")
+        short = (prompt + f"\n\nYOUR LAST ANSWER WAS CUT OFF OR NOT VALID JSON. Answer again as short as you can: exactly {need} visual cards, \"prompt\" at most 20 words, "
+                 f"\"elements\" at most 5 labels, and nothing outside the JSON.")
+        try:
+            planned = call_llm_json(messages=[{"role": "user", "content": short}], max_tokens=2000, temperature=0.2, agent="visual_planner")
+        except Exception as e2:      # the outline stays valid without them; its checks will say visuals are missing
+            print(f"Visual planner skipped: {e2}")
+            return outline
     added = [v for v in (planned.get("visual_cards") if isinstance(planned, dict) else []) or [] if isinstance(v, dict)
              and v.get("parent_card_id") not in taken]
     outline["visual_cards"] = list(existing) + added
@@ -399,7 +441,8 @@ def normalize_visual_cards(outline: Dict[str, Any]) -> Dict[str, Any]:
 INTRO_TITLE = "Instructor Introduction"
 
 
-def merge_opening_cards(outline: Dict[str, Any], target_minutes: int, program_opening: bool = True) -> Dict[str, Any]:
+def merge_opening_cards(outline: Dict[str, Any], target_minutes: int, program_opening: bool = True, first_of_module: bool = False,
+                        previous_module: Optional[str] = None, earlier_class: Optional[str] = None) -> Dict[str, Any]:
     """Every class opens the same way: the mandatory setup, then three cards. Card 1 is a short instructor note "Instructor Introduction" (the instructor
     prepares to introduce themselves). Card 2 is "Welcome & Introductions" (card_type welcome): the spoken welcome and the introduction. Card 3 is
     "Today's Agenda" (card_type agenda): only the agenda with its times. The Outliner's own first note card becomes card 1 and an agenda card it made
@@ -431,7 +474,9 @@ def merge_opening_cards(outline: Dict[str, Any], target_minutes: int, program_op
     rest = cards[idx + 1: idx + 3]
     welcome = next((c for c in rest if c.get("card_type") == "welcome"), None)
     agenda = next((c for c in rest if c.get("card_type") == "agenda"), None)
-    welcome_title = "Welcome & Introductions" if program_opening else "Welcome back"
+    new_module = first_of_module and not program_opening            # the first class of a module that is not the track's first: nothing of this module came before it
+    follow_up = bool(earlier_class) and not program_opening           # the learners already took a lower-level version of this class
+    welcome_title = "Welcome & Introductions" if program_opening else "Welcome back" if follow_up else "Welcome to the module" if new_module else "Welcome back"
     if welcome is None:
         welcome = {"card_id": "WELCOME", "card_type": "welcome", "title": welcome_title, "duration_sec": 120, "agenda_items": [], "outcomes": []}
         put_after(first, welcome)
@@ -445,7 +490,10 @@ def merge_opening_cards(outline: Dict[str, Any], target_minutes: int, program_op
     welcome["title"], welcome["card_type"] = welcome_title, "welcome"
     welcome["agenda_items"] = []
     welcome["teaching_shape_note"] = ("The approved spoken welcome, a first question in chat, then the instructor's introduction." if program_opening
-                                      else "A warm welcome back and a few sentences on where the last class stopped.")
+                                      else f"A warm welcome back. In one or two spoken sentences say that this class builds on '{earlier_class}', which the learners already took, and goes deeper. Do not teach it again here."
+                                      if follow_up else "A warm welcome to this module and its first class. In one or two spoken sentences say how it follows on from the previous module"
+                                           + (f" ('{previous_module}')" if previous_module else "") + ". Do not refer to a previous class of this module, and do not teach."
+                                      if new_module else "A warm welcome back and a few sentences on where the last class stopped.")
     agenda["title"] = "Today's Agenda"
     agenda["duration_sec"] = min(float(agenda.get("duration_sec") or 90), 120)
     agenda["teaching_shape_note"] = "Only the agenda: read aloud as a short numbered list, each item with about how many minutes it takes."
@@ -555,29 +603,73 @@ def plan_code(outline: Dict[str, Any], code_ratio: Optional[int]) -> Dict[str, A
 
 
 def quiz_before_topic(outline: Dict[str, Any]) -> Dict[str, Any]:
-    """A quiz asks first and the teaching answers it. A quiz card that sits after the teaching cards it tests moves to just before the first of them
-    (the run of concept, problem and walkthrough cards right before it that serve the same agenda items). Sections keep their sizes and every card keeps
-    its time. Only call this when no card of the script is written yet, because card numbers change."""
+    """A quiz asks first and the teaching answers it. Each quiz card sits just before the first concept, problem or walkthrough card of its own topic, wherever it was
+    (after the teaching, or stacked with other quizzes at the start). The topic is told by the agenda items, not by an outcome that nearly every card serves:
+    a broad outcome such as "derive the complexity of loops and recursion" is on most teaching cards, and matching on it would pull every quiz up to the first card.
+    Sections keep their sizes and every card keeps its time. Only call this when no card of the script is written yet, because card numbers change."""
     if not isinstance(outline, dict) or not outline.get("sections"):
         return outline
     sizes = [len(s_.get("cards", [])) for s_ in outline["sections"]]
     cards = _cards_in_order(outline)
+    teaching_types = ("concept", "problem", "walkthrough")
 
     def items(c):
         return {str(a).strip().lower() for a in (c.get("agenda_items") or []) if str(a).strip()}
-    q = 0
-    while q < len(cards):
-        if cards[q].get("card_type") == "quiz":
-            mine, j = items(cards[q]), q
-            while j > 0 and cards[j - 1].get("card_type") in ("concept", "problem", "walkthrough") and mine & items(cards[j - 1]):
-                j -= 1
-            if j < q:
-                cards.insert(j, cards.pop(q))
-        q += 1
+    teaching = [c for c in cards if c.get("card_type") in teaching_types]
+    counts: Dict[str, int] = {}
+    for c in teaching:
+        for i in items(c):
+            counts[i] = counts.get(i, 0) + 1
+    broad = {i for i, n in counts.items() if len(teaching) >= 5 and n / len(teaching) > 0.5}      # an item on most teaching cards tells nothing about where a topic starts
+    for quiz in [c for c in cards if c.get("card_type") == "quiz"]:
+        mine = items(quiz) - broad
+        if not mine:
+            continue
+        here = next(k for k, c in enumerate(cards) if c is quiz)
+        target = next((k for k, c in enumerate(cards) if c.get("card_type") in teaching_types and mine & items(c)), None)
+        if target is None or (target > here and all(c.get("card_type") == "quiz" for c in cards[here + 1:target])):      # it tests nothing taught here, or only quizzes sit between it and its topic
+            continue
+        cards.pop(here)
+        cards.insert(target - 1 if target > here else target, quiz)
     n = 0
     for s_, size in zip(outline["sections"], sizes):
         s_["cards"] = cards[n:n + size]
         n += size
+    return outline
+
+
+def ensure_topic_quizzes(outline: Dict[str, Any], agendas: Optional[List[str]], target_minutes: int) -> Dict[str, Any]:
+    """The instructor asks first and then teaches, for every agenda topic. A topic that has teaching cards but no quiz of its own gets a short quiz card (2.5 minutes)
+    planned right before its first teaching card. The durations are then rebalanced so the class still adds up. The quiz is written later like any other card.
+    No model call. Safe to run twice."""
+    from agents.rule_checker import covered
+    agendas = [str(a).strip() for a in (agendas or []) if str(a).strip()]
+    if not agendas or not isinstance(outline, dict) or not outline.get("sections"):
+        return outline
+    teaching = ("concept", "problem", "walkthrough")
+    items_of = lambda c: " ".join(c.get("agenda_items") or [])
+    added = []
+    for item in agendas:
+        cards = _cards_in_order(outline)
+        serving = [c for c in cards if c.get("card_type") in teaching and covered(item, [items_of(c)], threshold=0.6)]
+        if not serving or any(c.get("card_type") == "quiz" and covered(item, [items_of(c)], threshold=0.6) for c in cards):
+            continue
+        first = serving[0]
+        ids = {str(c.get("card_id")) for c in cards}
+        n = 1
+        while f"QZ{n}" in ids:
+            n += 1
+        short = item if len(item) <= 60 else item[:57].rstrip() + "..."
+        quiz = {"card_id": f"QZ{n}", "card_type": "quiz", "title": f"Predict: {short}", "duration_sec": 150, "agenda_items": [item], "outcomes": [],
+                "teaching_shape_note": "Ask first: one short predict question about this topic, with tempting wrong options. The cards right after it answer it, so do not explain the answer here."}
+        for sec in outline["sections"]:
+            if first in sec.get("cards", []):
+                sec["cards"].insert(sec["cards"].index(first), quiz)
+                break
+        added.append(short)
+    if added:
+        outline.setdefault("auto_adjustments", []).append("Added a short quiz before: " + "; ".join(added) + " (the instructor asks first, then teaches each topic).")
+        outline = _normalize_outline_duration(outline, target_minutes)
     return outline
 
 

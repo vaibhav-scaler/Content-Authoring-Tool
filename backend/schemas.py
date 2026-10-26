@@ -291,6 +291,7 @@ class ScriptDetailResponse(BaseModel):
     review_passed: Optional[bool] = None
     review_score: Optional[float] = None
     review_at: Optional[datetime.datetime] = None
+    planned_cards: Optional[int] = None          # how many cards the approved outline plans, so a script with only some of them written does not look finished
     approved_by_name: Optional[str] = None
     approved_at: Optional[datetime.datetime] = None
 

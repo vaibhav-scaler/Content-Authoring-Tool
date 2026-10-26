@@ -64,7 +64,7 @@ def _snap(frame):
 def _tracer(frame, event, arg):
     if frame.f_code.co_filename != "main.py": return None
     if event == "line":
-        if len(_steps) >= 150:
+        if len(_steps) >= 400:
             sys.settrace(None); _steps.append({"cut": True}); return None
         _steps.append({"l": frame.f_lineno, "vars": _snap(frame), "out": _printed[0], "fn": frame.f_code.co_name})
     return _tracer
@@ -108,7 +108,132 @@ def _python_steps(wd: str, code: str) -> Optional[Dict[str, Any]]:
     truncated = any(isinstance(r, dict) and r.get("cut") for r in raw)
     steps = [{"l": [r["l"], r["l"]], "note": "", "vars": r.get("vars") or {}, "out": r.get("out", 0), "fn": r.get("fn")}
              for r in raw if isinstance(r, dict) and "l" in r]
+    for step, note in zip(steps, python_notes(code, steps)):         # what each step does, in plain words, from the code itself and the values it really had
+        step["note"] = note
     return _trace("python", code, steps, truncated)
+
+
+_AUG = {"Add": "Add {v} to {t}.", "Sub": "Subtract {v} from {t}.", "Mult": "Multiply {t} by {v}.", "Div": "Divide {t} by {v}.", "FloorDiv": "Divide {t} by {v}, dropping the remainder.",
+        "Mod": "Set {t} to the remainder of {t} divided by {v}."}
+
+
+def python_notes(code: str, steps: list) -> list:
+    """One short plain-English sentence for each traced step: what that line does. Built from the code's structure and the values the run really had, so it
+    can never say something the program did not do. A step it cannot describe gets "" (the page then shows the line number)."""
+    import ast
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return [""] * len(steps)
+    funcs = {n.name for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
+    stmts = [n for n in ast.walk(tree) if isinstance(n, ast.stmt)]
+    compound = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.If, ast.For, ast.While, ast.With, ast.Try)
+
+    def src(node, limit=44):
+        try:
+            text = ast.unparse(node)
+        except Exception:
+            return "this"
+        text = " ".join(text.split())
+        return text if len(text) <= limit else text[:limit - 3].rstrip() + "..."
+
+    def stmt_at(line):
+        for n in stmts:
+            if isinstance(n, compound) and n.lineno == line:
+                return n
+        inside = [n for n in stmts if not isinstance(n, compound) and n.lineno <= line <= getattr(n, "end_lineno", n.lineno)]
+        return min(inside, key=lambda n: getattr(n, "end_lineno", n.lineno) - n.lineno) if inside else None
+
+    def span(node):
+        body = getattr(node, "body", None) or []
+        return (body[0].lineno, max(getattr(b, "end_lineno", b.lineno) for b in body)) if body else (0, -1)
+
+    def target_names(node):
+        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+        names = []
+        for t in targets:
+            names += [src(e) for e in t.elts] if isinstance(t, (ast.Tuple, ast.List)) else [src(t)]
+        return " and ".join(names) if len(names) <= 2 else ", ".join(names[:-1]) + " and " + names[-1]
+
+    def clean(value):
+        """A value as the trace recorded it (cut at 40 characters), closed neatly instead of ending mid-word."""
+        if len(value) < 40:
+            return value
+        opener = value[:1]
+        closer = {"{": "}", "[": "]", "(": ")"}.get(opener, "")
+        cut = value.rfind(",", 0, 38)
+        return (value[:cut] + ", ..." + closer) if (closer and cut > 0) else value[:37].rstrip() + "..."
+
+    notes = []
+    for i, step in enumerate(steps):
+        line = (step.get("l") or [0])[0]
+        node = stmt_at(line)
+        nxt = steps[i + 1] if i + 1 < len(steps) else None
+        nxt_line = (nxt.get("l") or [0])[0] if nxt else 0
+        note = ""
+        if node is None:
+            note = ""
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            note = f"Define the function {node.name}. Its lines run later, when the function is called."
+        elif isinstance(node, ast.ClassDef):
+            note = f"Define the class {node.name}."
+        elif isinstance(node, ast.For):
+            note = f"Take the next item from {src(node.iter)} and call it {src(node.target)}."
+            value = (nxt or {}).get("vars", {}).get(src(node.target)) if nxt and nxt.get("fn") == step.get("fn") else None
+            lo, hi = span(node)
+            if nxt and not (lo <= nxt_line <= hi):
+                note = f"No more items in {src(node.iter)}, so the loop ends."
+            elif value:
+                note += f" Now {src(node.target)} is {clean(value)}."
+        elif isinstance(node, (ast.If, ast.While)):
+            kind = "Check" if isinstance(node, ast.If) else "Check the loop condition"
+            note = f"Check: is {src(node.test)}?" if isinstance(node, ast.If) else f"Check the loop condition: is {src(node.test)}?"
+            lo, hi = span(node)
+            if nxt:
+                note += " Yes, so the lines inside run." if lo <= nxt_line <= hi else " No, so the lines inside are skipped."
+        elif isinstance(node, ast.Return):
+            note = f"Send back {src(node.value)} and leave the function." if node.value is not None else "Leave the function."
+        elif isinstance(node, ast.Assign) or isinstance(node, ast.AnnAssign):
+            value = node.value
+            names = target_names(node)
+            if value is None:
+                note = f"Declare {names}."
+            elif line != node.lineno:
+                note = f"Build {names}: add the item on this line."
+            elif isinstance(value, ast.Call) and isinstance(value.func, ast.Name) and value.func.id in funcs:
+                note = f"Call the function {value.func.id}. Keep what it sends back in {names}."
+            elif isinstance(value, (ast.List, ast.Tuple, ast.Set)):
+                kind = {"List": "list", "Tuple": "tuple", "Set": "set"}[type(value).__name__]
+                note = f"Create {names}, a {kind} with {len(value.elts)} item{'s' if len(value.elts) != 1 else ''}."
+            elif isinstance(value, ast.Dict):
+                note = f"Create {names}, a dictionary with {len(value.keys)} entr{'ies' if len(value.keys) != 1 else 'y'}."
+            else:
+                note = f"Set {names} to {src(value)}."
+        elif isinstance(node, ast.AugAssign):
+            note = _AUG.get(type(node.op).__name__, "Update {t} using {v}.").format(t=src(node.target), v=src(node.value))
+        elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Call):
+            call = node.value
+            name = call.func.id if isinstance(call.func, ast.Name) else None
+            if name == "print":
+                note = "Show " + (" and ".join(src(a, 30) for a in call.args) or "an empty line") + " on the screen."
+            elif name in funcs:
+                note = f"Call the function {name}."
+            else:
+                note = f"Run {src(call)}."
+        elif isinstance(node, (ast.Import, ast.ImportFrom)):
+            note = "Load " + ", ".join(a.name for a in node.names) + "."
+        elif isinstance(node, ast.Break):
+            note = "Stop the loop now."
+        elif isinstance(node, ast.Continue):
+            note = "Skip to the next round of the loop."
+        elif isinstance(node, ast.Pass):
+            note = "Do nothing here."
+        elif isinstance(node, ast.Raise):
+            note = "Raise an error."
+        if note and step.get("fn") and step["fn"] != "<module>":
+            note += f" (inside {step['fn']})"
+        notes.append(note)
+    return notes
 
 
 def _line_steps(code: str) -> Optional[Dict[str, Any]]:

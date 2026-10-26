@@ -57,6 +57,7 @@ def format_spoken(text: Optional[str]) -> str:
     """Spoken script text as safe HTML. Everything is escaped first; only the markup we choose to allow is added back."""
     out = esc(text)
     out = re.sub(r"\[\[VISUAL:\s*([^\]|]+?)\s*(?:\|[^\]]*)?\]\]", "", out)         # the visual is shown in its place; the marker is only for the writer
+    out = re.sub(r"\[\[CODE\]\]", "", out)                                              # so is the place of the code box
     out = re.sub(r"\*\*([^*\n]+)\*\*", r"<strong>\1</strong>", out)
     out = re.sub(r"(?<![\w*])\*([^*\n]+)\*(?![\w*])", r"<em>\1</em>", out)
     out = re.sub(r"`([^`\n]+)`", r"<code>\1</code>", out)
@@ -83,6 +84,83 @@ def animation_document(content: Optional[str]) -> str:
     return f"<!doctype html><html><head>{csp}{meta}{BASE_STYLE}</head><body>{inner}{HEIGHT_REPORTER}</body></html>"
 
 
+_JS_KEYWORDS = {"return", "typeof", "case", "in", "of", "void", "delete", "throw", "new", "else", "do", "instanceof", "yield", "await", "default", "export", "import", "var", "let", "const"}
+
+
+def js_syntax_problem(src: Optional[str]) -> Optional[str]:
+    """A cheap look for the mistake models make most in animation scripts: a double quote inside a text written between double quotes ("... TARGET_ID "S3" ..."),
+    which breaks the whole script so the animation shows nothing. A text (string) must not be followed straight away, on the same line, by a word, a number or another text.
+    Also finds a text that is never closed. Returns a short description, or None when nothing is wrong. It is not a full JavaScript parser."""
+    text = src or ""
+    i, n, line = 0, len(text), 1
+    prev, newline = "", True
+    while i < n:
+        ch = text[i]
+        if ch == "\n":
+            line += 1; newline = True; i += 1; continue
+        if ch.isspace():
+            i += 1; continue
+        if text.startswith("//", i):
+            j = text.find("\n", i); i = n if j < 0 else j; continue
+        if text.startswith("/*", i):
+            j = text.find("*/", i + 2)
+            if j < 0:
+                return f"a comment that is never closed (line {line})"
+            line += text.count("\n", i, j); i = j + 2; continue
+        if ch in "\"'":
+            if not newline and (prev == "str" or prev == "ident"):
+                return f"a text starts straight after another word or text on line {line}, usually a double quote inside a double-quoted text"
+            j = i + 1
+            while j < n and text[j] != ch:
+                if text[j] == "\\":
+                    j += 2; continue
+                if text[j] == "\n":
+                    return f"a text that is never closed on line {line}"
+                j += 1
+            if j >= n:
+                return f"a text that is never closed on line {line}"
+            i, prev, newline = j + 1, "str", False; continue
+        if ch == "`":
+            j, depth = i + 1, 0
+            while j < n and not (text[j] == "`" and depth == 0):
+                if text[j] == "\\":
+                    j += 2; continue
+                if text.startswith("${", j):
+                    depth += 1; j += 2; continue
+                if text[j] == "}" and depth:
+                    depth -= 1
+                if text[j] == "\n":
+                    line += 1
+                j += 1
+            i, prev, newline = j + 1, "str", False; continue
+        if ch.isalpha() or ch in "_$":
+            j = i
+            while j < n and (text[j].isalnum() or text[j] in "_$"):
+                j += 1
+            word = text[i:j]
+            if prev == "str" and not newline and word not in ("in", "of", "instanceof"):
+                return f"the word {word} follows a text on line {line}, usually a double quote inside a double-quoted text"
+            i, prev, newline = j, "kw" if word in _JS_KEYWORDS else "ident", False; continue
+        if ch.isdigit():
+            j = i
+            while j < n and (text[j].isalnum() or text[j] == "."):
+                j += 1
+            if prev == "str" and not newline:
+                return f"a number follows a text on line {line}"
+            i, prev, newline = j, "num", False; continue
+        if ch == "/" and prev in ("op", ""):                  # a regular expression literal
+            j, in_class = i + 1, False
+            while j < n and text[j] != "\n" and (in_class or text[j] != "/"):
+                if text[j] == "\\":
+                    j += 2; continue
+                in_class = (text[j] == "[") or (in_class and text[j] != "]")
+                j += 1
+            i, prev, newline = j + 1, "num", False; continue
+        prev, newline = ("close" if ch in ")]" else "op"), False
+        i += 1
+    return None
+
+
 def animation_is_complete(content: Optional[str]) -> bool:
     """False for an animation the model did not finish writing (its answer hit the length limit): a page with no body, an open <style> or
     <script>, no closing tag. Such a page shows nothing, so it is never shown as if it were an animation."""
@@ -100,7 +178,9 @@ def animation_is_complete(content: Optional[str]) -> bool:
     else:
         body = low
     shown = re.sub(r"<(style|script)\b.*?</\1>", "", body, flags=re.S)
-    return len(re.findall(r"<(?:div|svg|section|p|span|button|canvas|ul|ol|table|h[1-6]|g|rect|circle)\b", shown)) >= 3
+    if len(re.findall(r"<(?:div|svg|section|p|span|button|canvas|ul|ol|table|h[1-6]|g|rect|circle)\b", shown)) < 3:
+        return False
+    return not any(js_syntax_problem(code) for code in re.findall(r"<script\b[^>]*>(.*?)</script>", c, flags=re.S | re.I))      # a script with a syntax error shows nothing
 
 
 def step_player_html(title: str, steps) -> str:

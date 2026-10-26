@@ -192,3 +192,84 @@ def render_previous_class(number: Any, title: str, memory: Optional[Dict[str, An
                  "then moves to today's agenda. Reviewing something already taught takes one sentence at most, and never re-explains it.")
     lines.append("</previous_class>")
     return "\n".join(lines)
+
+
+# ---- the same class taught earlier at a lower level (for example "Intermediate DSA: Time Complexity" before the advanced "DSA: Time Complexity")
+_LEVEL_WORDS = (("beginner", 0), ("intermediate", 1), ("advanced", 2))
+
+
+def _level_rank(*texts: Optional[str]) -> Optional[int]:
+    """The highest level a class or its module names ("Intermediate DSA ..." is 1, "Advanced DSA ..." is 2); None when none is named."""
+    found = [rank for text in texts for word, rank in _LEVEL_WORDS if re.search(rf"\b{word}\b", text or "", re.I)]
+    return max(found) if found else None
+
+
+def _same_topic(title: Optional[str]) -> str:
+    return re.sub(r"[\s:\-]+", " ", re.sub(r"\b(beginner|intermediate|advanced)\b", "", title or "", flags=re.I)).strip().lower()
+
+
+def earlier_version_of(db, cls) -> Optional[Dict[str, Any]]:
+    """The class of the same program with the same topic that sits at a LOWER level, so this one can be its follow-up and not teach it again.
+    It must name a lower level than this class does, in its title or its module's name. The same track is preferred, then the nearest level below.
+    None when there is no such class."""
+    import json
+    from models import Class, MemoryLedger, Module, Track
+    mod = cls.module
+    here = _level_rank(cls.title, mod.name if mod else None)
+    if mod is None or mod.track is None or here is None:
+        return None
+    topic = _same_topic(cls.title)
+    best = None
+    for other in db.query(Class).join(Module, Class.module_id == Module.id).join(Track, Module.track_id == Track.id) \
+            .filter(Track.program_id == mod.track.program_id, Class.id != cls.id).all():
+        if other.class_type == "Archived" or _same_topic(other.title) != topic:
+            continue
+        rank = _level_rank(other.title, other.module.name if other.module else None)
+        if rank is None or rank >= here:
+            continue
+        key = (other.module.track_id == mod.track_id, rank)
+        if best is None or key > best[0]:
+            best = (key, other)
+    if best is None:
+        return None
+    other = best[1]
+    try:
+        agenda = [str(a) for a in json.loads(other.agendas or "[]") if isinstance(a, str)]
+    except ValueError:
+        agenda = []
+    outcomes = (other.learning_outcomes or "").strip()
+    from agents.shared_context import _PLACEHOLDER_OUTCOME_PREFIX, agenda_is_placeholder
+    if agenda_is_placeholder(agenda):                                   # the generic filler text says nothing about what that class taught
+        agenda = []
+    memory = None
+    ledger = db.query(MemoryLedger).filter(MemoryLedger.class_id == other.id).first()
+    if ledger and ledger.summary_json:
+        try:
+            memory = json.loads(ledger.summary_json)
+        except ValueError:
+            memory = None
+    if not (isinstance(memory, dict) and memory.get("points")):
+        memory = latest_script_memory(db, other.id, cls.title)
+    return {"class_id": other.id, "title": other.title, "module": other.module.name if other.module else "", "track": other.module.track.name if other.module and other.module.track else "",
+            "agenda": agenda[:8], "outcomes": "" if outcomes.startswith(_PLACEHOLDER_OUTCOME_PREFIX) else outcomes[:600],
+            "points": [p.get("title") for p in (memory or {}).get("points", [])][:10] if isinstance(memory, dict) else []}
+
+
+def render_earlier_version(ev: Optional[Dict[str, Any]]) -> str:
+    """What the Outliner, the Writer and the reviewers are told about the lower-level class this one follows up."""
+    if not ev:
+        return ""
+    lines = [f"EARLIER VERSION OF THIS CLASS: the learners already took \"{ev['title']}\" ({ev['module']}"
+             + (f", {ev['track']}" if ev.get("track") else "") + "). This class is its ADVANCED follow-up, on the same topic at a higher level."]
+    if ev.get("agenda"):
+        lines.append("  It covered: " + "; ".join(ev["agenda"]))
+    if ev.get("outcomes"):
+        lines.append("  Its learning outcomes: " + ev["outcomes"])
+    if ev.get("points"):
+        lines.append("  It taught (from its script): " + "; ".join(str(p) for p in ev["points"] if p))
+    if not (ev.get("agenda") or ev.get("outcomes") or ev.get("points")):
+        lines.append("  Its agenda was not recorded: assume it taught the standard introduction to this topic.")
+    lines.append("  So do NOT teach those basics again. Open with ONE short recap of them (a single card of about 5 minutes, or the welcome plus the first teaching card), then go deeper "
+                 "than that class did: edge cases, formal derivations, trade-offs and harder examples. Say plainly in the welcome that this class builds on it. "
+                 "The agenda below is still the full scope of this class.")
+    return "\n".join(lines)

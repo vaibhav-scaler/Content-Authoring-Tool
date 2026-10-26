@@ -137,9 +137,9 @@ def retrieve_context_memory(db: Session, class_id: int, manual_context: Optional
                         "key_terms_mastered": prev_mod_terms or [f"Foundations of {prev_module.name}"],
                         "running_system_used": prev_mod_analogy,
                         "bridge_directive": (
-                            f"Connect from '{prev_module.name}' (specifically '{last_class_of_prev_mod.title}'). "
-                            f"Show the transition from the system built in the previous module to motivate why "
-                            f"learners now need today's module: '{current_module.name}'."
+                            f"Link from '{prev_module.name}' (its last class was '{last_class_of_prev_mod.title}') in one or two spoken sentences inside the welcome card, "
+                            f"to say why today's module '{current_module.name}' comes next. Plan no card of its own for this link and teach nothing "
+                            f"beyond today's agenda."
                         )
                     }
                     # Inherit the running system/analogy from the previous module if available

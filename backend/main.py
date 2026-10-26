@@ -2197,7 +2197,11 @@ def create_script_outline(script_id: int, _actor: User = Depends(script_guard(Tr
     outline_data = best
     if isinstance(outline_data, dict) and outline_data.get("sections"):
         from agents.outliner import merge_opening_cards
-        outline_data = merge_opening_cards(outline_data, int(script.duration_minutes), program_opening=_program_opening(script))
+        _first, _prev_mod = _module_start(script, db)
+        outline_data = merge_opening_cards(outline_data, int(script.duration_minutes), program_opening=_program_opening(script), first_of_module=_first, previous_module=_prev_mod,
+                                           earlier_class=_earlier_title(script, db))
+        from agents.outliner import ensure_topic_quizzes
+        outline_data = ensure_topic_quizzes(outline_data, _script_scope(script)[1], int(script.duration_minutes))      # a quiz before every agenda topic: ask first, then teach
         outline_data = enforce_card_count(outline_data, int(script.duration_minutes))
         outline_data = ensure_animations(outline_data, min_animations_for(trk_name))
         from agents.outliner import finalize_plan
@@ -2318,6 +2322,34 @@ def _continuity_context(script, db: Session) -> dict:
         if memory and memory.get("draft_status"):
             known |= {str(t).strip().lower() for t in memory.get("terms") or [] if str(t).strip()}      # a draft's terms count as known too
     return {"previous": previous, "upcoming": upcoming, "known_terms": known}
+
+
+def _module_start(script, db: Session):
+    """(is this the first class of its module, the name of the module before it). The first class of a module has no class before it in the module; a welcome that
+    says "where the last class stopped" would invent one."""
+    first = _continuity_context(script, db)["previous"] is None
+    prev_name = None
+    if first:
+        try:
+            bridge = (json.loads(script.previous_script_context) if script.previous_script_context else {}).get("previous_module_bridge") or {}
+            prev_name = bridge.get("previous_module_name")
+        except (ValueError, AttributeError):
+            prev_name = None
+    return first, prev_name
+
+
+def _next_class_preview(script, db: Session) -> Optional[dict]:
+    """The class after this one in the module, for the closing card: its title and its real agenda items (none when its agenda is only the generic filler text)."""
+    upcoming = _continuity_context(script, db)["upcoming"]
+    return {"title": upcoming[0]["title"], "items": upcoming[0].get("items") or []} if upcoming else None
+
+
+def _earlier_title(script, db: Session) -> Optional[str]:
+    """The title of the lower-level version of this class the learners already took, if the program has one (see class_memory.earlier_version_of)."""
+    from agents.class_memory import earlier_version_of
+    cls = script.class_entity
+    ev = earlier_version_of(db, cls) if cls is not None else None
+    return ev["title"] if ev else None
 
 
 def _continuity_summary(script, db: Session) -> dict:
@@ -2662,6 +2694,10 @@ def handle_outline_action(script_id: int, payload: OutlineApprovalRequest, _acto
         )
         trk_name = cls.module.track.name if cls and cls.module and cls.module.track else "Core"
 
+        try:
+            _old_outline = json.loads(script.outline_json) if script.outline_json else None
+        except ValueError:
+            _old_outline = None
         outline_data = generate_sections_outline(
             class_title=effective_title,
             agendas=agendas,
@@ -2675,16 +2711,25 @@ def handle_outline_action(script_id: int, payload: OutlineApprovalRequest, _acto
             api_docs=script.api_docs,
             reference_urls=script.reference_urls,
             rethink_feedback=payload.revision_feedback,
+            rethink=True,
+            current_outline=_old_outline,
+            earlier_feedback=(_old_outline or {}).get("sme_feedback") if isinstance(_old_outline, dict) else None,
             track=trk_name,
             script_id=script.id
         )
         if isinstance(outline_data, dict) and outline_data.get("sections"):
             from agents.outliner import enforce_card_count, ensure_animations, min_animations_for
             from agents.outliner import merge_opening_cards
-            outline_data = merge_opening_cards(outline_data, int(script.duration_minutes), program_opening=_program_opening(script))
+            _first, _prev_mod = _module_start(script, db)
+            outline_data = merge_opening_cards(outline_data, int(script.duration_minutes), program_opening=_program_opening(script), first_of_module=_first, previous_module=_prev_mod,
+                                               earlier_class=_earlier_title(script, db))
+            from agents.outliner import ensure_topic_quizzes
+            outline_data = ensure_topic_quizzes(outline_data, _script_scope(script)[1], int(script.duration_minutes))
             outline_data = ensure_animations(enforce_card_count(outline_data, int(script.duration_minutes)), min_animations_for(trk_name))
             from agents.outliner import finalize_plan
             outline_data = finalize_plan(outline_data, script.content_mix_beginner, script.code_ratio)
+            if (payload.revision_feedback or "").strip():             # remembered, so the next ReThink keeps honouring what was already asked
+                outline_data["sme_feedback"] = (((_old_outline or {}).get("sme_feedback") if isinstance(_old_outline, dict) else None) or [])[-4:] + [payload.revision_feedback.strip()]
         script.outline_json = json.dumps(outline_data)
         db.commit()
 
@@ -2940,6 +2985,8 @@ def _card_flow(earlier, start_card: int, flat_outline) -> dict:
         prev = {"title": prev_spec.get("title"), "type": prev_spec.get("card_type"), "ended_with": None}
     else:
         prev = None
+    if prev is not None and str(prev.get("type") or "").lower().startswith("instructor"):
+        prev = None                                      # the instructor note is a cue for the instructor, never spoken: the card after it opens the class
     here = flat_outline[start_card - 1][1] if 0 <= start_card - 1 < len(flat_outline) else {}
     prev_level = None                                      # the level of the nearest earlier card that has one
     for _sec, spec in reversed(flat_outline[:max(0, start_card - 1)]):
@@ -3020,6 +3067,14 @@ def generate_section(
         or "Real-time Distributed Booking Engine"
     )
 
+    # The class's one example dataset: made once, then part of the running example, so every card, code block and diagram uses the same data
+    from agents import class_data
+    if isinstance(outline_raw, dict) and outline_raw.get("sections") and live_llm_available():
+        _cards_flat = [c for sec in outline_raw["sections"] for c in sec.get("cards", [])]
+        _shared = _shared_data_for(script, outline_raw, _cards_flat, running_example, effective_title, agendas, db)
+        if _shared:
+            running_example = f"{running_example}\n\n{class_data.block(_shared)}"
+
     # If outline is structured as sections
     if isinstance(outline_raw, dict) and outline_raw.get("sections"):
         target_sec_id = section_id or f"sec_{max(1, (start_card - 1) // 4 + 1)}"
@@ -3046,6 +3101,8 @@ def generate_section(
             digest = [{"n": c.card_index, "title": c.title, "type": c.pedagogical_phase,
                        "gist": spoken_text(c.content_script)[:220], "ended_with": spoken_tail(c.content_script, 30)} for c in earlier[-8:]]
             flow = _card_flow(earlier, start_card, flat_outline)
+            if not flow.get("next"):                                             # the last card closes the class: it also says what the next class covers
+                flow["next_class"] = _next_class_preview(script, db)
             terms = list(dict.fromkeys(t.strip() for c in earlier for t in _re.findall(r"\*\*([^*\n]{2,60})\*\*", c.content_script or "")))[:40]
             # Approved pages (the SME's links and the module's approved sources) are fetched now, and the passages that match
             # this card go to the Writer, so its claims come from the documentation and not from memory.
@@ -3112,8 +3169,8 @@ def generate_section(
             from agents.rule_checker import clean_spoken
             body = clean_spoken(c.get("body_markdown") or c.get("content_script") or "")
             if idx == 1 and str(c.get("card_type") or "").lower() == "instructor_note":
-                from agents.shared_context import INTRO_NOTE_BODY, INTRO_NOTE_CUE
-                body, c["instructor_note"], c["title"] = INTRO_NOTE_BODY, INTRO_NOTE_CUE, "Instructor Introduction"      # card 1 is always the same short note
+                from agents.shared_context import INTRO_NOTE_BODY, intro_note_cue
+                body, c["instructor_note"], c["title"] = INTRO_NOTE_BODY, intro_note_cue(_program_opening(script)), "Instructor Introduction"      # card 1 is always the same short note
             elif idx <= 3 and str(c.get("card_type") or "").lower() == "welcome" and _program_opening(script):
                 from agents.shared_context import ensure_opening_welcome
                 body = ensure_opening_welcome(body, _opening_welcome(script))         # a track's first welcome card starts with that track's spoken welcome
@@ -3134,10 +3191,14 @@ def generate_section(
             ).first()
 
             dur = round(c.get("duration_sec", 300) / 60.0, 1) if c.get("duration_sec") else c.get("duration_mins", 5.0)
+            from agents.rule_checker import strip_duplicate_code
+            body = strip_duplicate_code(body, c.get("code_snippet"))         # the code has its own box: not twice
 
             from agents.source_fetcher import resolve_sources
             sources_val = json.dumps(resolve_sources(c.get("sources"), [script.reference_urls, script.api_docs, script.additional_resources,
                                                                         cls.module.approved_sources if cls and cls.module else None]))
+            if str(c.get("card_type") or "").lower() == "quiz":
+                sources_val = "[]"                                       # a quiz cites no source: the claim a source was matched to is usually the card's own question
             stage_note = c.get("instructor_note") or c.get("stage_directions") or c.get("teaching_shape_note")
             from agents.quiz_format import clean_quiz
             quiz_val = json.dumps(clean_quiz(c.get("quiz_json"))) if isinstance(c.get("quiz_json"), dict) else (c.get("quiz_json") if isinstance(c.get("quiz_json"), str) else None)
@@ -3477,6 +3538,9 @@ def _regenerate_visual_asset(script, db: Session, visual_id: str, instruction: O
     if row is None:
         raise HTTPException(status_code=409, detail="Write the card this visual sits on first; the visual is made from its text.")
     running_example = (outline.get("running_example") if isinstance(outline, dict) else None) or ""
+    from agents import class_data as _class_data
+    if _class_data.of_outline(outline):
+        running_example = f"{running_example}\n\n{_class_data.block(_class_data.of_outline(outline))}"      # a redrawn diagram uses the class's data too
     # Asking again means the SME did not like the last web picture: remember it so the search never offers it again
     try:
         previous = json.loads(row.visual_asset_json) if row.visual_asset_json else {}
@@ -3533,6 +3597,24 @@ def approve_visual(script_id: int, visual_id: str, approved: bool = True, _actor
 # 5. MULTI-AGENT REVIEW AUDIT & MODERATOR REPAIR (PRD FR-17)
 # ==============================================================================
 
+def _shared_data_for(script, outline_raw, cards: list, running_example: str, title: str, agendas: list, db: Session) -> str:
+    """The class's one example dataset (see agents/class_data.py). It is made once, before the first card of a class with code is written, and kept with the outline.
+    An empty string when the class has no code or the model could not make it."""
+    from agents import class_data
+    if not isinstance(outline_raw, dict):
+        return ""
+    have = class_data.of_outline(outline_raw)
+    if have or not class_data.needs_shared_data(cards):
+        return have
+    from agents.reviewer import track_level
+    made = class_data.make_shared_data(title, agendas, running_example, cards, level=track_level(_track_of(script), _program_of(script)), script_id=script.id)
+    if made:
+        outline_raw["shared_data"] = made
+        script.outline_json = json.dumps(outline_raw)
+        db.commit()
+    return made or ""
+
+
 def _scope_digest(script) -> str:
     """The short scope text reviewers and the Moderator need: what the script must cover, what it may use and what it must not teach."""
     title, agendas, outcomes = _script_scope(script)
@@ -3550,6 +3632,28 @@ def _scope_digest(script) -> str:
     lines.append("Learning outcomes: " + (outcomes.strip() or "none provided; derive them from the title"))
     if script.additional_resources:
         lines.append("SME additional resources (use them; do not contradict them): " + script.additional_resources.strip()[:700])
+    try:
+        from agents import class_data
+        shared = class_data.of_outline(json.loads(script.outline_json)) if script.outline_json else ""
+    except ValueError:
+        shared = ""
+    if shared:
+        lines.append("SHARED DATA the whole script must use, unchanged:\n" + shared)
+    try:
+        from agents.class_memory import earlier_version_of, render_earlier_version
+        _db = object_session(script)
+        _ev = earlier_version_of(_db, cls) if (_db is not None and cls is not None) else None
+        if _ev:
+            lines.append(render_earlier_version(_ev) + " Do not report the recap of it, or a deeper treatment of it, as repetition or as too advanced.")
+    except Exception:
+        pass
+    try:
+        _first, _prev_module = _module_start(script, _db) if _db is not None else (False, None)
+        if _first and _prev_module:
+            lines.append(f'PREVIOUS MODULE (from the program, not an error): the learners come from the module "{_prev_module}". The welcome card may link to it in one or two sentences; '
+                         "that link is expected. Report it only if it claims something about that module the module's name does not support.")
+    except Exception:
+        pass
     if cls is not None and cls.module is not None:
         later = sorted((c for c in cls.module.classes if (cls.sequence_number or 0) < (c.sequence_number or 0) < 1000),
                        key=lambda c: c.sequence_number)[:3]
@@ -3582,7 +3686,7 @@ def _review_cards_dicts(db: Session, script_id: int):
             "sources": json.loads(c.sources_json) if c.sources_json else [],
             "visual_type": vis.get("type") if isinstance(vis, dict) else None,
             "visual_content": vis.get("content") if isinstance(vis, dict) else None,
-            "visual_caption": " ".join(str(vis.get(k) or "") for k in ("caption", "alt_text")) if isinstance(vis, dict) else None,
+            "visual_caption": " ".join(dict.fromkeys(str(vis.get(k) or "").strip() for k in ("caption", "alt_text") if str(vis.get(k) or "").strip())) if isinstance(vis, dict) else None,
             "stage_directions": c.stage_directions,
             "level": plan.get(c.card_index, {}).get("level"), "planned_code": plan.get(c.card_index, {}).get("has_code"),
             "covers": plan.get(c.card_index, {}).get("agenda_items") or [],
@@ -3782,7 +3886,7 @@ def _run_review(script_id: int, _actor, db: Session, mode: str = "find", only_ca
         queue = stored.get("checklist") or _checklist_from_findings([f for r in stored["reviews"] for f in (r.get("findings") or [])])
         set_checklist(script_id, [{**i, "status": "todo" if i.get("status") in ("open", "new", "applied") else i.get("status")} for i in queue])
         stored_lens = [r for r in stored["reviews"] if r.get("lens_name") != "Rule Check (automatic)"]
-        stored_fit = [f for r in stored["reviews"] if r.get("lens_name") == "Rule Check (automatic)" for f in (r.get("findings") or []) if f.get("rule") in ("V5", "Q4")]
+        stored_fit = [f for r in stored["reviews"] if r.get("lens_name") == "Rule Check (automatic)" for f in (r.get("findings") or []) if f.get("rule") in ("V5", "Q4", "C1")]
     do_prep = mode in ("apply", "full") and only_cards is None       # the free fixes and the setup checklist are changes: only on apply
 
     from agents.progress import report
@@ -3814,6 +3918,11 @@ def _run_review(script_id: int, _actor, db: Session, mode: str = "find", only_ca
     all_passed = False
     passes_done = 0
     not_run: list = []
+    try:
+        _dismissed = list((json.loads(script.outline_json) or {}).get("dismissed_findings") or []) if script.outline_json else []
+    except (ValueError, AttributeError):
+        _dismissed = []
+    _newly_dismissed: list = []     # findings the final check dropped in this run; remembered so the same false alarm is not shown again
     changed_since = None            # None: nothing reviewed yet, so read every card
     previous_blockers, stalled = None, 0
     fit_findings: list = []         # the model's meaning check of visuals and quizzes, kept for cards not read again
@@ -3822,14 +3931,16 @@ def _run_review(script_id: int, _actor, db: Session, mode: str = "find", only_ca
         """The three lenses over these cards; one more try, after a pause, when a lens could not run (usually a rate limit)."""
         got = run_multi_lens_reviews(class_title=title, cards=cards, target_duration_mins=script.duration_minutes,
                                      content_mix_beginner=script.content_mix_beginner, scope_digest=scope, script_id=script_id, lens_keys=_script_lenses(script), program=_program_of(script),
-                                     already_reported=earlier_findings)
+                                     already_reported=earlier_findings, context_cards=_review_cards_dicts(db, script_id),
+                                     dismissed=_dismissed + _newly_dismissed, dropped_out=_newly_dismissed)
         if any(r.get("ran") is False and not r.get("passed", False) for r in got):
             import time as _time
             report(script_id, "The model's per-minute limit was reached; trying the reviewers again in 30 seconds")
             _time.sleep(30)
             got = run_multi_lens_reviews(class_title=title, cards=cards, target_duration_mins=script.duration_minutes,
                                          content_mix_beginner=script.content_mix_beginner, scope_digest=scope, script_id=script_id, lens_keys=_script_lenses(script), program=_program_of(script),
-                                         already_reported=earlier_findings)
+                                         already_reported=earlier_findings, context_cards=_review_cards_dicts(db, script_id),
+                                     dismissed=_dismissed + _newly_dismissed, dropped_out=_newly_dismissed)
         return got
 
     if do_prep and _load_setup(script) is None:  # a programming class gets its before-the-class checklist made along the way (best effort)
@@ -3884,7 +3995,19 @@ def _run_review(script_id: int, _actor, db: Session, mode: str = "find", only_ca
         else:
             report(script_id, "Checking that the diagrams, animations and quizzes say the right thing")
             fresh_fit, fit_problem = judge_fit(cards_dicts, scope, script_id, only=changed_since)
-            fit_findings = [f for f in fit_findings if changed_since is not None and f["card_id"] not in changed_since] + fresh_fit
+            from agents.consistency import judge_consistency
+            report(script_id, "Checking that the cards agree with each other")
+            try:
+                _shared_now = __import__("agents.class_data", fromlist=["of_outline"]).of_outline(json.loads(script.outline_json)) if script.outline_json else ""
+            except ValueError:
+                _shared_now = ""
+            fresh_cons, cons_problem = judge_consistency(cards_dicts, scope, _shared_now, script_id)      # the whole script, every round: a repaired card can now disagree with another
+            from agents.reviewer import verify_finding_list
+            fresh_fit = verify_finding_list(fresh_fit, cards_dicts, "Meaning check", script_id, _newly_dismissed, _dismissed)       # each finding is checked against the cards it names before anything is repaired
+            fresh_cons = verify_finding_list(fresh_cons, cards_dicts, "Consistency", script_id, _newly_dismissed, _dismissed)
+            fit_findings = [f for f in fit_findings if f.get("rule") != "C1" and changed_since is not None and f["card_id"] not in changed_since] + fresh_fit + fresh_cons
+            if cons_problem and not any("agree with each other" in n for n in notes):
+                notes.append(f"The check that the cards agree with each other could not run ({cons_problem}).")
         if fit_problem and not any("meaning check" in n for n in notes):
             notes.append(f"The meaning check of diagrams and quizzes could not run ({fit_problem}); only the word check was done.")
         rule_review = as_review(check_script(cards_dicts, int(script.duration_minutes), agendas, outcomes, script.code_ratio,
@@ -3964,6 +4087,16 @@ def _run_review(script_id: int, _actor, db: Session, mode: str = "find", only_ca
                 notes.append(f"Card {first_spoken.card_index}: the approved welcome was put back after the rewrite.")
         changed_since = set(info["changed"]) | fit_changed
 
+    if _newly_dismissed:
+        from agents.reviewer import card_fingerprint
+        _fps = {c["card_index"]: card_fingerprint(c) for c in _review_cards_dicts(db, script_id)}
+        try:
+            _outline = json.loads(script.outline_json) if script.outline_json else {}
+            if isinstance(_outline, dict):
+                _outline["dismissed_findings"] = (_dismissed + [{**d, "fp": _fps.get(d.get("card"))} for d in _newly_dismissed if d.get("card") in _fps])[-80:]
+                script.outline_json = json.dumps(_outline)
+        except ValueError:
+            pass
     for r in reviews:
         db.add(ReviewAudit(
             script_id=script_id, lens_name=r.get("lens_name"), reviewer_persona=r.get("reviewer_persona"),
@@ -4366,6 +4499,7 @@ def _build_script_detail(script_id: int, db: Session):
         ))
 
     return ScriptDetailResponse(
+        planned_cards=_planned_cards(script),
         id=script.id,
         class_id=cls.id,
         class_title=_effective_title(script),
@@ -4772,6 +4906,9 @@ def chat_assist_card(script_id: int, payload: ChatAssistRequest, _actor: User = 
     card = db.query(ScriptCard).filter(ScriptCard.script_id == script_id, ScriptCard.card_index == payload.card_index).first()
     if not card:
         raise HTTPException(status_code=404, detail="Card not found")
+    if str(card.pedagogical_phase or "").lower().startswith("instructor"):
+        # Chat rewrites what the instructor says aloud. A note card is not spoken: it is fixed text with the SME's own details, and Chat would turn it into a made-up speech.
+        raise HTTPException(status_code=400, detail="This note is fixed text, not something the instructor says aloud, so Chat cannot change it. Use Edit to put in your own details.")
 
     execution_mode = os.getenv("EXECUTION_MODE", "hybrid")
     if not (llm_configured() and execution_mode != "mock"):
@@ -4785,7 +4922,8 @@ def chat_assist_card(script_id: int, payload: ChatAssistRequest, _actor: User = 
     code_run = None
     rules = (f"- Keep the same card structure and pedagogical phase\n"
              f"- Write only what the instructor says aloud: 'I' and 'we' speaking to 'you', never a direction to the instructor\n"
-             f"- No em dashes, keep paragraphs 2-4 sentences\n")
+             f"- No em dashes, keep paragraphs 2-4 sentences\n"
+             f"- Simple English: short sentences (about 15 words, none over 30), everyday words, one idea per sentence, no idioms or slang\n")
     try:
         if has_code or _CODE_WORDS.search(payload.user_prompt or ""):
             run = json.loads(card.code_run_json) if card.code_run_json else None
@@ -4945,6 +5083,11 @@ def fill_sme_item(script_id: int, payload: SmeFillRequest, _actor: User = Depend
 # 9. EXPORTS & ASSIGNMENTS GENERATION (PRD FR-23)
 # ==============================================================================
 
+def _without_code_marker(body: Optional[str]) -> str:
+    """[[CODE]] only says where the page shows the code box; a downloaded file lists the code after the text."""
+    return re.sub(r"\[\[CODE\]\]\s*", "", body or "")
+
+
 @app.get("/api/scripts/{script_id}/export/markdown")
 def export_script_markdown(script_id: int, _actor: User = Depends(script_guard(False)), db: Session = Depends(get_db)):
     """Generates clean, canonical Markdown export of the entire lecture script."""
@@ -4978,7 +5121,7 @@ def export_script_markdown(script_id: int, _actor: User = Depends(script_guard(F
         if c.stage_directions:
             md_lines.append(f"> **Stage Direction:** {c.stage_directions}\n")
         
-        md_lines.append(f"### Spoken Script:\n{c.content_script}\n")
+        md_lines.append(f"### Spoken Script:\n{_without_code_marker(c.content_script)}\n")
 
         if c.visual_asset_json:
             try:
@@ -5092,7 +5235,7 @@ def share_script_to_hackmd(script_id: int, payload_body: dict = Body(default={})
             if c.stage_directions:
                 md_lines.append(f"> **Instructor Note:** {c.stage_directions}\n")
             
-            md_lines.append(f"{c.content_script}\n")
+            md_lines.append(f"{_without_code_marker(c.content_script)}\n")
 
             if c.visual_asset_json:
                 try:
@@ -5229,6 +5372,9 @@ def submit_script_to_mo(
     actor = _require_script_access(db, user_id, script, write=True)       # Program Managers (read-only), Administrators and people outside the program cannot submit
     if not script.cards or len(script.cards) == 0:
         raise HTTPException(status_code=400, detail="Cannot submit an empty script. Please draft cards first.")
+    planned, written = _planned_cards(script), sum(1 for c in script.cards if (c.content_script or "").strip())
+    if planned and written < planned and script.status != "MO Approval":
+        raise HTTPException(status_code=409, detail=f"Only {written} of the {planned} planned cards are written. Write the rest of the cards before you submit the script.")
     left = _references_to_check(script)
     if left and script.status != "MO Approval":
         raise HTTPException(status_code=409, detail=f"{len(left)} reference{'s' if len(left) != 1 else ''} the AI found outside the approved list still need{'s' if len(left) == 1 else ''} your check. "

@@ -2754,8 +2754,31 @@ async function fixOverlap(cardIndex, topic, classTitle) {
 }
 window.fixOverlap = fixOverlap;
 
+// A box with room to write: the browser's one-line prompt() is too small for instructions to the Outliner.
+function askForText({ title, hint, placeholder, okLabel = "Apply" }) {
+  return new Promise(resolve => {
+    const wrap = document.createElement("div");
+    wrap.className = "ask-overlay";
+    wrap.innerHTML = `<div class="ask-box" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}">
+      <h3>${escapeHtml(title)}</h3><p>${escapeHtml(hint)}</p>
+      <textarea rows="7" placeholder="${escapeHtml(placeholder)}"></textarea>
+      <div class="ask-actions"><button type="button" class="btn btn-secondary" data-act="cancel">Cancel</button><button type="button" class="btn btn-primary" data-act="ok">${escapeHtml(okLabel)}</button></div></div>`;
+    document.body.appendChild(wrap);
+    const box = wrap.querySelector("textarea");
+    const done = (v) => { wrap.remove(); resolve(v); };
+    wrap.addEventListener("click", (e) => { const a = e.target.dataset && e.target.dataset.act; if (a === "ok") done(box.value); else if (a === "cancel" || e.target === wrap) done(null); });
+    wrap.addEventListener("keydown", (e) => { if (e.key === "Escape") done(null); });
+    box.focus();
+  });
+}
+
 async function onOutlineRethink() {
-  const feedback = prompt("Enter ReThink Feedback for the Outliner (e.g. 'Make section 2 more hands-on with BookMyShow analogy'):");
+  const feedback = await askForText({
+    title: "What should change in this outline?",
+    hint: "Say what to change and what to keep. Your words are applied to the outline you see now: everything you do not mention stays as it is. Leave it empty to get a different structure.",
+    placeholder: "For example: Keep the same example. Make the recursion part more hands-on with one extra worked example. Do not add any card that is not in the agenda.",
+    okLabel: "Regenerate outline"
+  });
   if (feedback === null) return;
 
   try {
@@ -2816,7 +2839,10 @@ function updateSectionGateState() {
   const gtgBtn = document.getElementById("sectionGtgBtn");
   if (!gate) return;
 
-  const totalCards = (currentOutlineCards && currentOutlineCards.length) ? currentOutlineCards.length : (currentLoadedCards ? currentLoadedCards.length : 14);
+  const submitted = !!currentLoadedScript && ["MO Approval", "GTG"].includes(currentLoadedScript.status);          // a script that went for approval is not asked to grow
+  const totalCards = submitted ? (currentLoadedCards ? currentLoadedCards.length : 0)
+    : (currentOutlineCards && currentOutlineCards.length) ? currentOutlineCards.length
+    : ((currentLoadedScript && currentLoadedScript.planned_cards) || (currentLoadedCards ? currentLoadedCards.length : 14));      // a reopened script has no outline in memory: the server says how many cards are planned
   const draftedCards = currentLoadedCards || [];
   const latestCardIndex = draftedCards.length;
   const isLatestApproved = latestCardIndex > 0 && !!draftedCards[latestCardIndex - 1]?.is_approved;
@@ -3201,6 +3227,7 @@ async function loadScriptStudioView() {
 
     currentLoadedCards = script.cards;
     renderCardsStream(script.cards);
+    updateSectionGateState();                  // a reopened script shows "Card N of M drafted" and the button for the next card, not only after approving one
     renderDynamicDownloadMenu();
     loadAiReview(script);
   } finally {
@@ -3229,7 +3256,18 @@ function linkHtml(label, url, index) {
   return `<a class="card-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(shown)}</a>`;
 }
 
-function formatCardText(text, sources) {
+function formatCardText(text, sources, snippet, place) {
+  // the card's code has its own box: a copy of it inside the text is not shown a second time, and the box is shown where the copy was
+  const codeKey = String(snippet || "").replace(/\s+/g, " ").trim();
+  let codeMarked = /\[\[\s*CODE\s*\]\]/i.test(String(text || ""));
+  if (codeKey) text = String(text || "").replace(/```[^\n]*\n([\s\S]*?)```[ \t]*\n?/g, (m, inner) => {
+    const k = inner.replace(/\s+/g, " ").trim();
+    if (!(k && (k === codeKey || k.includes(codeKey)))) return m;
+    if (codeMarked) return "";
+    codeMarked = true; return "\n\n[[CODE]]\n\n";
+  });
+  // the visual and the code box sit where the writer put their markers (for the card page); anywhere else the markers are only hidden
+  text = String(text || "").replace(/\[\[\s*VISUAL\s*:\s*[^\]]*\]\]/g, place ? "\n\n@@VISUAL@@\n\n" : "").replace(/\[\[\s*CODE\s*\]\]/gi, place ? "\n\n@@CODE@@\n\n" : "");
   const linkIndex = {};
   (Array.isArray(sources) ? sources : []).forEach(x => { if (x && x.url) linkIndex[normUrl(x.url)] = x; });
   const inline = raw => {
@@ -3872,7 +3910,11 @@ function renderCardsStream(cards) {
 
     const quizHtml = c.quiz ? formatQuiz(c.quiz, c.card_index) : '';
 
-    const formattedDialogue = formatCardText(c.content_script || "", c.sources);
+    let formattedDialogue = formatCardText(c.content_script || "", c.sources, c.code_snippet, true);
+    let visualAt = false, codeAt = false;                      // the visual and the code box appear at their markers in the text; with no marker they follow the text
+    if (visualHtml && formattedDialogue.includes("@@VISUAL@@")) { formattedDialogue = formattedDialogue.replace(/<p[^>]*>\s*@@VISUAL@@\s*<\/p>/, () => visualHtml); visualAt = true; }
+    if (codeHtml && formattedDialogue.includes("@@CODE@@")) { formattedDialogue = formattedDialogue.replace(/<p[^>]*>\s*@@CODE@@\s*<\/p>/, () => codeHtml); codeAt = true; }
+    formattedDialogue = formattedDialogue.replace(/<p[^>]*>\s*@@(?:VISUAL|CODE)@@\s*<\/p>/g, "");
 
     let sourcesHtml = '';
     if (Array.isArray(c.sources) && c.sources.length) {
@@ -3928,8 +3970,8 @@ function renderCardsStream(cards) {
           ${formattedDialogue}
         </div>
 
-        ${visualHtml}
-        ${codeHtml}
+        ${visualAt ? "" : visualHtml}
+        ${codeAt ? "" : codeHtml}
         ${quizHtml}
         ${sourcesHtml}
 
@@ -4551,7 +4593,8 @@ window.toggleCardApproval = async function (cardId, cardIndex) {
     }
 
     // If user just approved (GTG) the latest card in the deck and more outline cards remain:
-    const totalCards = (currentOutlineCards && currentOutlineCards.length) ? currentOutlineCards.length : (currentLoadedCards ? currentLoadedCards.length : 14);
+    const totalCards = (currentOutlineCards && currentOutlineCards.length) ? currentOutlineCards.length
+      : ((currentLoadedScript && currentLoadedScript.planned_cards) || (currentLoadedCards ? currentLoadedCards.length : 14));
     const draftedCount = (currentLoadedCards || []).length;
     
     if (nextStatus && cardIndex === draftedCount && cardIndex < totalCards) {
@@ -4893,6 +4936,7 @@ async function onGenerateAssignments() {
       ${interviewHtml}
     `;
 
+    document.getElementById("assignmentsModal").classList.remove("inspect-full");
     document.getElementById("assignmentsModal").classList.remove("hidden");
   } catch (err) {
     alert("Error generating assignments: " + err);
@@ -8174,6 +8218,41 @@ window.deleteUserDirectly = async function (userId, userName) {
   document.getElementById("curriculumConfirmModal").classList.remove("hidden");
 };
 
+// The visual of a card as the Module Owner reads it: the diagram, the animation (in its sandboxed frame) or the picture. No editing buttons.
+function inspectionVisualHtml(c) {
+  if (!c.visual_content) return "";
+  const caption = (fallback) => `<div class="visual-caption" style="margin-top: 6px; font-size: 0.82rem; color: var(--text-muted);">${escapeHtml(c.visual_caption || fallback)}</div>`;
+  if (c.visual_type === "mermaid") {
+    return `<div class="visual-container" style="margin: 14px 0; text-align: center;"><div class="mermaid">${escapeHtml(c.visual_content)}</div>${caption("Diagram")}</div>`;
+  }
+  if (c.visual_type === "animation") {
+    if (!c.visual_srcdoc) {
+      return `<div class="visual-container" style="margin: 14px 0;"><div style="padding: 14px; border: 1px dashed #f59e0b; border-radius: 10px; color: #b45309; background: rgba(245, 158, 11, 0.08); font-size: 0.9rem;">${escapeHtml(c.visual_note || "This animation could not be shown.")}</div></div>`;
+    }
+    return `<div class="visual-container" style="margin: 14px 0;"><iframe class="animation-frame" sandbox="allow-scripts" referrerpolicy="no-referrer" title="${escapeHtml(c.visual_caption || "Animation")}" style="width: 100%; height: 480px; border: 0; border-radius: 10px;" srcdoc="${escapeHtml(c.visual_srcdoc)}"></iframe>${caption("Interactive animation")}</div>`;
+  }
+  if (c.visual_type === "image") {
+    const isSvg = (c.visual_content || "").trim().startsWith("<");
+    const src = isSvg ? "data:image/svg+xml;charset=utf-8," + encodeURIComponent(c.visual_content) : safeUrl(c.visual_content);
+    return `<div class="visual-container" style="margin: 14px 0; text-align: center;"><img src="${escapeHtml(src)}" alt="${escapeHtml(c.visual_caption || "")}" style="max-width:100%; border-radius:8px;">${caption("Picture")}</div>`;
+  }
+  return "";
+}
+
+// The card's code as the Module Owner reads it: numbered lines that cannot be edited, what it printed, and the step-by-step player.
+function inspectionCodeHtml(c) {
+  if (!c.code_snippet) return "";
+  const lines = String(c.code_snippet).split("\n");
+  const nums = lines.map((_, i) => i + 1).join("\n");
+  return `<div class="code-container ce" style="margin: 12px 0;" data-card-index="${Number(c.card_index)}">
+    <div class="code-header"><span>Code (${escapeHtml(c.code_language || "python")}), read only</span>
+      <span><button type="button" style="padding: 2px 10px; font-size: 0.72rem; background: #1e293b; color: #e2e8f0; border: 1px solid #475569; border-radius: 6px; cursor: pointer;" onclick="copyCodeFromBlock(this)">Copy Code</button></span></div>
+    <div class="ce-wrap"><pre class="ce-nums" aria-hidden="true">${nums}</pre><pre class="ce-area" style="margin:0; overflow-x:auto;"><code>${escapeHtml(c.code_snippet)}</code></pre></div>
+    <div class="ce-output">${codeRunHtml(c.code_run, c.card_index, false)}</div>
+    <div class="ce-trace">${renderCodeTrace(c)}</div>
+  </div>`;
+}
+
 // Read-Only Script Inspection Modal
 window.viewScriptReadonly = async function (scriptId) {
   try {
@@ -8209,6 +8288,13 @@ window.viewScriptReadonly = async function (scriptId) {
     `;
 
     (script.cards || []).forEach(c => {
+      // the diagram, the animation and the code sit where the card's text puts them, as on the author's page; with no marker they follow the text
+      const visualHtml = inspectionVisualHtml(c), codeHtml = inspectionCodeHtml(c);
+      let inspectionBody = formatCardText(c.content_script || "", c.sources, c.code_snippet, true);
+      let visualAt = false, codeAt = false;
+      if (visualHtml && inspectionBody.includes("@@VISUAL@@")) { inspectionBody = inspectionBody.replace(/<p[^>]*>\s*@@VISUAL@@\s*<\/p>/, () => visualHtml); visualAt = true; }
+      if (codeHtml && inspectionBody.includes("@@CODE@@")) { inspectionBody = inspectionBody.replace(/<p[^>]*>\s*@@CODE@@\s*<\/p>/, () => codeHtml); codeAt = true; }
+      inspectionBody = inspectionBody.replace(/<p[^>]*>\s*@@(?:VISUAL|CODE)@@\s*<\/p>/g, "");
       contentHtml += `
         <div style="border:1px solid var(--border-subtle); border-radius:8px; padding:16px; background:var(--bg-card);">
           <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
@@ -8216,9 +8302,10 @@ window.viewScriptReadonly = async function (scriptId) {
             <span style="font-size:0.8rem; color:var(--text-secondary);">${c.duration_mins} mins</span>
           </div>
           ${c.stage_directions ? `<div style="font-size:0.8rem; color:var(--purple-accent); font-style:italic; margin-bottom:8px;">${escapeHtml(c.stage_directions)}</div>` : ''}
-          <div style="font-size:0.88rem; color:var(--text-primary); line-height:1.6;">${formatCardText(c.content_script || "", c.sources)}</div>
+          <div style="font-size:0.88rem; color:var(--text-primary); line-height:1.6;">${inspectionBody}</div>
+          ${visualAt ? "" : visualHtml}
+          ${codeAt ? "" : codeHtml}
           ${c.quiz ? formatQuiz(c.quiz) : ""}
-          ${c.code_snippet ? `<pre style="background:var(--bg-main); padding:10px; border-radius:6px; margin-top:10px; font-family:monospace; font-size:0.8rem; overflow-x:auto;"><code>${escapeHtml(c.code_snippet)}</code></pre>` : ''}
         </div>
       `;
     });
@@ -8234,7 +8321,10 @@ window.viewScriptReadonly = async function (scriptId) {
     } catch (e) { /* the script is still shown */ }
     bodyEl.innerHTML = reviewHtml + contentHtml;
 
+    document.getElementById("assignmentsModal").classList.add("inspect-full");       // reading a script takes the whole screen
     document.getElementById("assignmentsModal").classList.remove("hidden");
+    if (window.initCodeTrace) initCodeTrace(document.getElementById("assignmentsContent"));            // the step-by-step code player
+    if (window.mermaid) { try { await mermaid.run({ querySelector: "#assignmentsContent .mermaid" }); } catch (e) { /* a diagram that cannot be drawn shows as text */ } }
 
   } catch (err) {
     alert("Error inspecting script: " + err.message);

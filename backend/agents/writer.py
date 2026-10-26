@@ -43,7 +43,10 @@ its card_type.
 - SCOPE: teach only what this card's agenda_items and outcomes ask for, in the depth the spec gives. Use the SME's
   additional resources and reference material in the context for facts and examples. Add nothing outside the agenda
   and outcomes, and nothing from the upcoming classes.
-- WELCOME CARD: when the card_type is welcome, the card is the spoken welcome and the introduction placeholder, nothing else: no agenda and no teaching.
+- WELCOME CARD: when the card_type is welcome, the card is the spoken welcome, nothing else: no agenda and no teaching. It is the FIRST thing the learners hear, so open by greeting them
+  ("Hi everyone, welcome..."). The instructor note before it is for the instructor and is never spoken: do not refer to it, and never say the learners already know the instructor or
+  have heard an introduction. Follow the card's plan note for how this class connects to what came before. Close by saying the instructor will say a quick word about themselves
+  and then go through the agenda. Do not say how many classes, weeks or hours the module has.
 - AGENDA CARD: when the spec has "agenda_timing", this is the agenda card and it holds ONLY the agenda. One sentence that introduces it, then the class agenda read
   aloud as a short numbered list: every item in agenda_timing, in that order, each with its minutes in brackets after the item, for example "Why SQL now (14 minutes)", never written as "about N minutes". Use exactly those items and minutes, add none
   and drop none, then one sentence that moves on to the first topic. No welcome, no introduction, no learning outcomes and no teaching.
@@ -66,7 +69,28 @@ its card_type.
   lines, no tables, and no em dashes. Short paragraphs of 2 to 4 sentences.
 - LINKS: give a link only when you need one, write it as [what it is](https://full-address) (the page shows the source beside it), use only
   addresses from the approved sources and the opening kit, and add the same address to "sources" with its source name. Never invent an address.
-- Use the running example with identical names. Introduce no new running example.
+- Use no technical word that this class has not taught and the agenda does not cover (for example "hashing", "Master Theorem", "stack frame"); if you need one, explain it in one short sentence.
+  When you say a step is fast, slow or cheap, give the cost in Big-O with it ("building it once costs O(n); each lookup after that is O(1)").
+- Every wrong option in a quiz must be tempting: one a learner could really pick by a plausible mistake. Never write a wrong option that contradicts itself or the question's own setup.
+- The code goes ONLY in code_snippet, which the page shows in its own box with a Run button and a step-by-step player. Do not paste the same code into the spoken text. Put the
+  placeholder [[CODE]] on a line by itself at the point where the code should appear, and refer to it ("the code above", "look at line 3 of the code"). Small output samples and trace
+  tables may stay in the text.
+- Never state a number of classes, weeks, hours or learners unless the context gives that exact number. Never say how learners usually answer ("the most common wrong pick"):
+  nobody measured it. Say "a tempting wrong answer" in the staging cue and in the reasons.
+- A PREDICT question must not give its answer away. Before the reveal, do not list the steps, values or working that lead to the answer (for example "64, 32, 16, 8, 4, 2, 1"): say
+  only what to think about. The working goes in the reveal.
+- A general claim must be true in every case. If it depends on the case, say what it depends on ("a function that halves its input and follows only one half costs O(log n)"), and do not use
+  "always", "never" or "not O(n)" unless that is true for every case.
+- Big-O, Omega and Theta are bounds on how fast the steps grow. Best, worst and average case say WHICH input is measured. Never say "Big-O is the worst case": say that Big-O is usually stated
+  for the worst case.
+- If the card before already ended by leading into this one ("now let's predict the cost"), do not say that again: start with this card's own first words.
+- Quiz cards cite no source. The quiz's reasons are one short sentence each, in simple English, with no jargon you have not taught.
+- Say what the example is in plain words the first time it appears, for example "a simple seat-booking app, like BookMyShow, for a small cinema hall with 6 seats". After that say "our cinema hall"
+  or "our booking app", never "the BookMyShow hall": the company is not a place.
+- A company or product is the setting, never the actor: write "our seat-search code" or "a BookMyShow-style booking app checks the seats", not "BookMyShow is searching". Say once that the example is
+  a simplified model when a real system would work differently (real systems use indexes and caches).
+- Use the running example with identical names. Introduce no new running example. When the running example carries SHARED DATA, every example, code block, trace table
+  and question uses exactly those names, rows and values: never invent other people, rows or numbers, and never change one.
 - Never write generator or production wording in the spoken text: no "option index", "zero-based", "quiz JSON", "Visual V01", "UNVERIFIED" or notes about how the script was made. The instructor reads only what is meant to be said.
 - Keep every term one thing all the way through: if a card calls SQL a language, no other card calls it a tool. Define a term once, in the card that introduces it, and do not repeat the definition in later cards.
 - Never write a year or "current release" next to a version unless a source in this card says so; say "a recent version" instead.
@@ -96,7 +120,7 @@ its card_type.
   official documentation page you believe states it (leave it out if you are unsure). Every source is fetched from the
   internet and checked against your claim, so a wrong URL is simply dropped, but a claim the page does not support is
   marked unverified. State only what the REFERENCE EXCERPTS and the approved sources support.
-- LENGTH: the card runs {duration_sec} seconds, so write about {target_words} spoken words and never more than {max_words}. Code, quiz and callout text
+- LENGTH: the card runs {duration_sec} seconds, so write about {target_words} spoken words, no fewer than {min_words} and never more than {max_words}. A card under {min_words} words leaves the class time empty: add teaching (a worked example, a check question, the reason behind a step), never filler. Code, quiz and callout text
   count. Cover EVERY agenda item and outcome in the spec inside that space: one clear idea, one example, one check each. Spend words on the
   idea, not on repeats, recaps inside the card, extra examples or restating a point. A card that runs over its time is a failure; so is a
   card that skips one of its topics.
@@ -245,6 +269,13 @@ def continuity_text(flow: Optional[Dict[str, Any]]) -> str:
         lines.append(f'NEXT CARD: {nxt.get("type") or "card"}, "{nxt.get("title")}"' + (f' (it covers: {nxt.get("covers")})' if nxt.get("covers") else ""))
     else:
         lines.append("There is no next card: this one closes the class.")
+        nc = flow.get("next_class")
+        if nc and nc.get("items"):
+            lines.append(f'NEXT CLASS: close the class with one or two spoken sentences telling the learners what the next class, "{nc.get("title")}", covers. Its agenda: '
+                         f'{"; ".join(nc["items"])}. Use only these items, in plain words, and do not teach them now.')
+        elif nc:
+            lines.append(f'NEXT CLASS: the next class is "{nc.get("title")}". Its agenda is not written yet, so close the class by naming it and saying the module continues there. '
+                         f'Say nothing about what it covers: do not guess its topics.')
     return "\n".join(lines)
 
 
@@ -260,7 +291,7 @@ def build_card_prompts(
     flow: Optional[Dict[str, Any]] = None,
 ) -> tuple:
     """The (system, task) prompts for writing one card."""
-    from agents.shared_context import BLOCK_B_GOOD_SCRIPT_RULES, word_budget
+    from agents.shared_context import BLOCK_B_GOOD_SCRIPT_RULES, min_words, word_budget
     system_prompt = WRITER_SYSTEM.format(block_a=block_a_context, block_b=BLOCK_B_GOOD_SCRIPT_RULES)
     task_prompt = WRITER_CARD_TASK.format(
         outline_overview=json.dumps(outline_overview, separators=(",", ":")),
@@ -272,10 +303,22 @@ def build_card_prompts(
         continuity=continuity_text(flow),
         duration_sec=int(card_spec.get("duration_sec") or 300),
         target_words=word_budget((card_spec.get("duration_sec") or 300) / 60.0)[0], max_words=word_budget((card_spec.get("duration_sec") or 300) / 60.0)[1],
+        min_words=min_words((card_spec.get("duration_sec") or 300) / 60.0),
         reference_excerpts=(f"REFERENCE EXCERPTS (from the approved documentation, fetched just now; your facts must agree with them):\n{reference_excerpts}"
                             if reference_excerpts else ""),
     )
     return system_prompt, task_prompt
+
+
+def card_max_tokens(card_spec: Dict[str, Any]) -> int:
+    """How many tokens the model may use for one card. A long card with code needs about 3000; the old fixed 2500 cut the long ones off, and the whole
+    card (about 45 seconds of writing) then had to be written again with a bigger limit. Sized from the card's own minutes and what it carries."""
+    from agents.shared_context import word_budget
+    minutes = float(card_spec.get("duration_sec") or 300) / 60.0
+    spoken = word_budget(minutes)[1] * 1.5                     # tokens for the most words the card may hold
+    code = 900 if card_spec.get("has_code") else 0
+    quiz = 700 if str(card_spec.get("card_type") or "").lower() == "quiz" else 0
+    return int(min(6000, max(1500, spoken + code + quiz + 700)))      # 700: the JSON around it, the sources and the notes
 
 
 def write_card(
@@ -295,7 +338,7 @@ def write_card(
         card_spec, section_goal, outline_overview, written_so_far, term_register, running_example, block_a_context, reference_excerpts, flow)
     from agents.image_gen import without_image_option
     return call_llm_json(system=without_image_option(system_prompt), messages=[{"role": "user", "content": without_image_option(task_prompt)}],
-                         max_tokens=2500, temperature=0.2, agent="writer_card")
+                         max_tokens=card_max_tokens(card_spec), temperature=0.2, agent="writer_card")
 
 
 CODE_REPAIR_TASK = """\
