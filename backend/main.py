@@ -2208,7 +2208,7 @@ def create_script_outline(script_id: int, _actor: User = Depends(script_guard(Tr
         outline_data = enforce_card_count(outline_data, int(script.duration_minutes))
         outline_data = ensure_animations(outline_data, min_animations_for(trk_name))
         from agents.outliner import finalize_plan
-        outline_data = finalize_plan(outline_data, script.content_mix_beginner, script.code_ratio)    # the SME's split and code ratio, planned per card
+        outline_data = finalize_plan(outline_data, script.content_mix_beginner, script.code_ratio, agendas=_script_scope(script)[1])    # the SME's split and code ratio, planned per card
 
     # Save outline JSON to database (stores sections, cards, and running example)
     script.outline_json = json.dumps(outline_data)
@@ -2613,7 +2613,7 @@ def _save_flat_edits(script, modified_cards):
         current = None
     if isinstance(current, dict) and current.get("sections"):
         from agents.outliner import finalize_plan
-        script.outline_json = json.dumps(finalize_plan(apply_flat_edits(current, edits), script.content_mix_beginner, script.code_ratio, reorder=not script.cards))
+        script.outline_json = json.dumps(finalize_plan(apply_flat_edits(current, edits), script.content_mix_beginner, script.code_ratio, reorder=not script.cards, agendas=_script_scope(script)[1]))
     else:
         script.outline_json = json.dumps(edits)          # an older flat outline has no structure to keep
 
@@ -2730,7 +2730,7 @@ def handle_outline_action(script_id: int, payload: OutlineApprovalRequest, _acto
             outline_data = ensure_topic_quizzes(outline_data, _script_scope(script)[1], int(script.duration_minutes))
             outline_data = ensure_animations(enforce_card_count(outline_data, int(script.duration_minutes)), min_animations_for(trk_name))
             from agents.outliner import finalize_plan
-            outline_data = finalize_plan(outline_data, script.content_mix_beginner, script.code_ratio)
+            outline_data = finalize_plan(outline_data, script.content_mix_beginner, script.code_ratio, agendas=_script_scope(script)[1])
             if (payload.revision_feedback or "").strip():             # remembered, so the next ReThink keeps honouring what was already asked
                 outline_data["sme_feedback"] = (((_old_outline or {}).get("sme_feedback") if isinstance(_old_outline, dict) else None) or [])[-4:] + [payload.revision_feedback.strip()]
         script.outline_json = json.dumps(outline_data)
@@ -3029,7 +3029,7 @@ def generate_section(
     outline_raw = json.loads(script.outline_json)
     if isinstance(outline_raw, dict) and outline_raw.get("sections") and any("has_code" not in c for _s, c in _outline_card_list(outline_raw)):
         from agents.outliner import finalize_plan          # an outline made before the plan existed gets its levels and code plan now
-        outline_raw = finalize_plan(outline_raw, script.content_mix_beginner, script.code_ratio, reorder=not script.cards)
+        outline_raw = finalize_plan(outline_raw, script.content_mix_beginner, script.code_ratio, reorder=not script.cards, agendas=_script_scope(script)[1])
         script.outline_json = json.dumps(outline_raw)
         db.commit()
     try:

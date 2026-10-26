@@ -59,6 +59,12 @@ STEPS
    Never plan a card about anything an UPCOMING_CLASSES entry lists in its AGENDA; the only mention of an upcoming class is one closing
    line inside the recap. An upcoming class's title is only a label: a topic that is in its title but not in its agenda is not off limits. When one of this class's agenda items
    is close to an item in a later class's agenda, keep to what this class's agenda asks for and teach nothing of the later item itself.
+9. NO NEW TOPICS OR TERMS: use only the technical terms that the agenda, the outcomes or the reference material use. Never add a topic or term they do not name (for example a compiler,
+   machine code or a framework nobody asked for). Anything you say about a language must be true for that language (Python is run by an interpreter, not compiled to machine code).
+10. TITLES AND ITEMS: a quiz title is a real question ("Predict: What does this loop print?"), never an agenda item copied. When an agenda item names a demo, hands-on work or Q&A, plan a card
+   whose title says so, with its own time. Program logistics (PSP, attendance, contests, FAQs, dashboard) together take at most 15% of the class and never carry code.
+11. LEVELS: advanced means a harder example of the same agenda topic, never a different topic. Basic if / else and simple loops are beginner topics.
+12. ANALOGIES: an analogy is a simplification, so say that it is simplified, and do not state exact facts about the real system (UPI, banks, trains) that you are not sure of.
 Keep every text field short: teaching_shape_note at most 15 words. A long answer will not fit, so brevity matters.
 
 OUTPUT (JSON only)
@@ -565,6 +571,14 @@ _ORIENT_WORDS = re.compile(r"\b(welcome|agenda|career|careers|expectation|expect
                            r"introduction to the program|what is dsml)\b", re.I)
 
 
+_LOGISTICS_WORDS = re.compile(r"\b(psp|attendance|contests?|faqs?|dashboard|chat norms|session flow|assignments?\b.*\bnotes|how this program works)\b", re.I)
+
+
+def is_logistics(card: Dict[str, Any]) -> bool:
+    """A card about how the program runs (PSP, attendance, contests, FAQs, dashboard), judged from its title. It never carries code."""
+    return bool(_LOGISTICS_WORDS.search(card.get("title") or "")) or card.get("card_type") == "faq"
+
+
 def _code_fit(card: Dict[str, Any]) -> int:
     """How well a teaching card suits having code: walkthroughs and problems most, a concept card that is about something you can run, then the rest;
     a card about the program, careers or expectations least. Judged from the card's type, title, note and agenda items."""
@@ -588,7 +602,7 @@ def plan_code(outline: Dict[str, Any], code_ratio: Optional[int]) -> Dict[str, A
     if code_ratio is None or not cards:
         return outline
     target = round(max(0, min(100, int(code_ratio))) / 100.0 * len(cards))
-    eligible = [c for c in cards if c.get("card_type") in LEVEL_CARD_TYPES]
+    eligible = [c for c in cards if c.get("card_type") in LEVEL_CARD_TYPES and not is_logistics(c)]
     tiers: Dict[int, List[Dict[str, Any]]] = {}
     for c in eligible:
         tiers.setdefault(_code_fit(c), []).append(c)
@@ -602,7 +616,7 @@ def plan_code(outline: Dict[str, Any], code_ratio: Optional[int]) -> Dict[str, A
     return outline
 
 
-def quiz_before_topic(outline: Dict[str, Any]) -> Dict[str, Any]:
+def quiz_before_topic(outline: Dict[str, Any], agendas: Optional[List[str]] = None) -> Dict[str, Any]:
     """A quiz asks first and the teaching answers it. Each quiz card sits just before the first concept, problem or walkthrough card of its own topic, wherever it was
     (after the teaching, or stacked with other quizzes at the start). The topic is told by the agenda items, not by an outcome that nearly every card serves:
     a broad outcome such as "derive the complexity of loops and recursion" is on most teaching cards, and matching on it would pull every quiz up to the first card.
@@ -613,8 +627,11 @@ def quiz_before_topic(outline: Dict[str, Any]) -> Dict[str, Any]:
     cards = _cards_in_order(outline)
     teaching_types = ("concept", "problem", "walkthrough")
 
+    real = {str(a).strip().lower() for a in (agendas or []) if str(a).strip()}
+
     def items(c):
-        return {str(a).strip().lower() for a in (c.get("agenda_items") or []) if str(a).strip()}
+        got = {str(a).strip().lower() for a in (c.get("agenda_items") or []) if str(a).strip()}
+        return got & real if real else got              # an outcome is not a topic: it can be listed on a card that has nothing to do with where the topic starts
     teaching = [c for c in cards if c.get("card_type") in teaching_types]
     counts: Dict[str, int] = {}
     for c in teaching:
@@ -673,13 +690,13 @@ def ensure_topic_quizzes(outline: Dict[str, Any], agendas: Optional[List[str]], 
     return outline
 
 
-def finalize_plan(outline: Dict[str, Any], beginner_pct: Optional[int], code_ratio: Optional[int], reorder: bool = True) -> Dict[str, Any]:
+def finalize_plan(outline: Dict[str, Any], beginner_pct: Optional[int], code_ratio: Optional[int], reorder: bool = True, agendas: Optional[List[str]] = None) -> Dict[str, Any]:
     """Apply the SME's beginner/advanced split and code ratio to the finished outline. Run it after the card list is final (after any merge or edit).
     `reorder` puts each quiz before the topic it tests; turn it off when cards are already written."""
     if not isinstance(outline, dict) or not outline.get("sections"):
         return outline
     if reorder:
-        quiz_before_topic(outline)
+        quiz_before_topic(outline, agendas)
     plan_levels(outline, beginner_pct)
     plan_code(outline, code_ratio)
     cards = _cards_in_order(outline)

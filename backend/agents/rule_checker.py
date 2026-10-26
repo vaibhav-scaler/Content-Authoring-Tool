@@ -1085,6 +1085,40 @@ def check_outline(outline: Dict[str, Any], target_minutes: int, agendas: Optiona
         if len(missing) > 0.3 * len(required_topics):
             out.append({"level": "major", "problem": "The opening kit topics not planned as cards: " + "; ".join(missing)})
 
+    # a quiz is a question, the demo and Q&A the agenda names get a card, program logistics stay short, quizzes sit next to their topic
+    real_items = [a for a in (agendas or []) if str(a).strip()]
+    quizzes = [c for c in cards if c.get("card_type") == "quiz"]
+    for q in quizzes:
+        asked = re.sub(r"^\s*(predict|quiz)\s*:\s*", "", q.get("title") or "", flags=re.I)
+        if any(words(asked) and len(words(asked) & words(it)) / max(1, len(words(asked))) >= 0.8 for it in real_items):
+            out.append({"level": "major", "problem": f"Quiz card \"{q.get('title')}\" is named after an agenda item, not a question. Make the title the question learners are asked."})
+    for it in real_items:
+        if re.search(r"q\s*&\s*a|questions", it, re.I) and not any(re.search(r"q\s*&\s*a|questions", f"{c.get('title') or ''} {c.get('teaching_shape_note') or ''}", re.I)
+                                                                      for c in cards if c.get("card_type") != "quiz"):
+            out.append({"level": "major", "problem": f"The agenda item \"{it[:70]}\" asks for Q&A, but no card plans it. Add a card, or time inside the demo card, for open questions."})
+    logistics = [c for c in cards if re.search(r"\b(psp|attendance|contests?|faqs?|dashboard|chat norms|session flow)\b", c.get("title") or "", re.I) or c.get("card_type") == "faq"]
+    spent = sum((c.get("duration_sec") or 0) for c in logistics) / 60.0
+    if logistics and target_minutes and spent > 0.15 * target_minutes + 0.05:
+        out.append({"level": "major", "problem": f"Program logistics cards take {round(spent, 1)} of {target_minutes} minutes ({round(100 * spent / target_minutes)}%); keep them under 15% so the class itself has the time."})
+    for c in logistics:
+        if c.get("has_code"):
+            out.append({"level": "major", "problem": f"Card \"{c.get('title')}\" is about how the program runs and is planned with code. Logistics cards carry no code."})
+    qmin = sum((c.get("duration_sec") or 0) for c in quizzes) / 60.0
+    if target_minutes and qmin > 0.22 * target_minutes:
+        out.append({"level": "major", "problem": f"Quiz cards take {round(qmin, 1)} of {target_minutes} minutes ({round(100 * qmin / target_minutes)}%); keep quizzes to about a fifth of the class."})
+    if real_items:
+        lowered = {str(a).strip().lower() for a in real_items}
+        for k, q in enumerate(cards):
+            if q.get("card_type") != "quiz":
+                continue
+            mine = {str(a).strip().lower() for a in (q.get("agenda_items") or [])} & lowered
+            if not mine:
+                continue
+            target = next((j for j in range(k + 1, len(cards)) if cards[j].get("card_type") in ("concept", "problem", "walkthrough")
+                           and mine & {str(a).strip().lower() for a in (cards[j].get("agenda_items") or [])}), None)
+            if target is not None and sum(1 for j in range(k + 1, target) if cards[j].get("card_type") != "quiz") > 2:
+                out.append({"level": "major", "problem": f"Quiz card \"{q.get('title')}\" comes {target - k - 1} cards before the card that teaches its topic. Put it right before that topic."})
+
     visuals = outline.get("visual_cards") or []
     if len(visuals) < LIMITS["min_diagrams"]:
         out.append({"level": "major", "problem": f"{len(visuals)} visual cards planned; at least {LIMITS['min_diagrams']} are required."})
