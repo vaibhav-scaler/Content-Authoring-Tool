@@ -73,6 +73,7 @@ LENS_SPECS = {
         "reviewer_persona": "Curriculum Quality & Standards Auditor",
         "criteria": [
             "S5: Every card serves an agenda item or learning outcome in the scope. Flag content that is OUTSIDE the scope, not content that is merely extra explanation of an agenda item. Welcome, agenda, recap, FAQ and note cards serve the whole class.",
+            "S9: Every agenda item is TAUGHT by a concept, problem or walkthrough card. An item that only the agenda card, a quiz or the recap mentions is not taught. For each agenda item name the teaching card (the script map shows each card's type); report any item with none, and a card that promises to teach something in 'the next card' that the next card does not teach. Report these with card_id null.",
             "S6: Nothing from the upcoming classes is taught (a one-line forward pointer is allowed).",
             "S3: The recap card is one unified visual mental model of the class. The recap is the LAST spoken card only; never apply this to an earlier card, even one that recaps a previous class.",
             "T6: Every term is defined before it is used, including in quizzes and code comments. Applies to a term new to THIS class; a term the learners met in an earlier class or module, or in the scope above, needs no definition. A quiz may ask before the cards that teach it.",
@@ -446,7 +447,7 @@ def run_single_lens_review(
                          + "\n".join(f"- Card {d.get('card')}: {str(d.get('problem'))[:160]}" for d in dismissed[-30:]) + "\n\n")
     groups = _chunks(cards)
     everything = context_cards or cards
-    script_map = "; ".join(f"{c.get('card_index') or c.get('card_id')} {str(c.get('title') or '')[:45]}" for c in everything)
+    script_map = "; ".join(f"{c.get('card_index') or c.get('card_id')} [{str(c.get('pedagogical_phase') or c.get('card_type') or '').lower()[:9]}] {str(c.get('title') or '')[:45]}" for c in everything)
     subset_note = ("THESE ARE ONLY SOME CARDS: those changed since the last read. The cards between them exist and were already read; never report that a card, a number or an idea "
                    "is missing because it is not shown here.\n") if len(everything) > len(cards) else ""
     findings: List[Dict[str, Any]] = []
@@ -489,7 +490,7 @@ CARDS (full text; "printed_output" is what the code really printed when it was r
 
 Return ONLY JSON:
 {{"score": number 0 to 10, "summary": string,
-  "findings": [{{"card_id": number, "rule": string, "severity": "blocker" | "major" | "minor",
+  "findings": [{{"card_id": number or null for the whole script, "rule": string, "severity": "blocker" | "major" | "minor",
                  "quote": string under 20 words, "problem": string, "suggested_fix": string}}]}}"""
         try:
             parsed = call_llm_json(

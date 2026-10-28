@@ -58,6 +58,7 @@ def format_spoken(text: Optional[str]) -> str:
     out = esc(text)
     out = re.sub(r"\[\[VISUAL:\s*([^\]|]+?)\s*(?:\|[^\]]*)?\]\]", "", out)         # the visual is shown in its place; the marker is only for the writer
     out = re.sub(r"\[\[CODE\]\]", "", out)                                              # so is the place of the code box
+    out = re.sub(r"\[\[\s*QUIZ\s*\]\]", "", out)                                          # and the place of the quiz
     out = re.sub(r"\*\*([^*\n]+)\*\*", r"<strong>\1</strong>", out)
     out = re.sub(r"(?<![\w*])\*([^*\n]+)\*(?![\w*])", r"<em>\1</em>", out)
     out = re.sub(r"`([^`\n]+)`", r"<code>\1</code>", out)

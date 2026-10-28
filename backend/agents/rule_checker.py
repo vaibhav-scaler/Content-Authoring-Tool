@@ -126,6 +126,9 @@ def check_numbers_match_output(cards: List[Dict[str, Any]]) -> List[Dict[str, An
             continue
         printed = set(re.findall(r"\d+(?:\.\d+)?", shown.replace(",", "")))
         for m in _PRINT_CLAIM.finditer(spoken_text(c.get("content_script"))):
+            around = spoken_text(c.get("content_script"))[max(0, m.start() - 160):m.end() + 40]
+            if re.search(r"\b(instead of|would|if you|if the|forgetting|mistake|wrong|skips?|only)\b", around, re.I):
+                continue                                      # a sentence about what a mistake would print, not what this code prints
             num = m.group(1).replace(",", "")
             if num not in printed and num not in re.findall(r"\d+(?:\.\d+)?", c.get("code_snippet") or ""):
                 out.append(_finding(c.get("card_index"), "L3", "major", f"The text says the code gives {num}, but the code printed: {shown.strip()[:80]!r}.",
@@ -261,7 +264,7 @@ def check_script(
         # ---- the plan for this card: its level and whether it carries code (from the SME's split and ratio)
         level, planned_code = c.get("level"), c.get("planned_code")
         has_code_now = bool((c.get("code_snippet") or "").strip())
-        if planned_code is True and not has_code_now and kind in ("walkthrough", "problem", "concept"):
+        if planned_code is True and not has_code_now and kind in ("walkthrough", "problem", "concept", "quiz"):
             out.append(_finding(cid, "S7", "major", "The plan says this card carries code, but it has none.",
                                 "Add a short, runnable code example that shows the idea, with the platform and version, and tie the spoken text to it."))
         elif planned_code is False and has_code_now and kind in ("walkthrough", "problem", "concept"):
@@ -341,7 +344,7 @@ def check_script(
                 out.append(_finding(cid, "R2", "minor", "A teaching card needs at least one Key callout.", "Add a Key callout."))
 
         # ---- E1 predict moments (Predict callout, then a line starting 'Reveal:')
-        if re.search(r"Predict", body) and re.search(r"^\W*(?:Reveal\b|The answer (?:is|was)\b)", body, re.M | re.I):      # the answer line may start "Reveal:" or "The answer is"
+        if re.search(r"Predict|\[\[\s*QUIZ\s*\]\]", body) and re.search(r"^\W*(?:Reveal\b|The answer (?:is|was)\b)", body, re.M | re.I):      # the answer line may start "Reveal:" or "The answer is"
             predicts += 1
 
         # ---- E2 quiz must explain every wrong option
@@ -455,9 +458,22 @@ def check_script(
             if not covered(item, texts) and not covered_across(item, texts):
                 out.append(_finding("all", "S5", "blocker", f"The {label} \"{item[:90]}\" is not covered by any card.",
                                     "Write or extend a card so it covers this."))
+    # ---- S5 each teaching card says what it was planned to teach: the agenda items the plan gave it appear in its own text
+    real_agenda = {str(a).strip().lower(): str(a).strip() for a in (agendas or []) if str(a).strip()}
+    for c in cards:
+        if _kind(c) in ("concept", "problem", "walkthrough") and c.get("covers"):
+            own = [f"{c.get('title') or ''} {c.get('content_script') or ''} {c.get('code_snippet') or ''}"]
+            for item in c["covers"]:
+                if str(item).strip().lower() in real_agenda and not covered(real_agenda[str(item).strip().lower()], own, threshold=0.34):
+                    out.append(_finding(c.get("card_index"), "S5", "minor", f'This card is planned to teach "{real_agenda[str(item).strip().lower()][:80]}" but its text never gets to it.',
+                                        "Teach that agenda item in this card, with an example, or move it to a card that does."))
     out.extend(check_script_craft(cards, running_example))
     out.extend(check_cited_lines(cards))
     out.extend(check_company_as_place(cards))
+    out.extend(check_repetition(cards))
+    out.extend(check_answer_given_away(cards))
+    out.extend(check_quiz_teaches_first(cards))
+    out.extend(check_spoken_polish(cards))
     out.extend(check_numbers_match_output(cards))
     out.extend(check_term_order(cards))
     # ---- K6 the last card tells the learners what the next class covers
@@ -494,6 +510,129 @@ def diagram_branches(mermaid: str) -> bool:
     for m in re.finditer(r"(?<![\w-])([A-Za-z_]\w*)(?:\s*[\[(\{>][^\]\)\}\n]*[\]\)\}]?)?\s*(?:-->|---|==>|-\.->)", src):
         out_counts[m.group(1)] = out_counts.get(m.group(1), 0) + 1
     return any(n >= 2 for n in out_counts.values())
+
+
+def check_repetition(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Q5, C3 and Q6: the same quiz question twice, two code cards printing the same output, and a spoken answer that explains what the quiz widget already explains."""
+    out: List[Dict[str, Any]] = []
+    quizzes = [c for c in cards if isinstance(c.get("quiz"), dict) and (c["quiz"].get("question") or "").strip()]
+    for k, a in enumerate(quizzes):
+        for b in quizzes[k + 1:]:
+            wa, wb = words(a["quiz"]["question"]), words(b["quiz"]["question"])
+            if wa and wb and len(wa & wb) / min(len(wa), len(wb)) >= 0.7:
+                out.append(_finding(b.get("card_index"), "Q5", "major", f"This quiz asks almost the same question as card {a.get('card_index')}.",
+                                    "Ask about a different idea, or use a fresh case.", (b["quiz"]["question"] or "")[:100]))
+    seen: Dict[str, Any] = {}
+    for c in cards:
+        run = c.get("code_run")
+        shown = ((run or {}).get("stdout") or "").strip() if isinstance(run, dict) else ""
+        if shown and len(shown) > 12:
+            if shown in seen:
+                out.append(_finding(c.get("card_index"), "C3", "minor", f"This code prints exactly what the code in card {seen[shown]} printed.",
+                                    "Use a fresh case for this idea (a different target, filter or count).", shown[:80]))
+            else:
+                seen[shown] = c.get("card_index")
+    for c in cards:
+        if isinstance(c.get("quiz"), dict) and c["quiz"].get("question"):
+            spoken = spoken_text(c.get("content_script"))
+            m = re.search(r"\bThe answer is\b.*", spoken, re.S)
+            if m and len(m.group(0).split()) > 70:
+                out.append(_finding(c.get("card_index"), "Q6", "minor", f"The spoken answer is {len(m.group(0).split())} words; the quiz widget already explains it.",
+                                    "Keep it to the answer, one reason and a lead into the next card (about 45 words).", m.group(0)[:100]))
+    return out
+
+
+_QUIZ_MARKER = re.compile(r"\[\[\s*QUIZ\s*\]\]", re.I)
+
+
+def normalize_quiz_text(body: Optional[str], quiz: Any) -> str:
+    """A quiz card's text in the one format: a lead-in, "Let's take a quiz.", the marker [[QUIZ]] where the quiz is shown, the pause, the answer. A Predict callout that prints
+    the question and the options is taken out (the quiz on screen carries them); a card with no marker gets one before the pause or the answer. A "Reveal:" label is dropped.
+    Text of a card with no quiz is returned unchanged."""
+    text = body or ""
+    if isinstance(quiz, str):
+        try:
+            import json as _json
+            quiz = _json.loads(quiz)
+        except ValueError:
+            return text
+    if not (isinstance(quiz, dict) and str(quiz.get("question") or "").strip()):
+        return text
+    text = re.sub(r"^(\W*)Reveal:\s*", r"\1", text, flags=re.M | re.I)
+    if _QUIZ_MARKER.search(text):
+        return text
+    lines = text.split("\n")
+    start = next((i for i, l in enumerate(lines) if re.match(r"^\s*>.*Predict", l, re.I)), None)
+    if start is not None:
+        end = start
+        while end + 1 < len(lines) and lines[end + 1].lstrip().startswith(">"):
+            end += 1
+        lines = lines[:start] + ["Let's take a quiz.", "", "[[QUIZ]]"] + lines[end + 1:]
+    else:
+        at = next((i for i, l in enumerate(lines) if "[pause for replies]" in l), None)
+        if at is None:
+            at = next((i for i, l in enumerate(lines) if re.match(r"^\W*The answer (?:is|was)\b", l, re.I)), len(lines))
+        lines = lines[:at] + ["Let's take a quiz.", "", "[[QUIZ]]", ""] + lines[at:]
+    out = "\n".join(lines)
+    out = re.sub(r"\[\[QUIZ\]\]\s*\n\s*\[pause for replies\]", "[[QUIZ]]\n\n[pause for replies]", out)
+    return re.sub(r"\n{3,}", "\n\n", out).strip("\n") + "\n"
+
+
+_SELF_CORRECTION = re.compile(r"\b(but wait|actually,|let me rethink|scratch that|on second thought|hmm,)\b", re.I)
+
+
+def check_spoken_polish(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Q10 and R16: a Predict callout must contain a question, and a teaching card must not correct itself aloud ("But wait", "Actually,")."""
+    out: List[Dict[str, Any]] = []
+    for c in cards:
+        body = c.get("content_script") or ""
+        for m in re.finditer(r"^[ \t]*>[ \t]*\*\*Predict:?\*\*:?(.*(?:\n[ \t]*>.*)*)", body, re.M | re.I):
+            stem = "\n".join(l for l in re.sub(r"^[ \t]*>[ \t]?", "", m.group(1), flags=re.M).split("\n") if not re.match(r"^\s*[A-D][.)]\s", l))
+            if "?" not in stem:
+                out.append(_finding(c.get("card_index"), "Q10", "major", "A Predict callout lists options but asks no question.", "State the question the learners are answering.", m.group(0)[:100]))
+        if _kind(c) in ("concept", "problem", "walkthrough"):
+            m = _SELF_CORRECTION.search(spoken_text(body))
+            if m:
+                out.append(_finding(c.get("card_index"), "R16", "minor", f'The card corrects itself aloud ("{m.group(0)}").', "Decide the explanation first, then write it once, without backing out of it.", m.group(0)))
+    return out
+
+
+def check_quiz_teaches_first(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Q8: a quiz card asks first. Headings or Key, Remember and Mistake callouts before its question mean it is teaching, and that belongs in a concept card."""
+    out: List[Dict[str, Any]] = []
+    for c in cards:
+        if not (isinstance(c.get("quiz"), dict) and c["quiz"].get("question")):
+            continue
+        body = c.get("content_script") or ""
+        before = re.split(r"\[pause for replies\]|>\s*\*\*Predict|\bPredict\s*:|\[\[\s*QUIZ\s*\]\]", body, maxsplit=1)[0]
+        m = re.search(r"^#{2,4}\s+.+$|^>\s*\*\*(Key|Remember|Mistake|Real-world)\b", before, re.M | re.I)
+        if m:
+            out.append(_finding(c.get("card_index"), "Q8", "major", "This quiz card teaches before it asks.",
+                                "Move the explanation into a concept card before it, and keep this card to the question.", m.group(0)[:100]))
+    return out
+
+
+def check_answer_given_away(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Q7: a quiz must not be explained before it is asked. When the right option is a short number and that number is not in the question itself, it must not appear in
+    the spoken text before the question."""
+    out: List[Dict[str, Any]] = []
+    for c in cards:
+        quiz = c.get("quiz")
+        if not isinstance(quiz, dict) or not isinstance(quiz.get("options"), list):
+            continue
+        try:
+            right = str(quiz["options"][int(quiz.get("correct_option_index"))]).strip()
+        except (TypeError, ValueError, IndexError):
+            continue
+        right = re.sub(r"^[A-D][.)]\s*", "", right)
+        if not (0 < len(right) <= 14 and re.search(r"\d", right)):
+            continue
+        before = re.split(r"\[pause for replies\]|\bPredict\s*:|The answer is", spoken_text(c.get("content_script")), maxsplit=1)[0]
+        token = re.escape(right)
+        if re.search(rf"(?<![\w.]){token}(?![\w.])", before) and not re.search(rf"(?<![\w.]){token}(?![\w.])", str(quiz.get("question") or "")):
+            out.append(_finding(c.get("card_index"), "Q7", "major", f'The right answer "{right}" is already stated before the question is asked.',
+                                "Move the explanation after the question, or take the number out of the text before it.", right))
+    return out
 
 
 _COMPANY_AS_PLACE = re.compile(r"\b(BookMyShow|Swiggy|Zomato|Uber|Ola|Paytm|PhonePe|IRCTC|Flipkart|Amazon)(?:'s)?\s+(hall|venue|theatre|theater|cinema|restaurant|kitchen|warehouse|station)\b", re.I)
@@ -723,8 +862,11 @@ def check_visuals_and_quizzes(cards: List[Dict[str, Any]]) -> List[Dict[str, Any
             idx = q.get("correct_option_index")
             if opts and (not isinstance(idx, int) or isinstance(idx, bool) or not 0 <= idx < len(opts)):
                 out.append(_finding(cid, "Q2", "blocker", "The quiz has no valid correct answer.", "Mark exactly one of the options as correct."))
-            if len({re.sub(r"\W+", " ", o).strip().lower() for o in opts}) < len(opts):
+            if len({re.sub(r"\s+", " ", o).strip().lower() for o in opts}) < len(opts):          # symbols count: "O(N + Q)" and "O(N · Q)" are different answers
                 out.append(_finding(cid, "Q2", "major", "Two quiz options say the same thing.", "Make every option different."))
+            if (q.get("question") or "").strip() and not _QUIZ_MARKER.search(body):
+                out.append(_finding(cid, "Q9", "major", "The card does not say where its quiz is shown: it has no [[QUIZ]] marker.",
+                                    "Write a lead-in, \"Let's take a quiz.\", the marker, the pause and the answer; do not print the question and options in the text.", auto_fix=True))
             qw = _topic_words(q.get("question") or "")
             if qw:
                 hits = [_ratio(_topic_words(o), card_words) for o in opts if _topic_words(o)]
@@ -736,7 +878,7 @@ def check_visuals_and_quizzes(cards: List[Dict[str, Any]]) -> List[Dict[str, Any
                     best = [max((_ratio(_topic_words(o), w) for w in windows), default=0.0) for o in opts if _topic_words(o)]
                     if best and sum(best) / len(best) < 0.75:
                         mix = 0.0
-                if mix < 0.6:
+                if mix < 0.6 and not re.search(r"\[\[\s*QUIZ\s*\]\]", body):          # a card that points at the quiz on screen does not print its question
                     out.append(_finding(cid, "Q1", "major", "The quiz on screen is not the question the instructor reads out in the card.",
                                         "Make the spoken question and options and the on-screen quiz the same.", quote=(q.get("question") or "")[:100]))
                 if _ratio(qw, script_words) < 0.5:
@@ -1095,6 +1237,11 @@ def check_outline(outline: Dict[str, Any], target_minutes: int, agendas: Optiona
                     out.append({"level": "major", "problem": f"Card \"{c.get('title')}\" serves only a learning outcome and none of the agenda items, so it teaches something nobody asked for. "
                                                         f"Attach it to an agenda item or take it out."})
 
+    # every agenda item is taught by a concept, problem or walkthrough card: a quiz, the agenda card or the recap that names it is not teaching
+    for item in [a for a in (agendas or []) if str(a).strip()]:
+        if not any(c.get("card_type") in ("concept", "problem", "walkthrough") and covered(item, [" ".join(c.get("agenda_items") or [])], threshold=0.6) for c in cards):
+            out.append({"level": "major", "problem": f'The agenda item "{item[:80]}" has no teaching card of its own: only a quiz or the recap names it. Plan a concept, problem or walkthrough card for it.'})
+
     # the opening kit lists what an opening class must cover; most of it has to be planned as cards
     if required_topics:
         text = [" ".join([c.get("title") or "", c.get("teaching_shape_note") or ""] + list(c.get("agenda_items") or [])) for c in cards]
@@ -1169,6 +1316,12 @@ def check_outline(outline: Dict[str, Any], target_minutes: int, agendas: Optiona
         want = round(code_ratio / 100.0 * len(cards))
         if coded < min(want, eligible) - 1 or (cards and abs(100.0 * coded / len(cards) - code_ratio) > 12 and eligible >= want):
             out.append({"level": "major", "problem": f"{coded} of {len(cards)} cards are planned with code ({round(100.0 * coded / len(cards))}%); the SME asked for about {code_ratio}%."})
+    if code_ratio and cards:
+        can_carry = [c for c in cards if c.get("card_type") in ("concept", "problem", "walkthrough", "quiz") and not re.search(r"\b(psp|attendance|contests?|faqs?|dashboard)\b", c.get("title") or "", re.I)]
+        want_cards = round(code_ratio / 100.0 * len(cards))
+        if want_cards > len(can_carry):
+            out.append({"level": "minor", "problem": f"The code share you asked for (about {code_ratio}%) needs {want_cards} cards with code, but only {len(can_carry)} of {len(cards)} cards can carry code "
+                                                     f"(at most {round(100.0 * len(can_carry) / len(cards))}%). Quizzes, the welcome, the agenda and the recap carry none. Plan more walkthrough or problem cards, or lower the share."})
     animations = sum(1 for v in visuals if v.get("kind") == "animation")
     if min_animations and animations < min_animations:
         out.append({"level": "major", "problem": f"{animations} animation(s) planned; a beginner track needs at least {min_animations}."})

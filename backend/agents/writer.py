@@ -48,8 +48,7 @@ its card_type.
   have heard an introduction. Follow the card's plan note for how this class connects to what came before. Close by saying the instructor will say a quick word about themselves
   and then go through the agenda. Do not say how many classes, weeks or hours the module has.
 - AGENDA CARD: when the spec has "agenda_timing", this is the agenda card and it holds ONLY the agenda. One sentence that introduces it, then the class agenda read
-  aloud as a short numbered list: every item in agenda_timing, in that order, each with its minutes in brackets after the item, for example "Why SQL now (14 minutes)", never written as "about N minutes". Use exactly those items and minutes, add none
-  and drop none, then one sentence that moves on to the first topic. No welcome, no introduction, no learning outcomes and no teaching.
+  aloud as a short numbered list: every item in agenda_timing, in that order, each with its minutes in brackets after the item, for example "Why SQL now (14 minutes)", never written as "about N minutes". Use exactly those items and minutes, none added or dropped, then one sentence that moves on to the first topic. No welcome, no introduction, no learning outcomes and no teaching.
 - LEVEL: the spec's "level" says how deep this card goes. beginner: plain words, define every term, one small step at a time, a simple everyday example before any
   definition, no internals. bridge: this is where the class steps up: say so in one sentence, recap the simple version, then add the first deeper idea. advanced:
   the learners have the basics, so go deeper: edge cases, how it works inside, trade-offs, failure modes, numbers. Put the deeper material under a "### Going deeper"
@@ -85,6 +84,10 @@ its card_type.
   for the worst case.
 - If the card before already ended by leading into this one ("now let's predict the cost"), do not say that again: start with this card's own first words.
 - Quiz cards cite no source. The quiz's reasons are one short sentence each, in simple English, with no jargon you have not taught.
+- A quiz card only asks: no headings or Key, Remember or Mistake callouts and no explanation before the question (a topic that needs explaining first is a concept card, then the quiz). The spoken
+  answer comes after the pause: "The answer is X", one reason and a lead into the next card, about 45 words; the widget holds the full explanation.
+- Do not repeat an example: give each idea a fresh case. Never run the same search with the same output in two cards or ask the same quiz question twice.
+- A quiz card with has_code true shows a short code_snippet (4 to 10 lines) at [[CODE]] before [[QUIZ]] and asks what it prints or costs; the right option equals the real output.
 - Say what the example is in plain words the first time it appears, for example "a simple seat-booking app, like BookMyShow, for a small cinema hall with 6 seats". After that say "our cinema hall"
   or "our booking app", never "the BookMyShow hall": the company is not a place.
 - A company or product is the setting, never the actor: write "our seat-search code" or "a BookMyShow-style booking app checks the seats", not "BookMyShow is searching". Say once that the example is
@@ -92,15 +95,15 @@ its card_type.
 - Use the running example with identical names. Introduce no new running example. When the running example carries SHARED DATA, every example, code block, trace table
   and question uses exactly those names, rows and values: never invent other people, rows or numbers, and never change one.
 - Never write generator or production wording in the spoken text: no "option index", "zero-based", "quiz JSON", "Visual V01", "UNVERIFIED" or notes about how the script was made. The instructor reads only what is meant to be said.
-- Keep every term one thing all the way through: if a card calls SQL a language, no other card calls it a tool. Define a term once, in the card that introduces it, and do not repeat the definition in later cards.
-- Never write a year or "current release" next to a version unless a source in this card says so; say "a recent version" instead.
-- A spoken question and the quiz on screen under it must be the same question.
-- A Predict callout puts the question on its own line and each option (A, B, C) on its own line below it, never run together in one line.
+- Keep every term one thing all the way through (not a language in one card and a tool in another). Define a term once, in the card that introduces it, never again later.
+- Never write a year or "current release" beside a version unless a source here says so; say "a recent version".
+- QUIZ CARD FORMAT: a lead-in of 2 to 4 sentences that does not give the answer; "Let's take a quiz."; the marker [[QUIZ]] alone on a line (the quiz is shown there with its question and options);
+  "Type your answer in the chat." and [pause for replies]; then "The answer is X.", one reason and a lead into the next card. Never print the question or options and never write a Predict callout.
 - Every time given for an agenda item must add up to the class length, and a card never says "Hour 2" or similar unless the clock is there.
 - Use only terms listed as defined, terms from past classes, or terms you define in this card before using them.
 - QUIZ FIRST: a quiz card comes BEFORE its topic is explained. Ask it so a learner can reason to an answer from everyday sense or from what earlier cards taught,
-  use no term the class has not defined yet, and write the explanation as the answer the next card will teach. The card AFTER a quiz opens by giving the answer
-  (name the right option and why) and then explains the topic.
+  use no term the class has not defined yet, and write the explanation as the answer the next card will teach. The quiz card tells the answer after the pause for replies, in a few words;
+  the card AFTER it explains the topic.
 - quiz card: return quiz_json that is easy to read aloud and on screen. question: one or two short sentences (any code goes in a fenced block);
   options: exactly 4, each one short line of at most 12 words, written WITHOUT a letter in front (the page adds A to D); correct_option_index;
   explanation: one or two sentences on why the right option is right; distractor_explanations: one short sentence (at most 20 words) for EACH

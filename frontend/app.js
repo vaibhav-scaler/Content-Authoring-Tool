@@ -3267,7 +3267,7 @@ function formatCardText(text, sources, snippet, place) {
     codeMarked = true; return "\n\n[[CODE]]\n\n";
   });
   // the visual and the code box sit where the writer put their markers (for the card page); anywhere else the markers are only hidden
-  text = String(text || "").replace(/\[\[\s*VISUAL\s*:\s*[^\]]*\]\]/g, place ? "\n\n@@VISUAL@@\n\n" : "").replace(/\[\[\s*CODE\s*\]\]/gi, place ? "\n\n@@CODE@@\n\n" : "");
+  text = String(text || "").replace(/\[\[\s*VISUAL\s*:\s*[^\]]*\]\]/g, place ? "\n\n@@VISUAL@@\n\n" : "").replace(/\[\[\s*CODE\s*\]\]/gi, place ? "\n\n@@CODE@@\n\n" : "").replace(/\[\[\s*QUIZ\s*\]\]/gi, place ? "\n\n@@QUIZ@@\n\n" : "");
   const linkIndex = {};
   (Array.isArray(sources) ? sources : []).forEach(x => { if (x && x.url) linkIndex[normUrl(x.url)] = x; });
   const inline = raw => {
@@ -3914,7 +3914,9 @@ function renderCardsStream(cards) {
     let visualAt = false, codeAt = false;                      // the visual and the code box appear at their markers in the text; with no marker they follow the text
     if (visualHtml && formattedDialogue.includes("@@VISUAL@@")) { formattedDialogue = formattedDialogue.replace(/<p[^>]*>\s*@@VISUAL@@\s*<\/p>/, () => visualHtml); visualAt = true; }
     if (codeHtml && formattedDialogue.includes("@@CODE@@")) { formattedDialogue = formattedDialogue.replace(/<p[^>]*>\s*@@CODE@@\s*<\/p>/, () => codeHtml); codeAt = true; }
-    formattedDialogue = formattedDialogue.replace(/<p[^>]*>\s*@@(?:VISUAL|CODE)@@\s*<\/p>/g, "");
+    let quizAt = false;                                           // a card can say where its quiz is shown: the question appears there and the answer is told under it
+    if (quizHtml && formattedDialogue.includes("@@QUIZ@@")) { formattedDialogue = formattedDialogue.replace(/<p[^>]*>\s*@@QUIZ@@\s*<\/p>/, () => quizHtml); quizAt = true; }
+    formattedDialogue = formattedDialogue.replace(/<p[^>]*>\s*@@(?:VISUAL|CODE|QUIZ)@@\s*<\/p>/g, "");
 
     let sourcesHtml = '';
     if (Array.isArray(c.sources) && c.sources.length) {
@@ -3972,7 +3974,7 @@ function renderCardsStream(cards) {
 
         ${visualAt ? "" : visualHtml}
         ${codeAt ? "" : codeHtml}
-        ${quizHtml}
+        ${quizAt ? "" : quizHtml}
         ${sourcesHtml}
 
         <div class="script-card-actions" id="card-actions-${c.id}">
@@ -8294,7 +8296,10 @@ window.viewScriptReadonly = async function (scriptId) {
       let visualAt = false, codeAt = false;
       if (visualHtml && inspectionBody.includes("@@VISUAL@@")) { inspectionBody = inspectionBody.replace(/<p[^>]*>\s*@@VISUAL@@\s*<\/p>/, () => visualHtml); visualAt = true; }
       if (codeHtml && inspectionBody.includes("@@CODE@@")) { inspectionBody = inspectionBody.replace(/<p[^>]*>\s*@@CODE@@\s*<\/p>/, () => codeHtml); codeAt = true; }
-      inspectionBody = inspectionBody.replace(/<p[^>]*>\s*@@(?:VISUAL|CODE)@@\s*<\/p>/g, "");
+      const inspectionQuiz = c.quiz ? formatQuiz(c.quiz) : "";
+      let quizAt = false;
+      if (inspectionQuiz && inspectionBody.includes("@@QUIZ@@")) { inspectionBody = inspectionBody.replace(/<p[^>]*>\s*@@QUIZ@@\s*<\/p>/, () => inspectionQuiz); quizAt = true; }
+      inspectionBody = inspectionBody.replace(/<p[^>]*>\s*@@(?:VISUAL|CODE|QUIZ)@@\s*<\/p>/g, "");
       contentHtml += `
         <div style="border:1px solid var(--border-subtle); border-radius:8px; padding:16px; background:var(--bg-card);">
           <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
@@ -8305,7 +8310,7 @@ window.viewScriptReadonly = async function (scriptId) {
           <div style="font-size:0.88rem; color:var(--text-primary); line-height:1.6;">${inspectionBody}</div>
           ${visualAt ? "" : visualHtml}
           ${codeAt ? "" : codeHtml}
-          ${c.quiz ? formatQuiz(c.quiz) : ""}
+          ${quizAt ? "" : inspectionQuiz}
         </div>
       `;
     });

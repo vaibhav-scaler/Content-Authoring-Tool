@@ -603,6 +603,7 @@ def plan_code(outline: Dict[str, Any], code_ratio: Optional[int]) -> Dict[str, A
         return outline
     target = round(max(0, min(100, int(code_ratio))) / 100.0 * len(cards))
     eligible = [c for c in cards if c.get("card_type") in LEVEL_CARD_TYPES and not is_logistics(c)]
+    quizzes = [c for c in cards if c.get("card_type") == "quiz"]               # a quiz can show a short piece of code and ask what it prints or costs
     tiers: Dict[int, List[Dict[str, Any]]] = {}
     for c in eligible:
         tiers.setdefault(_code_fit(c), []).append(c)
@@ -611,6 +612,8 @@ def plan_code(outline: Dict[str, Any], code_ratio: Optional[int]) -> Dict[str, A
         if len(chosen) >= target:
             break
         chosen += _spread(tiers[score], min(len(tiers[score]), target - len(chosen)))
+    if len(chosen) < target and quizzes:                                      # the teaching cards cannot carry the share the SME asked for: code-reading quizzes make up the rest
+        chosen += _spread(quizzes, min(len(quizzes), target - len(chosen)))
     for c in chosen:
         c["has_code"] = True
     return outline
@@ -652,6 +655,45 @@ def quiz_before_topic(outline: Dict[str, Any], agendas: Optional[List[str]] = No
     for s_, size in zip(outline["sections"], sizes):
         s_["cards"] = cards[n:n + size]
         n += size
+    return outline
+
+
+def ensure_agenda_taught(outline: Dict[str, Any], agendas: Optional[List[str]], target_minutes: int) -> Dict[str, Any]:
+    """Every agenda item the SME wrote is taught by a concept, problem or walkthrough card of its own. An item that only a quiz, the agenda card or the recap names gets a
+    walkthrough card (6 minutes), placed right after the quiz that asks about it (or before the recap), and the minutes are rebalanced so the class still adds up. No model call.
+    Safe to run twice."""
+    from agents.rule_checker import covered
+    agendas = [str(a).strip() for a in (agendas or []) if str(a).strip()]
+    if not agendas or not isinstance(outline, dict) or not outline.get("sections"):
+        return outline
+    teaching = ("concept", "problem", "walkthrough")
+    items_of = lambda c: " ".join(c.get("agenda_items") or [])
+    added = []
+    for item in agendas:
+        cards = _cards_in_order(outline)
+        if any(c.get("card_type") in teaching and covered(item, [items_of(c)], threshold=0.6) for c in cards):
+            continue
+        quiz = next((c for c in cards if c.get("card_type") == "quiz" and covered(item, [items_of(c)], threshold=0.6)), None)
+        recap = next((c for c in reversed(cards) if c.get("card_type") == "recap"), None)
+        anchor, after = (quiz, True) if quiz is not None else (recap, False)
+        if anchor is None and cards:
+            anchor, after = cards[-1], True
+        ids = {str(c.get("card_id")) for c in cards}
+        n = 1
+        while f"TC{n}" in ids:
+            n += 1
+        short = item if len(item) <= 60 else item[:57].rstrip() + "..."
+        card = {"card_id": f"TC{n}", "card_type": "walkthrough", "title": f"{short} (worked example)", "duration_sec": 360, "agenda_items": [item], "outcomes": [],
+                "teaching_shape_note": "Teach this agenda item with one worked example on the shared data: the idea, the steps, the code and what it prints."}
+        for sec in outline["sections"]:
+            if anchor in sec.get("cards", []):
+                at = sec["cards"].index(anchor) + (1 if after else 0)
+                sec["cards"].insert(at, card)
+                break
+        added.append(short)
+    if added:
+        outline.setdefault("auto_adjustments", []).append("Added a teaching card for: " + "; ".join(added) + " (only a quiz or the recap named it).")
+        outline = _normalize_outline_duration(outline, target_minutes)
     return outline
 
 
@@ -732,6 +774,24 @@ def fit_outline_to_rules(outline: Dict[str, Any], target_minutes: int, agendas: 
             host = next((c for c in logistics if c.get("card_type") == "faq"), logistics[0])
             note = (host.get("teaching_shape_note") or "").rstrip(". ")
             host["teaching_shape_note"] = (note + ". Also cover: " + "; ".join(t.rstrip(".") for t in missing))[:600].lstrip(". ")
+    # 2b. two quizzes in a row before the same topic are one quiz asked twice: the second is folded into the first
+    k = 0
+    while k < len(cards) - 1:
+        first, second = cards[k], cards[k + 1]
+        if first.get("card_type") == "quiz" and second.get("card_type") == "quiz":
+            mine = {str(x).strip().lower() for x in (first.get("agenda_items") or [])}
+            theirs = {str(x).strip().lower() for x in (second.get("agenda_items") or [])}
+            nxt_first = next((c for c in cards[k + 2:] if c.get("card_type") in ("concept", "problem", "walkthrough")), None)
+            nxt_items = {str(x).strip().lower() for x in ((nxt_first or {}).get("agenda_items") or [])}
+            if (mine & theirs) or ((mine & nxt_items) and (theirs & nxt_items)):
+                first["agenda_items"] = list(dict.fromkeys(list(first.get("agenda_items") or []) + list(second.get("agenda_items") or [])))
+                for s_ in sections:
+                    if second in s_.get("cards", []):
+                        s_["cards"].remove(second)
+                cards = _cards_in_order(outline)
+                changed = True
+                continue
+        k += 1
     # 3. a quiz is a question, not an agenda item: it asks about the topic of the card it comes before
     for k, q in enumerate(cards):
         if q.get("card_type") != "quiz":

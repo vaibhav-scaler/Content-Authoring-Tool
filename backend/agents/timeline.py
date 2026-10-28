@@ -61,6 +61,25 @@ def agenda_timing(outline_cards: List[Dict[str, Any]], agendas: Optional[List[st
     return out
 
 
+def with_class_segments(outline_cards: List[Dict[str, Any]], timing: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """The agenda items with the rest of the class around them, so the minutes read aloud add up to the class length: the opening (note, welcome and
+    agenda cards) first, then the items, then the closing (recap, FAQ and any teaching time no item claims) as the remainder."""
+    if not timing:
+        return timing
+    total = sum(float(c.get("duration_sec") or 0) for c in outline_cards) / 60.0
+    opening = sum(float(c.get("duration_sec") or 0) for c in outline_cards if c.get("card_type") in ("instructor_note", "welcome", "agenda")) / 60.0
+    if total <= 0:
+        return timing
+    items = [{**t, "minutes": max(1, round(t["minutes"]))} if t["minutes"] > 0 else dict(t) for t in timing]
+    first = max(1, round(opening))
+    last = int(round(total)) - first - sum(t["minutes"] for t in items)
+    out = [{"item": "Welcome, introductions and agenda", "minutes": first, "cards": []}] if opening > 0 else []
+    out += items
+    if last >= 1:
+        out.append({"item": "Recap and what's next", "minutes": last, "cards": []})
+    return out
+
+
 def _minutes_text(m: float) -> str:
     if m <= 0:
         return "time to be decided"

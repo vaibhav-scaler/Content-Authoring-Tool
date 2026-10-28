@@ -7,6 +7,7 @@ It only reports (findings in the rule checker's shape, rule C1). If the model ca
 """
 
 import json
+import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from agents.llm import LLMUnavailable, call_llm_json, llm_configured
@@ -32,7 +33,7 @@ Do not report style, length or anything inside one card that is merely unclear. 
 CARDS (in order; "says" is what the instructor says, "code" is its code, "diagram" is the words in its diagram)
 {cards}
 
-Return ONLY JSON: {{"findings": [{{"card": int (the card that must change), "also": [int] (the other cards involved), "severity": "blocker" or "major",
+Do not write out your comparison: your whole reply is the JSON object and its first character is an opening brace. Return ONLY JSON: {{"findings": [{{"card": int (the card that must change), "also": [int] (the other cards involved), "severity": "blocker" or "major",
 "problem": string, "fix": string (say which value or name to use, taken from the shared data when there is one), "quote": string}}]}}
 Use "blocker" when a learner following the code or the trace would get a different result from the one stated.
 """
@@ -57,7 +58,7 @@ def judge_consistency(cards: List[Dict[str, Any]], scope_digest: str = "", share
     prompt = TASK.format(scope=scope_digest or "", shared=("SHARED DATA (the cards must all use it):\n" + shared_data) if shared_data else "",
                          cards=json.dumps([_view(c) for c in cards], separators=(",", ":"), ensure_ascii=False))
     try:
-        got = call_llm_json(messages=[{"role": "user", "content": prompt}], max_tokens=2500, temperature=0.0, agent="consistency", script_id=script_id)
+        got = call_llm_json(messages=[{"role": "user", "content": prompt}], max_tokens=4000, temperature=0.0, agent="consistency", script_id=script_id)
     except LLMUnavailable as e:
         return [], str(e)[:120]
     except Exception as e:
@@ -67,6 +68,8 @@ def judge_consistency(cards: List[Dict[str, Any]], scope_digest: str = "", share
     for f in (got.get("findings") if isinstance(got, dict) else None) or []:
         if not isinstance(f, dict) or not str(f.get("problem") or "").strip():
             continue
+        if re.match(r"\s*(no change|nothing to (change|fix)|none\b|n/a)", str(f.get("fix") or ""), re.I):
+            continue                                         # the model found on checking that the cards agree
         try:
             card = int(f.get("card"))
         except (TypeError, ValueError):

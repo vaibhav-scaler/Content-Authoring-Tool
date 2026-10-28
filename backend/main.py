@@ -2203,7 +2203,8 @@ def create_script_outline(script_id: int, _actor: User = Depends(script_guard(Tr
         _first, _prev_mod = _module_start(script, db)
         outline_data = merge_opening_cards(outline_data, int(script.duration_minutes), program_opening=_program_opening(script), first_of_module=_first, previous_module=_prev_mod,
                                            earlier_class=_earlier_title(script, db))
-        from agents.outliner import ensure_topic_quizzes
+        from agents.outliner import ensure_topic_quizzes, ensure_agenda_taught
+        outline_data = ensure_agenda_taught(outline_data, _script_scope(script)[1], int(script.duration_minutes))      # every agenda item the SME wrote is taught by a card of its own
         outline_data = ensure_topic_quizzes(outline_data, _script_scope(script)[1], int(script.duration_minutes))      # a quiz before every agenda topic: ask first, then teach
         outline_data = enforce_card_count(outline_data, int(script.duration_minutes))
         outline_data = ensure_animations(outline_data, min_animations_for(trk_name))
@@ -2362,13 +2363,16 @@ def _continuity_summary(script, db: Session) -> dict:
             "upcoming": [{"number": u["number"], "title": u["title"]} for u in c["upcoming"]]}
 
 
-def _agenda_timing_for(script, outline) -> list:
-    """The class agenda, each item with the minutes of the cards that teach it, for the agenda card."""
-    from agents.timeline import agenda_timing
+def _agenda_timing_for(script, outline, whole_class: bool = False) -> list:
+    """The class agenda, each item with the minutes of the cards that teach it, for the agenda card. whole_class adds the opening and the recap,
+    so the minutes read aloud add up to the class length."""
+    from agents.timeline import agenda_timing, with_class_segments
     if not isinstance(outline, dict) or not outline.get("sections"):
         return []
     _title, agendas, _outcomes = _script_scope(script)
-    return agenda_timing([c for _sid, c in _outline_card_list(outline)], agendas)
+    cards = [c for _sid, c in _outline_card_list(outline)]
+    timing = agenda_timing(cards, agendas)
+    return with_class_segments(cards, timing) if whole_class else timing
 
 
 def _effective_title(script) -> str:
@@ -2726,7 +2730,8 @@ def handle_outline_action(script_id: int, payload: OutlineApprovalRequest, _acto
             _first, _prev_mod = _module_start(script, db)
             outline_data = merge_opening_cards(outline_data, int(script.duration_minutes), program_opening=_program_opening(script), first_of_module=_first, previous_module=_prev_mod,
                                                earlier_class=_earlier_title(script, db))
-            from agents.outliner import ensure_topic_quizzes
+            from agents.outliner import ensure_topic_quizzes, ensure_agenda_taught
+            outline_data = ensure_agenda_taught(outline_data, _script_scope(script)[1], int(script.duration_minutes))
             outline_data = ensure_topic_quizzes(outline_data, _script_scope(script)[1], int(script.duration_minutes))
             outline_data = ensure_animations(enforce_card_count(outline_data, int(script.duration_minutes)), min_animations_for(trk_name))
             from agents.outliner import finalize_plan
@@ -3097,7 +3102,7 @@ def generate_section(
             planned_visuals = [v for v in (outline_raw.get("visual_cards") or []) if v.get("parent_card_id") == spec.get("card_id")]
             spec = {**spec, "visuals": [{k: v.get(k) for k in ("visual_id", "kind", "title", "prompt")} for v in planned_visuals]}
             if spec.get("card_type") == "agenda":
-                spec["agenda_timing"] = _agenda_timing_for(script, outline_raw)        # the agenda card reads these items and minutes aloud
+                spec["agenda_timing"] = _agenda_timing_for(script, outline_raw, whole_class=True)        # the agenda card reads these items and minutes aloud
             earlier = db.query(ScriptCard).filter(ScriptCard.script_id == script_id, ScriptCard.card_index < start_card) \
                 .order_by(ScriptCard.card_index).all()
             from agents.rule_checker import spoken_tail, spoken_text
@@ -3179,7 +3184,7 @@ def generate_section(
                 body = ensure_opening_welcome(body, _opening_welcome(script))         # a track's first welcome card starts with that track's spoken welcome
             if str(c.get("card_type") or "").lower() == "agenda" and isinstance(outline_raw, dict):
                 from agents.timeline import ensure_agenda_block
-                body = ensure_agenda_block(body, _agenda_timing_for(script, outline_raw))      # after the welcome: every agenda item, with its time
+                body = ensure_agenda_block(body, _agenda_timing_for(script, outline_raw, whole_class=True))      # after the welcome: every agenda item, with its time
             c["title"] = normalise_typography(c.get("title") or "")
             # Link visual asset if present
             card_vis = None
@@ -3196,6 +3201,8 @@ def generate_section(
             dur = round(c.get("duration_sec", 300) / 60.0, 1) if c.get("duration_sec") else c.get("duration_mins", 5.0)
             from agents.rule_checker import strip_duplicate_code
             body = strip_duplicate_code(body, c.get("code_snippet"))         # the code has its own box: not twice
+            from agents.rule_checker import normalize_quiz_text
+            body = normalize_quiz_text(body, c.get("quiz_json"))             # a quiz card points at its quiz; the question and options are not printed twice
 
             from agents.source_fetcher import resolve_sources
             sources_val = json.dumps(resolve_sources(c.get("sources"), [script.reference_urls, script.api_docs, script.additional_resources,
@@ -4069,6 +4076,9 @@ def _run_review(script_id: int, _actor, db: Session, mode: str = "find", only_ca
             row.title = new.get("title") or row.title
             row.duration_mins = new.get("duration_mins") or row.duration_mins
             row.content_script = new.get("content_script") or row.content_script
+            if row.quiz_json or new.get("quiz"):                              # a repaired quiz card keeps the one quiz format
+                from agents.rule_checker import normalize_quiz_text
+                row.content_script = normalize_quiz_text(row.content_script, new.get("quiz") or _quiz_of(row))
             row.stage_directions = new.get("stage_directions") or row.stage_directions
             code_before = row.code_snippet
             row.code_snippet = new.get("code_snippet")
@@ -5086,18 +5096,19 @@ def fill_sme_item(script_id: int, payload: SmeFillRequest, _actor: User = Depend
 # 9. EXPORTS & ASSIGNMENTS GENERATION (PRD FR-23)
 # ==============================================================================
 
-def _markdown_with_blocks(spoken: str, visual_md: str, code_md: str) -> str:
-    """A card's text with its diagram and its code placed where the text puts their markers; with no marker they follow the text. Leftover markers are removed."""
+def _markdown_with_blocks(spoken: str, visual_md: str, code_md: str, quiz_md: str = "") -> str:
+    """A card's text with its diagram, its code and its quiz placed where the text puts their markers; with no marker they follow the text. Leftover markers are removed."""
     vis_marker, code_marker = re.compile(r"\[\[\s*VISUAL\s*:\s*[^\]]*\]\]"), re.compile(r"\[\[\s*CODE\s*\]\]", re.I)
+    quiz_marker = re.compile(r"\[\[\s*QUIZ\s*\]\]", re.I)
     spoken, after = spoken or "", []
-    for block, marker in ((visual_md, vis_marker), (code_md, code_marker)):
+    for block, marker in ((visual_md, vis_marker), (code_md, code_marker), (quiz_md, quiz_marker)):
         if not block:
             continue
         if marker.search(spoken):
             spoken = marker.sub(lambda m: "\n" + block + "\n", spoken, count=1)
         else:
             after.append(block)
-    spoken = code_marker.sub("", vis_marker.sub("", spoken))
+    spoken = quiz_marker.sub("", code_marker.sub("", vis_marker.sub("", spoken)))
     return "\n".join([spoken] + after)
 
 
@@ -5168,14 +5179,14 @@ def export_script_markdown(script_id: int, _actor: User = Depends(script_guard(F
                     pass
 
         # the diagram, the animation note and the code sit where the text puts their markers; with no marker they follow the text
-        md_lines.append(f"### Spoken Script:\n{_markdown_with_blocks(c.content_script, visual_md, code_md)}\n")
-
+        quiz_md = ""
         if c.quiz_json:
             try:
                 from agents.quiz_format import quiz_markdown
-                md_lines.append(quiz_markdown(json.loads(c.quiz_json)))
-            except:
+                quiz_md = quiz_markdown(json.loads(c.quiz_json))
+            except Exception:
                 pass
+        md_lines.append(f"### Spoken Script:\n{_markdown_with_blocks(c.content_script, visual_md, code_md, quiz_md)}\n")
 
         md_lines.append("\n---\n")
 
@@ -5267,14 +5278,14 @@ def share_script_to_hackmd(script_id: int, payload_body: dict = Body(default={})
                 except Exception:
                     pass
             code_md = f"```{c.code_language or 'python'}\n{c.code_snippet}\n```\n" if c.code_snippet else ""
-            md_lines.append(_markdown_with_blocks(c.content_script, visual_md, code_md) + "\n")
-
+            quiz_md = ""
             if c.quiz_json:
                 try:
                     from agents.quiz_format import quiz_markdown
-                    md_lines.append(quiz_markdown(json.loads(c.quiz_json)))
-                except:
+                    quiz_md = quiz_markdown(json.loads(c.quiz_json))
+                except Exception:
                     pass
+            md_lines.append(_markdown_with_blocks(c.content_script, visual_md, code_md, quiz_md) + "\n")
 
             md_lines.append("\n---\n")
 
@@ -5446,7 +5457,7 @@ def _render_shared_script_html(detail: ScriptDetailResponse) -> str:
     for c in detail.cards:
         # Dialogue paragraphs (escaped; only bold, italics and inline code are allowed back in)
         # the diagram, the animation and the code box sit where the text puts their markers, as on the script page
-        marked = re.sub(r"\[\[\s*CODE\s*\]\]", "\n\n@@CODE@@\n\n", re.sub(r"\[\[\s*VISUAL\s*:\s*[^\]]*\]\]", "\n\n@@VISUAL@@\n\n", c.content_script or ""), flags=re.I)
+        marked = re.sub(r"\[\[\s*QUIZ\s*\]\]", "\n\n@@QUIZ@@\n\n", re.sub(r"\[\[\s*CODE\s*\]\]", "\n\n@@CODE@@\n\n", re.sub(r"\[\[\s*VISUAL\s*:\s*[^\]]*\]\]", "\n\n@@VISUAL@@\n\n", c.content_script or ""), flags=re.I), flags=re.I)
         paras_html = format_card_text(marked, c.sources)
 
         # Stage directions cue
@@ -5495,11 +5506,13 @@ def _render_shared_script_html(detail: ScriptDetailResponse) -> str:
             paras_html, placed_vis = re.sub(r"<p[^>]*>\s*@@VISUAL@@\s*</p>", lambda m: vis_html, paras_html, count=1), True
         if code_html and "@@CODE@@" in paras_html:
             paras_html, placed_code = re.sub(r"<p[^>]*>\s*@@CODE@@\s*</p>", lambda m: code_html, paras_html, count=1), True
-        paras_html = re.sub(r"<p[^>]*>\s*@@(?:VISUAL|CODE)@@\s*</p>", "", paras_html)      # a marker with nothing to show
-
         # Quiz: the same view as the script page (options A to D, the right one marked, why each wrong one is wrong)
         from agents.quiz_format import quiz_html
         quiz_html_out = quiz_html(c.quiz) if c.quiz and isinstance(c.quiz, dict) else ""
+        placed_quiz = False
+        if quiz_html_out and "@@QUIZ@@" in paras_html:
+            paras_html, placed_quiz = re.sub(r"<p[^>]*>\s*@@QUIZ@@\s*</p>", lambda m: quiz_html_out, paras_html, count=1), True
+        paras_html = re.sub(r"<p[^>]*>\s*@@(?:VISUAL|CODE|QUIZ)@@\s*</p>", "", paras_html)      # a marker with nothing to show
 
         # Sources
         sources_html = ""
@@ -5542,7 +5555,7 @@ def _render_shared_script_html(detail: ScriptDetailResponse) -> str:
             </div>
             {"" if placed_vis else vis_html}
             {"" if placed_code else code_html}
-            {quiz_html_out}
+            {"" if placed_quiz else quiz_html_out}
             {sources_html}
         </article>
         ''')
