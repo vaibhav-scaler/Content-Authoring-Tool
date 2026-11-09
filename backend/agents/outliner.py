@@ -508,7 +508,7 @@ def merge_opening_cards(outline: Dict[str, Any], target_minutes: int, program_op
         for s_ in sections:
             if first in s_.get("cards", []):
                 s_["cards"].remove(first)
-        welcome["duration_sec"] = float(welcome.get("duration_sec") or 0) + float(first.get("duration_sec") or 0)
+        welcome["duration_sec"] = min(float(welcome.get("duration_sec") or 120), 120.0)       # a welcome back that only welcomes and moves on takes about two minutes: the note's minute goes to the teaching cards
         welcome["teaching_shape_note"] = welcome["teaching_shape_note"] + " The instructor does not introduce themself in this class."
     adj = outline.setdefault("auto_adjustments", [])
     note = "The class opens with the instructor note (Instructor Introduction), the spoken Welcome & Introductions card, then a card with only the agenda."
