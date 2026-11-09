@@ -4748,6 +4748,8 @@ async function onSubmitChatAssist() {
 
     document.getElementById("chatAssistModal").classList.add("hidden");
     await loadScriptStudioView();
+    // say what the rewrite could not do, so a request that was only partly done is never missed
+    if (Array.isArray(data.notes) && data.notes.length) alert("Card " + cardIndex + " was changed, but not everything you asked for could be done:\n\n- " + data.notes.join("\n- ") + "\n\nYou can ask again with a more specific instruction, or edit the card by hand.");
     // say how the new code ran, so a change that does not work is never missed
     if (data.code_changed && data.code_run) {
       const run = data.code_run;

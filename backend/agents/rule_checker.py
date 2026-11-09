@@ -504,6 +504,11 @@ def check_script(
     out.extend(check_numbers_match_output(cards))
     out.extend(check_term_order(cards))
     out.extend(check_scope_terms(cards, agendas, outcomes, class_title, known_terms))
+    if not program_opening:
+        for c in cards:
+            if _kind(c) == "welcome" and (c.get("content_script") or "").strip() and not re.search(r"(?i)welcome back", c.get("content_script") or ""):
+                out.append(_finding(c.get("card_index"), "K5", "minor", "The learners are already in the program, but the welcome does not welcome them back.",
+                                    "Open with a welcome back; only the very first class of a track says \"welcome to your first session\"."))
     # ---- K6 the last card tells the learners what the next class covers
     if upcoming:
         spoken = [c for c in cards if _kind(c) != "instructor_note" and (c.get("content_script") or "").strip()]
@@ -525,6 +530,8 @@ _FANCY_WORDS_SIMPLE = {"utilise": "use", "utilize": "use", "leverage": "use", "f
                        "comprehensive": "complete", "plethora": "many", "paradigm": "way of working", "robust": "strong", "seamless": "smooth", "ubiquitous": "everywhere",
                        "myriad": "many", "obtain": "get", "numerous": "many", "sufficient": "enough", "prior to": "before", "in order to": "to"}
 _FANCY_WORDS = re.compile(r"\b(" + "|".join(sorted((re.escape(w) for w in _FANCY_WORDS_SIMPLE), key=len, reverse=True)) + r")\b", re.I)
+_IDIOMS = re.compile(r"\b(?:launchpad|launch pad|tie everything together|jump (?:straight )?(?:in|into|right in)|go all the way|all the way (?:to|from)|big journey|game[- ]?changer|hit the ground running|"
+                    r"under the hood|nuts and bolts|at the end of the day|in a nutshell|piece of cake|perfect (?:starting point|launchpad)|take it to the next level|buckle up)\b", re.I)
 _EVERYDAY = re.compile(r"\b(upi|whatsapp|zomato|swiggy|irctc|train|cricket|ipl|bank|atm|amazon|flipkart|uber|ola|google pay|phonepe|paytm|food delivery|cab|netflix|instagram|youtube|ticket|kirana|metro|shop|store|library|school|restaurant|grocery|market)\b", re.I)
 _DEFINITION_OPEN = re.compile(r"^(?:a|an|the)?\s*[\w' -]{2,40}?\s+(?:is|are|means|refers to)\s+(?:a|an|the|when|used|defined|short for|known as)\b", re.I)
 _ABSOLUTE = re.compile(r"\b(?:guaranteed|always works|never fails|100% (?:safe|secure|accurate)|completely safe|fully automatic(?:ally)?|works everywhere|cannot fail)\b", re.I)
@@ -735,6 +742,10 @@ def check_script_craft(cards: List[Dict[str, Any]], running_example: Optional[st
                 elif len(lengths) >= 4 and sum(lengths) / len(lengths) > 18:
                     out.append(_finding(cid, "R14", "minor", f"The sentences average {sum(lengths) / len(lengths):.0f} words; aim for about 15.",
                                         "Use shorter sentences and everyday words."))
+            idiom = _IDIOMS.search(prose)
+            if idiom:
+                out.append(_finding(cid, "R14", "minor", f"The card uses an idiom (\"{idiom.group(0)}\"); say it in plain words.",
+                                    "Write it in simple English, with no idioms.", quote=prose[max(0, idiom.start() - 40):idiom.end() + 40]))
             fancy = _FANCY_WORDS.search(prose)
             if fancy:
                 out.append(_finding(cid, "R14", "minor", f"The card uses a fancy word (\"{fancy.group(0)}\"); use the everyday word: {_FANCY_WORDS_SIMPLE[fancy.group(0).lower()]}.",

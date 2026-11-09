@@ -114,6 +114,7 @@ _ensure_initial_curriculum_seeded()
 
 from fastapi.responses import JSONResponse
 from agents.llm import LLMUnavailable, bind_usage_script, call_llm_chat, call_llm_json, llm_configured
+_check_llm_json = call_llm_json            # the small "did the rewrite do what was asked" request; a name of its own so the chat tests that replace call_llm_json do not see it
 
 app = FastAPI(
     title="Scaler AI Lecture Script Generator API",
@@ -5105,6 +5106,17 @@ def _chat_context(db: Session, script: Script, card: ScriptCard) -> str:
     if script.revision_note and script.revision_by != "Approval withdrawn":
         lines.append(f"The Module Owner asked for these changes to the script; respect them: {script.revision_note.strip()[:800]}")
     lines.append("Stay consistent with the other cards: keep the same running example, use the same terms, and do not repeat what the previous card already said.")
+    try:
+        planned = [c for _sid, c in _outline_card_list(json.loads(script.outline_json))] if script.outline_json else []
+        plan = planned[card.card_index - 1] if 1 <= card.card_index <= len(planned) else None
+    except ValueError:
+        plan = None
+    if plan and (plan.get("teaching_shape_note") or "").strip():
+        lines.append(f"This card's plan, which the rewrite must keep following: {str(plan['teaching_shape_note']).strip()[:600]}")
+    kind = (card.pedagogical_phase or "").lower()
+    if kind == "welcome":
+        lines.append("A welcome card only welcomes: no agenda, no preview of the topics or outcomes (the agenda card does that), no teaching. " +
+                     ("It is the track's first class: use the approved opening." if _program_opening(script) else "The learners are already in the program: open with a welcome back, never a first-session welcome."))
     lines.append("</script_context>")
     return "\n".join(lines)
 
@@ -5134,7 +5146,7 @@ def chat_assist_card(script_id: int, payload: ChatAssistRequest, _actor: User = 
     rules = (f"- Keep the same card structure and pedagogical phase\n"
              f"- Write only what the instructor says aloud: 'I' and 'we' speaking to 'you', never a direction to the instructor\n"
              f"- No em dashes, keep paragraphs 2-4 sentences\n"
-             f"- Simple English: short sentences (about 15 words, none over 30), everyday words, one idea per sentence, no idioms or slang\n")
+             f"- Simple English: short sentences (about 15 words, none over 25), everyday words, one idea per sentence, no idioms or slang\n")
     try:
         if has_code or _CODE_WORDS.search(payload.user_prompt or ""):
             run = json.loads(card.code_run_json) if card.code_run_json else None
@@ -5178,6 +5190,7 @@ def chat_assist_card(script_id: int, payload: ChatAssistRequest, _actor: User = 
         print(f"AI chat-assist failed ({e}).")
         raise HTTPException(status_code=502, detail="The AI could not revise this card. Your card is unchanged; try again.")
 
+    refined_script, chat_notes = _chat_answer_without_problems(script_id, db, card, refined_script, payload.user_prompt, before=card.content_script or "")
     card.content_script = refined_script
     if code_changed:
         card.code_snippet, card.code_language = new_code, new_lang
@@ -5195,8 +5208,101 @@ def chat_assist_card(script_id: int, payload: ChatAssistRequest, _actor: User = 
         "code_language": card.code_language,
         "code_run": code_run,
         "stage_directions": card.stage_directions,
+        "notes": chat_notes,
         "message": f"Card {card.card_index} revised based on prompt: '{payload.user_prompt}'"
     }
+
+def _chat_problems(script, card, text: str) -> list:
+    """What the free checks still find in a card's rewritten text: long sentences, idioms and fancy words, a welcome that previews the class or does not welcome back."""
+    from agents import rule_checker as rc
+    probe = {"card_index": card.card_index, "card_type": (card.pedagogical_phase or "").lower().replace(" ", "_"), "pedagogical_phase": card.pedagogical_phase,
+             "title": card.title, "duration_mins": card.duration_mins or 5, "content_script": text}
+    found = [f for f in rc.check_script_craft([probe]) if f.get("rule") in ("R14", "K5", "R1")]
+    if (card.pedagogical_phase or "").lower() == "welcome" and not _program_opening(script) and not re.search(r"(?i)welcome back", text or ""):
+        found.append({"problem": "The learners are already in the program, but the welcome does not welcome them back."})
+    return [f["problem"] + (f' ("{f["quote"][:80]}")' if f.get("quote") else "") for f in found][:6]
+
+
+def _instruction_misses(instruction: str, before: str, after: str) -> list:
+    """What the SME's instruction asked for that the rewrite did not do, judged by code for the asks that can be measured: a length, shorter or longer, a word to remove or add,
+    an example, a welcome back. The AI check (_ai_instruction_check) covers the rest."""
+    from agents.rule_checker import _sentences, spoken_text
+    low, a_low = (instruction or "").lower(), (after or "").lower()
+    wb, wa = len(spoken_text(before).split()), len(spoken_text(after).split())
+    miss = []
+    m = re.search(r"\b(\d{2,4})\s*words?\b", low)
+    if m and abs(wa - int(m.group(1))) > 0.2 * int(m.group(1)):
+        n = int(m.group(1))
+        miss.append(f"it must have between {int(n * 0.85)} and {int(n * 1.15)} words (you asked for {n}), but it has {wa}: " + ("add a little more detail" if wa < n else "cut some words"))
+    m = re.search(r"\b(\d{1,2})\s*(?:short\s+)?sentences?\b", low)
+    if m and abs(len(_sentences(spoken_text(after))) - int(m.group(1))) > 1:
+        miss.append(f"it should be {m.group(1)} sentences, but it has {len(_sentences(spoken_text(after)))}")
+    if re.search(r"\b(shorter|shorten|trim|cut (?:it )?down|reduce|condense|more concise|brief)\b", low) and wb and wa >= 0.95 * wb:
+        miss.append(f"it should be shorter, but it has {wa} words against {wb} before")
+    if re.search(r"\b(longer|expand|more detail|elaborate|add more)\b", low) and wb and wa <= 1.05 * wb:
+        miss.append(f"it should be longer, but it has {wa} words against {wb} before")
+    for quoted in re.findall(r"[\"'\u2018\u201c]([^\"'\u2019\u201d]{3,60})[\"'\u2019\u201d]", instruction or ""):
+        before_has, after_has = quoted.lower() in (before or "").lower(), quoted.lower() in a_low
+        if re.search(r"\b(remove|delete|drop|without|cut out|no longer|do not (?:mention|say|use)|don't (?:mention|say|use))\b[^.]*" + re.escape(quoted.lower()), low) and after_has:
+            miss.append(f'"{quoted}" is still in the text')
+        elif re.search(r"\b(add|include|mention|say|use)\b[^.]*" + re.escape(quoted.lower()), low) and not after_has and not before_has:
+            miss.append(f'"{quoted}" is not in the text')
+    if re.search(r"\bwelcome back\b", low) and "welcome back" not in a_low:
+        miss.append('it should say "welcome back"')
+    if re.search(r"\b(add|give|include|use)\s+(?:an?|one|another)\s+(?:simple\s+|everyday\s+|real[- ]life\s+)?example\b", low) and not re.search(r"(?i)\bfor (?:example|instance)\b|\bimagine\b|\bsuppose\b|\bsay you\b|\blet's say\b", after or ""):
+        miss.append("it should give an example")
+    return miss
+
+
+def _ai_instruction_check(script_id: int, instruction: str, before: str, after: str) -> list:
+    """One small request: did the rewrite do what the SME asked? Returns what is missing, or [] when it is done (or when the check itself could not run)."""
+    prompt = (f"An SME asked an editor to change a card of spoken lecture text.\nSME INSTRUCTION: {instruction}\n\nBEFORE:\n{before[:2500]}\n\nAFTER:\n{after[:2500]}\n\n"
+              'Did the AFTER text do everything the instruction asked? Ignore style that was not asked about. Return ONLY JSON: {"done": true or false, "missing": ["what is still not done", ...]}')
+    try:
+        got = _check_llm_json(messages=[{"role": "user", "content": prompt}], max_tokens=300, temperature=0.0, agent="chat_assist_check", script_id=script_id)
+    except Exception as e:                     # the check is extra: when it cannot run (AI down, over budget) the rewrite stands
+        print(f"Instruction check skipped: {str(e)[:100]}")
+        return []
+    if isinstance(got, dict) and got.get("done") is False:
+        return [str(x)[:160] for x in (got.get("missing") or [])][:4] or ["the instruction was not fully done"]
+    return []
+
+
+def _chat_answer_without_problems(script_id: int, db: Session, card, text: str, instruction: str, before: str = "") -> tuple:
+    """Checks the AI's rewrite twice over, then asks again if it fell short: (1) by code, the general rules (idioms, long sentences, a welcome that previews the class or does not welcome
+    back) and the measurable parts of the SME's own instruction; (2) by one small AI request, whether the instruction was done. It may ask up to twice, with the exact list, and the
+    answer with the fewest problems is kept. Returns (text, notes), where notes list anything still not done, so the screen can say so. Best effort: a failure keeps the answer as it was."""
+    notes: list = []
+    try:
+        script = db.query(Script).filter(Script.id == script_id).first()
+        from agents.rule_checker import clean_spoken
+
+        def judge(candidate: str) -> list:
+            return _chat_problems(script, card, candidate) + _instruction_misses(instruction, before, candidate)
+
+        best, best_problems = text, judge(text)
+        if not best_problems:
+            best_problems = [f"not done: {m}" for m in _ai_instruction_check(script_id, instruction, before, best)]
+        for _ in range(2):
+            if not best_problems:
+                break
+            retry = (f"You rewrote a card for the instructor to say aloud. The SME asked: {instruction}\n\nYOUR REWRITE:\n{best}\n\nIt still has these problems:\n- " + "\n- ".join(best_problems) +
+                     "\n\nFix every one of them and still do exactly what the SME asked. Use simple English: short sentences of about 15 words, everyday words, no idioms. Keep the meaning, the numbers and any code. "
+                     "Return ONLY the corrected spoken text, no labels, no JSON, no markdown wrapper.")
+            second = clean_spoken(call_llm_chat(messages=[{"role": "user", "content": retry}], max_tokens=1500, temperature=0.2, agent="chat_assist", script_id=script_id))
+            if not second.strip():
+                break
+            problems = judge(second)
+            if not problems:
+                problems = [f"not done: {m}" for m in _ai_instruction_check(script_id, instruction, before, second)]
+            if len(problems) < len(best_problems):
+                best, best_problems = second, problems
+        notes = [p_[len("not done: "):] for p_ in best_problems if p_.startswith("not done: ")] + _instruction_misses(instruction, before, best)      # the screen lists only what the SME asked for and did not get; a leftover style note is not shown
+        return best, notes
+    except Exception as e:                     # the rewrite is already made: a failed check or retry (AI down, over budget) leaves it as it was
+        print(f"Chat answer check skipped: {str(e)[:100]}")
+        return text, notes
+
 
 def _outline_card_list(outline_raw):
     """[(section_id, card)] in order, from either outline shape (sections, or the older flat list)."""
