@@ -805,6 +805,10 @@ def check_script_craft(cards: List[Dict[str, Any]], running_example: Optional[st
         elif kind == "welcome" and len(re.findall(r"^\s*\d+\.\s.*\(?\b\d+ minutes?\b", body, re.M)) >= 2:
             out.append(_finding(c.get("card_index"), "K5", "minor", "The welcome card lists the agenda; the agenda has its own card.",
                                 "Take the agenda list out of the welcome card."))
+    for c in cards:
+        if _kind(c) == "welcome" and re.search(r"(?i)\bby the end of (?:today|this class|this session)\b|\bwe (?:will |are going to |\'ll )?cover\b|\btoday you will (?:learn|explain|describe|write)\b", c.get("content_script") or ""):
+            out.append(_finding(c.get("card_index"), "K5", "minor", "The welcome card previews what the class covers or what learners will be able to do; the agenda card does that.",
+                                "Keep the welcome to the greeting and how this class follows on; let the agenda card list the topics."))
     # S9 no card number is missing (a later card may lean on the one that is gone)
     nums = sorted(int(c["card_index"]) for c in cards if str(c.get("card_index") or "").isdigit())
     gaps = [n for n in range(nums[0], nums[-1]) if n not in nums] if nums else []

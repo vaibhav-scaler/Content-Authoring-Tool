@@ -482,7 +482,7 @@ def merge_opening_cards(outline: Dict[str, Any], target_minutes: int, program_op
     agenda = next((c for c in rest if c.get("card_type") == "agenda"), None)
     new_module = first_of_module and not program_opening            # the first class of a module that is not the track's first: nothing of this module came before it
     follow_up = bool(earlier_class) and not program_opening           # the learners already took a lower-level version of this class
-    welcome_title = "Welcome & Introductions" if program_opening else "Welcome back" if follow_up else "Welcome to the module" if new_module else "Welcome back"
+    welcome_title = "Welcome & Introductions" if program_opening else "Welcome back" if follow_up else "Welcome back: A New Module Begins" if new_module else "Welcome back"
     if welcome is None:
         welcome = {"card_id": "WELCOME", "card_type": "welcome", "title": welcome_title, "duration_sec": 120, "agenda_items": [], "outcomes": []}
         put_after(first, welcome)
@@ -497,9 +497,9 @@ def merge_opening_cards(outline: Dict[str, Any], target_minutes: int, program_op
     welcome["agenda_items"] = []
     welcome["teaching_shape_note"] = ("The approved spoken welcome, a first question in chat, then the instructor's introduction." if program_opening
                                       else f"A warm welcome back. In one or two spoken sentences say that this class builds on '{earlier_class}', which the learners already took, and goes deeper. Do not teach it again here."
-                                      if follow_up else "A warm welcome to this module and its first class. In one or two spoken sentences say how it follows on from the previous module"
-                                           + (f" ('{previous_module}')" if previous_module else "") + ". Do not refer to a previous class of this module, and do not teach."
-                                      if new_module else "A warm welcome back that opens with something specific to today's topic (a surprising number, a short puzzle or a problem the learners will meet today), then one or two sentences on how it follows the last class. No stock opening, and not the class's running-example story.")
+                                      if follow_up else "A warm welcome back: the learners are already part of the program, so never say it is their first session. Then welcome them to this new module and its first class. In one or two spoken sentences say how it follows on from the previous module"
+                                           + (f" ('{previous_module}')" if previous_module else "") + ". Do not refer to a previous class of this module, do not teach, and do not preview the topics or outcomes: the agenda card does that."
+                                      if new_module else "A warm welcome back that opens with something specific to today's topic (a surprising number, a short puzzle or a problem the learners will meet today), then one or two sentences on how it follows the last class. No stock opening, not the class's running-example story, and no preview of the topics or outcomes: the agenda card does that.")
     agenda["title"] = "Today's Agenda"
     agenda["duration_sec"] = min(float(agenda.get("duration_sec") or 90), 120)
     agenda["teaching_shape_note"] = "Only the agenda: read aloud as a short numbered list, each item with about how many minutes it takes."
