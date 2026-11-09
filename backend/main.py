@@ -2423,6 +2423,34 @@ def _quiz_guard(script, db: Session, card_indexes: list, outline_raw) -> list:
     return notes
 
 
+def _welcome_guard(script, db: Session, card_indexes: list) -> list:
+    """A welcome card of a class that is not the track's first only welcomes: no preview, no teaching, no claims nobody gave, short paragraphs, a lead into the agenda. After it is
+    written the free checks look at it; if it still has such problems the AI rewrites it once, with the list, and the card's time is set to what its words take (about 85 words a minute,
+    at most two minutes), the other cards taking the difference. Returns notes about what was done."""
+    from agents.rule_checker import spoken_text
+    if _program_opening(script):
+        return []                                                     # the first class of a track uses the approved opening text
+    notes = []
+    for idx in card_indexes:
+        card = db.query(ScriptCard).filter(ScriptCard.script_id == script.id, ScriptCard.card_index == idx).first()
+        if card is None or (card.pedagogical_phase or "").lower() != "welcome" or not (card.content_script or "").strip():
+            continue
+        text = card.content_script
+        if _chat_problems(script, card, text):
+            instruction = ("Rewrite this welcome so it only welcomes the learners back and leads into the agenda: no preview of topics or outcomes, no teaching or definitions, no claims about the "
+                           "module that the agenda or curriculum do not give, paragraphs of at most 4 sentences, simple English, and end by moving on to the agenda card.")
+            new, _left = _chat_answer_without_problems(script.id, db, card, text, instruction, before=text)
+            if new.strip() and new != text:
+                card.content_script = new
+                notes.append(f"Card {idx}: the welcome was rewritten because it previewed the class or taught.")
+        words = len(spoken_text(card.content_script).split())
+        minutes = max(1.0, min(2.0, round(words / 85.0, 1)))
+        if abs(minutes - float(card.duration_mins or 0)) > 0.05:
+            _apply_card_minutes(db, script, card, minutes)
+            notes.append(f"Card {idx}: its time is now {minutes} minutes, which is what its words take.")
+    return notes
+
+
 def _plain_english_ask(script_id: int):
     """The small request that rewrites a card's long sentences (see agents/plain_english.py)."""
     return lambda prompt: call_llm_json(messages=[{"role": "user", "content": prompt}], max_tokens=900, temperature=0.2, agent="plain_english", script_id=script_id)
@@ -3475,6 +3503,7 @@ def generate_section(
     if llm_configured() and os.getenv("EXECUTION_MODE", "hybrid") != "mock":
         try:
             quiz_notes = _quiz_guard(script, db, [c_.card_index for c_ in persisted_cards], outline_raw)
+            quiz_notes += _welcome_guard(script, db, [c_.card_index for c_ in persisted_cards])
             db.commit()
         except Exception as e:
             quiz_notes = []

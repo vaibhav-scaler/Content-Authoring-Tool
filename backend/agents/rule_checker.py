@@ -817,9 +817,25 @@ def check_script_craft(cards: List[Dict[str, Any]], running_example: Optional[st
             out.append(_finding(c.get("card_index"), "K5", "minor", "The welcome card lists the agenda; the agenda has its own card.",
                                 "Take the agenda list out of the welcome card."))
     for c in cards:
-        if _kind(c) == "welcome" and re.search(r"(?i)\bby the end of (?:today|this class|this session)\b|\bwe (?:will |are going to |\'ll )?cover\b|\btoday you will (?:learn|explain|describe|write)\b", c.get("content_script") or ""):
+        if _kind(c) == "welcome" and re.search(r"(?i)\bby the end of (?:today|this class|this session|this module|the module)\b|\bwe (?:will |are going to |\'ll )?cover\b|\btoday you will (?:learn|explain|describe|write)\b|"
+                  r"\bthis module (?:has|will|covers)\b[^.]*\b(?:goals?|learn|cover|build)\b|\byou will (?:learn|be able to|build|explain|design|describe)\b", c.get("content_script") or ""):
             out.append(_finding(c.get("card_index"), "K5", "minor", "The welcome card previews what the class covers or what learners will be able to do; the agenda card does that.",
                                 "Keep the welcome to the greeting and how this class follows on; let the agenda card list the topics."))
+    for c in cards:
+        if _kind(c) != "welcome" or not (c.get("content_script") or "").strip():
+            continue
+        body_w = spoken_text(c.get("content_script"))
+        sents = _sentences(body_w)
+        if re.search(r"(?im)(?:^|[.!?]\s+)(?:an?|the)\s+[a-z][\w -]{2,30}\s+is\s+(?:not just|a|an|the)\b", body_w):
+            out.append(_finding(c.get("card_index"), "K5", "minor", "The welcome card defines something; a definition belongs in a teaching card.",
+                                "Keep the welcome to the greeting and how this class follows on, and leave every definition to the cards that teach.", quote=re.search(r"(?im)(?:^|[.!?]\s+)((?:an?|the)\s+[a-z][\w -]{2,30}\s+is\s+(?:not just|a|an|the)\b[^.]*)", body_w).group(1)[:100]))
+        claim = re.search(r"(?i)\bmost (?:students|learners)\b|\breal skills\b|\b(?:used|use) in (?:the )?industry\b|\bengineers use\b|\bfrom scratch\b|\bin the real world\b", body_w)
+        if claim:
+            out.append(_finding(c.get("card_index"), "K5", "minor", f"The welcome card makes a claim nobody gave (\"{claim.group(0)}\").",
+                                "Say only what the agenda, outcomes and curriculum say; cut praise and promises.", quote=claim.group(0)))
+        if sents and not re.search(r"(?i)\bagenda\b", " ".join(sents[-2:])):
+            out.append(_finding(c.get("card_index"), "K5", "minor", "The welcome card does not lead into the agenda card.",
+                                "End with one sentence that moves on to the agenda, for example \"Let's look at the agenda.\""))
     # S9 no card number is missing (a later card may lean on the one that is gone)
     nums = sorted(int(c["card_index"]) for c in cards if str(c.get("card_index") or "").isdigit())
     gaps = [n for n in range(nums[0], nums[-1]) if n not in nums] if nums else []
