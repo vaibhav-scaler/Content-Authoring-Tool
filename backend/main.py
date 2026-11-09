@@ -2992,10 +2992,18 @@ RULES:
     else:
         _apply_local_card_directive(target_card, payload.user_prompt)
 
+    asked_minutes = _minutes_in(payload.user_prompt)
+    if asked_minutes is not None:
+        target_card["duration_sec"] = int(round(asked_minutes * 60))                    # a time the SME names is set exactly, whatever the AI returned
     _rebalance_after_edit(outline_data, target_card, int(script.duration_minutes))      # the minutes still add up to the class length, and the card is inside its range
     script.outline_json = json.dumps(outline_data)
     db.commit()
-    return {"status": "SUCCESS", "message": "Card updated successfully", "updated_card": target_card}
+    info = []
+    if asked_minutes is not None:
+        got = round(int(target_card.get("duration_sec") or 0) / 60.0, 1)
+        info.append(f"This card now takes {got} minutes; the other cards took the difference, so the class is still {script.duration_minutes} minutes." if abs(got - asked_minutes) < 0.05
+                    else f"{asked_minutes} minutes is outside what this kind of card can take, so it was set to {got}; the other cards took the difference.")
+    return {"status": "SUCCESS", "message": "Card updated successfully", "updated_card": target_card, "info": info}
 
 
 def _assist_ranges() -> str:
@@ -4812,10 +4820,10 @@ def update_script_card(script_id: int, card_id: int, payload: CardUpdateRequest,
 
     if payload.title is not None:
         card.title = payload.title
-    if payload.duration_mins is not None:
-        card.duration_mins = payload.duration_mins
     if payload.pedagogical_phase is not None:
         card.pedagogical_phase = payload.pedagogical_phase
+    if payload.duration_mins is not None and abs(float(payload.duration_mins) - float(card.duration_mins or 0)) > 0.05:
+        _apply_card_minutes(db, db.query(Script).filter(Script.id == script_id).first(), card, float(payload.duration_mins))          # the class keeps its length: the other cards take the difference
     if payload.stage_directions is not None:
         card.stage_directions = payload.stage_directions
     if payload.content_script is not None:
@@ -5121,6 +5129,85 @@ def _chat_context(db: Session, script: Script, card: ScriptCard) -> str:
     return "\n".join(lines)
 
 
+_MINUTES_ASK = re.compile(r"(\d+(?:\.\d+)?)\s*(?:min(?:ute)?s?|mins?)\b|(\d+)\s*(?:sec(?:ond)?s?)\b", re.I)
+_REWRITE_WORDS = re.compile(r"\b(rewrite|shorten|shorter|longer|expand|trim|cut|words?|sentences?|simplif\w*|rephrase|reword|add|remove|explain|example)\b", re.I)
+
+
+def _minutes_in(instruction: str) -> Optional[float]:
+    """The time the SME asked a card to take ("make it 2 minutes", "set to 90 seconds"), in minutes, or None when the instruction is not about time."""
+    m = _MINUTES_ASK.search(instruction or "")
+    if not m:
+        return None
+    return round(float(m.group(1)), 1) if m.group(1) else round(int(m.group(2)) / 60.0, 1)
+
+
+def _apply_card_minutes(db: Session, script, card, minutes: float) -> dict:
+    """Give a written card the time the SME chose: held inside the range for its type, the other cards take up the difference (teaching and quiz cards first, then the opening
+    cards) so the class still adds up to its length, and the outline's planned times follow. Returns what happened: the minutes the card got, whether the request had to be limited,
+    and the words that now fit its time."""
+    from agents.shared_context import LIMITS, TEACHING_CARD_TYPES, min_words, word_budget
+    rows = db.query(ScriptCard).filter(ScriptCard.script_id == script.id).order_by(ScriptCard.card_index).all()
+    try:                                                              # with a plan, the plan is rebalanced (it has every card, written or not) and the written cards follow it
+        outline = json.loads(script.outline_json) if script.outline_json else None
+    except ValueError:
+        outline = None
+    planned = [c for _sid, c in _outline_card_list(outline)] if isinstance(outline, dict) else []
+    if planned and len(planned) >= len(rows) and 1 <= card.card_index <= len(planned):
+        pinned = planned[card.card_index - 1]
+        pinned["duration_sec"] = int(round(minutes * 60))
+        _rebalance_total(outline, int(script.duration_minutes), pinned=[pinned])
+        for r in rows:
+            if 1 <= r.card_index <= len(planned):
+                r.duration_mins = round(planned[r.card_index - 1]["duration_sec"] / 60.0, 1)
+        script.outline_json = json.dumps(outline)
+        got = round(pinned["duration_sec"] / 60.0, 1)
+        from agents.rule_checker import spoken_text as _spoken
+        words = len(_spoken(card.content_script or "").split())
+        k_ = str(card.pedagogical_phase or "").lower().replace(" ", "_")
+        lo_, hi_ = (LIMITS["teaching_card_minutes"] if k_ in set(TEACHING_CARD_TYPES) else LIMITS["quiz_card_minutes"] if k_ == "quiz" else LIMITS["note_card_minutes"])
+        return {"minutes": got, "limited": abs(got - minutes) > 0.05, "range": (lo_, hi_), "words": words, "fits": min_words(got) <= words <= word_budget(got)[1],
+                "words_wanted": word_budget(got)[0], "total": round(sum(c["duration_sec"] for c in planned) / 60.0, 1)}
+
+    def kind(r):
+        k = str(r.pedagogical_phase or "").lower().replace(" ", "_")
+        return "faq" if k == "faq" else k
+
+    def span(r):
+        k = kind(r)
+        return (LIMITS["teaching_card_minutes"] if k in set(TEACHING_CARD_TYPES) else LIMITS["quiz_card_minutes"] if k == "quiz" else LIMITS["note_card_minutes"])
+    lo, hi = span(card)
+    got = round(max(lo, min(hi, minutes)), 1)
+    card.duration_mins = got
+    free = [r for r in rows if r.id != card.id]
+    tiers = [[r for r in free if kind(r) in set(TEACHING_CARD_TYPES) | {"quiz"}], [r for r in free if kind(r) in ("welcome", "agenda", "instructor_note")]]
+    total = float(script.duration_minutes)
+    for tier in tiers:
+        for _ in range(3000):
+            gap = round(total - sum(float(r.duration_mins or 0) for r in rows), 1)
+            if abs(gap) < 0.05 or not tier:
+                break
+            up = gap > 0
+            room = [(span(r)[1] - float(r.duration_mins or 0)) if up else (float(r.duration_mins or 0) - span(r)[0]) for r in tier]
+            if max(room) < 0.1 - 1e-9:
+                break
+            best = max(range(len(tier)), key=lambda k: room[k])
+            tier[best].duration_mins = round(float(tier[best].duration_mins or 0) + (0.1 if up else -0.1), 1)
+    try:                                                              # the plan follows the written cards' times
+        outline = json.loads(script.outline_json) if script.outline_json else None
+        planned = [c for _sid, c in _outline_card_list(outline)] if isinstance(outline, dict) else []
+        if len(planned) == len(rows):
+            for pc, r in zip(planned, rows):
+                pc["duration_sec"] = int(round(float(r.duration_mins or 0) * 60))
+            outline["total_duration_sec"] = sum(pc["duration_sec"] for pc in planned)
+            script.outline_json = json.dumps(outline)
+    except ValueError:
+        pass
+    from agents.rule_checker import spoken_text
+    words = len(spoken_text(card.content_script or "").split())
+    return {"minutes": got, "limited": abs(got - minutes) > 0.05, "range": (lo, hi), "words": words, "fits": min_words(got) <= words <= word_budget(got)[1],
+            "words_wanted": word_budget(got)[0], "total": round(sum(float(r.duration_mins or 0) for r in rows), 1)}
+
+
 @app.post("/api/scripts/{script_id}/chat-assist")
 def chat_assist_card(script_id: int, payload: ChatAssistRequest, _actor: User = Depends(script_guard(True)), db: Session = Depends(get_db)):
     """Inline AI Chat Co-Pilot to revise a card (PRD FR-11 & FR-21). On a card with code, or when the instruction is about code, the AI
@@ -5132,6 +5219,28 @@ def chat_assist_card(script_id: int, payload: ChatAssistRequest, _actor: User = 
     if str(card.pedagogical_phase or "").lower().startswith("instructor"):
         # Chat rewrites what the instructor says aloud. A note card is not spoken: it is fixed text with the SME's own details, and Chat would turn it into a made-up speech.
         raise HTTPException(status_code=400, detail="This note is fixed text, not something the instructor says aloud, so Chat cannot change it. Use Edit to put in your own details.")
+
+    asked_minutes = _minutes_in(payload.user_prompt)
+    chat_notes_time: list = []
+    if asked_minutes is not None:
+        script_ = db.query(Script).filter(Script.id == script_id).first()
+        done = _apply_card_minutes(db, script_, card, asked_minutes)
+        _reopen_if_approved(db, script_id, _actor)
+        db.commit()
+        chat_notes_time.append(f"Card {card.card_index} now takes {done['minutes']} minutes; the other cards took the difference, so the class is still {done['total']} minutes.")
+        if done["limited"]:
+            lo_, hi_ = done["range"]
+            chat_notes_time.append(f"{asked_minutes} minutes is outside what this kind of card can take ({lo_} to {hi_}), so it was set to {done['minutes']}.")
+        wants_text = bool(_REWRITE_WORDS.search(re.sub(_MINUTES_ASK, " ", payload.user_prompt or "")))
+        if done["fits"] and not wants_text:
+            db.refresh(card)
+            return {"status": "REVISED", "card_index": card.card_index, "new_content_script": card.content_script, "code_changed": False, "code_snippet": card.code_snippet,
+                    "code_language": card.code_language, "code_run": None, "stage_directions": card.stage_directions, "duration_mins": card.duration_mins,
+                    "notes": [], "info": chat_notes_time, "message": f"Card {card.card_index} set to {done['minutes']} minutes."}
+        # the text no longer fits the time (or the SME also asked for a rewrite): the AI rewrites it to about the words that fit
+        payload = ChatAssistRequest(card_index=payload.card_index,
+                                    user_prompt=f"{payload.user_prompt}. The card now takes {done['minutes']} minutes to say, so rewrite the text to about {done['words_wanted']} words, keeping the meaning.")
+        chat_notes_time.append(f"The text had {done['words']} words, but {done['minutes']} minutes holds about {done['words_wanted']}, so it was rewritten to fit.")
 
     execution_mode = os.getenv("EXECUTION_MODE", "hybrid")
     if not (llm_configured() and execution_mode != "mock"):
@@ -5209,6 +5318,8 @@ def chat_assist_card(script_id: int, payload: ChatAssistRequest, _actor: User = 
         "code_run": code_run,
         "stage_directions": card.stage_directions,
         "notes": chat_notes,
+        "info": chat_notes_time,
+        "duration_mins": card.duration_mins,
         "message": f"Card {card.card_index} revised based on prompt: '{payload.user_prompt}'"
     }
 

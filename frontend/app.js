@@ -2738,10 +2738,11 @@ async function submitSingleCardChat() {
         user_prompt: promptText
       })
     });
+    const chatResult = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || "Could not update card");
+      throw new Error(chatResult.detail || "Could not update card");
     }
+    if (Array.isArray(chatResult.info) && chatResult.info.length) alert(chatResult.info.join("\n\n"));       // say what happened to the card's time
 
     // Fetch the updated outline from backend
     const outlineRes = await fetch(`${API_BASE}/scripts/${currentScriptId}/outline`);
@@ -4748,6 +4749,8 @@ async function onSubmitChatAssist() {
 
     document.getElementById("chatAssistModal").classList.add("hidden");
     await loadScriptStudioView();
+    // say what happened to the card's time, so a time request is never silently ignored
+    if (Array.isArray(data.info) && data.info.length) alert(data.info.join("\n\n"));
     // say what the rewrite could not do, so a request that was only partly done is never missed
     if (Array.isArray(data.notes) && data.notes.length) alert("Card " + cardIndex + " was changed, but not everything you asked for could be done:\n\n- " + data.notes.join("\n- ") + "\n\nYou can ask again with a more specific instruction, or edit the card by hand.");
     // say how the new code ran, so a change that does not work is never missed
