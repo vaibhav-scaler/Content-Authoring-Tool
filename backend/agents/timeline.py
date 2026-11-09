@@ -61,22 +61,49 @@ def agenda_timing(outline_cards: List[Dict[str, Any]], agendas: Optional[List[st
     return out
 
 
+def _short_title(title: str) -> str:
+    """The part of a card title before a colon or a dash: "How This Program Works: PSP, Attendance" gives "How This Program Works"."""
+    return (re.split(r"\s+[\u2014\u2013-]\s+|:\s+|\s*\(", title or "", maxsplit=1)[0].strip() or (title or "").strip())
+
+
 def with_class_segments(outline_cards: List[Dict[str, Any]], timing: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """The agenda items with the rest of the class around them, so the minutes read aloud add up to the class length: the opening (note, welcome and
-    agenda cards) first, then the items, then the closing (recap, FAQ and any teaching time no item claims) as the remainder."""
+    """The agenda items with the rest of the class around them, so the minutes read aloud add up to the class length: the opening (note, welcome and agenda cards) first, then each
+    program FAQ card under its own name, then the items, then the recap, and whatever time no row claims goes to the last row. Whole minutes that add up exactly (largest remainder)."""
     if not timing:
         return timing
-    total = sum(float(c.get("duration_sec") or 0) for c in outline_cards) / 60.0
-    opening = sum(float(c.get("duration_sec") or 0) for c in outline_cards if c.get("card_type") in ("instructor_note", "welcome", "agenda")) / 60.0
+    secs = lambda c: float(c.get("duration_sec") or 0) / 60.0
+    total = sum(secs(c) for c in outline_cards)
     if total <= 0:
         return timing
-    items = [{**t, "minutes": max(1, round(t["minutes"]))} if t["minutes"] > 0 else dict(t) for t in timing]
-    first = max(1, round(opening))
-    last = int(round(total)) - first - sum(t["minutes"] for t in items)
-    out = [{"item": "Welcome, introductions and agenda", "minutes": first, "cards": []}] if opening > 0 else []
-    out += items
-    if last >= 1:
-        out.append({"item": "Recap and what's next", "minutes": last, "cards": []})
+    opening = sum(secs(c) for c in outline_cards if c.get("card_type") in ("instructor_note", "welcome", "agenda"))
+    faqs = [(_short_title(c.get("title")), secs(c)) for c in outline_cards if c.get("card_type") == "faq"]
+    recap = sum(secs(c) for c in outline_cards if c.get("card_type") == "recap")
+    rows: List[List[Any]] = []                                   # [label, minutes, cards]
+    if opening > 0:
+        rows.append(["Welcome, introductions and agenda", opening, []])
+    rows += [[name, mins, []] for name, mins in faqs]
+    rows += [[t["item"], float(t["minutes"]), t.get("cards", [])] for t in timing]
+    rows.append(["Recap and what's next", recap, []])
+    leftover = total - sum(r[1] for r in rows)
+    if abs(leftover) > 0.05:
+        rows[-1][1] += leftover                                  # time no row claims (a card without an agenda item) closes the class
+    goal = int(round(total))
+    floors = [max(1, int(r[1])) if r[1] > 0 else 0 for r in rows]
+    drift = goal - sum(floors)
+    order = sorted(range(len(rows)), key=lambda k: -(rows[k][1] - int(rows[k][1])))
+    k = 0
+    while drift != 0 and order and k < 1000:
+        idx = order[k % len(order)]
+        if drift > 0 and rows[idx][1] > 0:
+            floors[idx] += 1; drift -= 1
+        elif drift < 0 and floors[idx] > 1:
+            floors[idx] -= 1; drift += 1
+        k += 1
+    out = []
+    for r, m in zip(rows, floors):
+        if r[0] == "Recap and what's next" and m <= 0:
+            continue
+        out.append({"item": r[0], "minutes": m, "cards": r[2]})
     return out
 
 
@@ -89,9 +116,10 @@ def _minutes_text(m: float) -> str:
 
 def agenda_block(timing: List[Dict[str, Any]]) -> str:
     """The agenda as the instructor reads it aloud: every item, in order, with its time."""
-    lines = ["Here is what we will do today, and how long each part takes.", ""]
+    untimed = bool(timing) and all(t.get("untimed") for t in timing)
+    lines = ["Here is what we will do today." if untimed else "Here is what we will do today, and how long each part takes.", ""]
     for n, t in enumerate(timing, start=1):
-        lines.append(f"{n}. {t['item']} ({_minutes_text(t['minutes'])})")
+        lines.append(f"{n}. {t['item']}" + ("" if untimed else f" ({_minutes_text(t['minutes'])})"))
     return "\n".join(lines)
 
 
@@ -102,11 +130,15 @@ def agenda_is_complete(body: str, timing: List[Dict[str, Any]]) -> bool:
     text = spoken_text(body)
     named = sum(1 for t in timing if covered(t["item"], [text], threshold=0.6))
     timed = len(re.findall(r"\b\d+\s*(?:minutes?|mins?|min)\b", text, re.I))
+    if all(t.get("untimed") for t in timing):
+        return named == len(timing)
     return named == len(timing) and timed >= max(1, len(timing) // 2)
 
 
 def ensure_agenda_block(body: str, timing: List[Dict[str, Any]]) -> str:
     """The agenda card's text, with the agenda and its times added after what is there when the card does not already give them. The welcome stays first."""
+    if timing and all(t.get("untimed") for t in timing):
+        body = re.sub(r"(?m)^(\s*(?:\d+[.)]|[-*])\s+.*?)\s*\((?:about\s+)?\d+\s*(?:minutes?|mins?)\)\s*$", r"\1", body or "")      # an untimed agenda carries no minutes
     if not timing or agenda_is_complete(body, timing):
         return body
     lines = (body or "").split("\n")
@@ -119,7 +151,7 @@ def ensure_agenda_block(body: str, timing: List[Dict[str, Any]]) -> str:
                 end += 1
             text = " ".join(lines[n:end])
             if sum(1 for t in timing if covered(t["item"], [text], threshold=0.6)) >= max(2, len(timing) // 2):
-                new = [f"{k}. {t['item']} ({_minutes_text(t['minutes'])})" for k, t in enumerate(timing, start=1)]
+                new = [f"{k}. {t['item']}" + ("" if t.get("untimed") else f" ({_minutes_text(t['minutes'])})") for k, t in enumerate(timing, start=1)]
                 return "\n".join(lines[:n] + new + lines[end:])
             n = end
         else:

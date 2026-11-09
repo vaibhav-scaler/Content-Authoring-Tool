@@ -2199,17 +2199,12 @@ def create_script_outline(script_id: int, _actor: User = Depends(script_guard(Tr
             break
     outline_data = best
     if isinstance(outline_data, dict) and outline_data.get("sections"):
-        from agents.outliner import merge_opening_cards
+        from agents.outliner import shape_outline
         _first, _prev_mod = _module_start(script, db)
-        outline_data = merge_opening_cards(outline_data, int(script.duration_minutes), program_opening=_program_opening(script), first_of_module=_first, previous_module=_prev_mod,
-                                           earlier_class=_earlier_title(script, db))
-        from agents.outliner import ensure_topic_quizzes, ensure_agenda_taught
-        outline_data = ensure_agenda_taught(outline_data, _script_scope(script)[1], int(script.duration_minutes))      # every agenda item the SME wrote is taught by a card of its own
-        outline_data = ensure_topic_quizzes(outline_data, _script_scope(script)[1], int(script.duration_minutes))      # a quiz before every agenda topic: ask first, then teach
-        outline_data = enforce_card_count(outline_data, int(script.duration_minutes))
-        outline_data = ensure_animations(outline_data, min_animations_for(trk_name))
-        from agents.outliner import finalize_plan
-        outline_data = finalize_plan(outline_data, script.content_mix_beginner, script.code_ratio, agendas=_script_scope(script)[1], target_minutes=int(script.duration_minutes), kit_topics=_opening_kit_topics(script))    # the SME's split and code ratio, planned per card
+        outline_data = shape_outline(outline_data, _script_scope(script)[1], int(script.duration_minutes), program_opening=_program_opening(script),
+                                     drop_note=not _program_opening(script), first_of_module=_first, previous_module=_prev_mod, earlier_class=_earlier_title(script, db),
+                                     beginner_pct=script.content_mix_beginner, code_ratio=script.code_ratio, kit_topics=_opening_kit_topics(script),
+                                     min_animations=min_animations_for(trk_name))
 
     # Save outline JSON to database (stores sections, cards, and running example)
     script.outline_json = json.dumps(outline_data)
@@ -2363,6 +2358,86 @@ def _continuity_summary(script, db: Session) -> dict:
             "upcoming": [{"number": u["number"], "title": u["title"]} for u in c["upcoming"]]}
 
 
+def _quiz_asked(card) -> str:
+    """The question (and right answer) a quiz card already asks, in one line, for the writer and the quiz maker to avoid repeating."""
+    q = _load_quiz(getattr(card, "quiz_json", None))
+    if not isinstance(q, dict) or not str(q.get("question") or "").strip():
+        return ""
+    opts, i = q.get("options") or [], q.get("correct_option_index")
+    right = opts[i] if isinstance(i, int) and 0 <= i < len(opts) else ""
+    return f"{re.sub(r'```.*?```', ' ', str(q['question']), flags=re.S).strip()[:140]} (answer: {str(right)[:60]})"
+
+
+def _quiz_guard(script, db: Session, card_indexes: list, outline_raw) -> list:
+    """After cards are written: each new quiz must be about what this class teaches, must not repeat another quiz in the script, and must not be sample text. A quiz that
+    fails is made again once by the quiz maker; the new one is kept only if it passes. Returns notes about what was done. Best effort: a failure leaves the quiz as it was."""
+    from agents.quiz_guard import problem_with
+    from agents.rule_checker import spoken_text
+    notes = []
+    title, agendas, outcomes = _script_scope(script)
+    scope = " ".join(list(agendas or []) + [outcomes or "", title or ""])
+    flat = [c for _sid, c in _outline_card_list(outline_raw)] if isinstance(outline_raw, dict) else []
+    plan_of = lambda c: " ".join([c.get("title") or "", c.get("teaching_shape_note") or ""] + [str(x) for x in (c.get("agenda_items") or [])] + [str(x) for x in (c.get("outcomes") or [])])
+    for idx in card_indexes:
+        card = db.query(ScriptCard).filter(ScriptCard.script_id == script.id, ScriptCard.card_index == idx).first()
+        if card is None or not card.quiz_json:
+            continue
+        for attempt in range(2):
+            quiz = _quiz_of(card)
+            all_cards = db.query(ScriptCard).filter(ScriptCard.script_id == script.id).order_by(ScriptCard.card_index).all()
+            around = [c for c in all_cards if abs(c.card_index - idx) <= 2 and c.id != card.id]
+            plans = []
+            if 1 <= idx <= len(flat):
+                plans.append(plan_of(flat[idx - 1]))
+                nxt = next((c for c in flat[idx:] if c.get("card_type") in ("concept", "problem", "walkthrough")), None)
+                if nxt:
+                    plans.append(plan_of(nxt))
+            context = [scope, spoken_text(card.content_script)] + plans + [spoken_text(c.content_script) + " " + (c.title or "") for c in around]
+            others = [q for q in (_quiz_of(c) for c in all_cards if c.id != card.id) if q]
+            why = problem_with(quiz, context, others)
+            if not why:
+                break
+            if attempt == 1:
+                notes.append(f"Card {idx}: the quiz is still weak ({why}); check it.")
+                break
+            try:
+                _regenerate_quiz_core(script.id, idx, f"The first quiz was rejected because {why}. Ask about what the next card teaches, and ask about a different idea than the other quizzes.", None, db)
+                db.refresh(card)
+                notes.append(f"Card {idx}: the quiz was made again because {why}.")
+            except Exception as e:
+                print(f"Quiz guard could not remake the quiz of card {idx}: {str(e)[:120]}")
+                break
+    return notes
+
+
+def _plain_english_ask(script_id: int):
+    """The small request that rewrites a card's long sentences (see agents/plain_english.py)."""
+    return lambda prompt: call_llm_json(messages=[{"role": "user", "content": prompt}], max_tokens=900, temperature=0.2, agent="plain_english", script_id=script_id)
+
+
+def _style_rules_for(script) -> list:
+    """Extra writing rules for a kind of class. A DSA class is taught without naming a language, with a fresh everyday story for each idea, a different welcome each
+    class, and an agenda with no times (the SME's review of the DSA scripts)."""
+    from agents.reviewer import class_persona
+    cls = script.class_entity
+    program = cls.module.track.program.name if cls is not None and cls.module is not None and cls.module.track is not None and cls.module.track.program is not None else None
+    persona = class_persona(cls.title if cls is not None else None, program)
+    if not persona or not str(persona.get("persona", "")).startswith("Algorithms"):
+        return []
+    return [
+        "Teach language-agnostically: stage directions never say to run the code (pseudocode cannot run): say walk through or trace it. Write every code_snippet as pseudocode in this style, code_language \"pseudocode\": Function name(Array[], L, R){ ... }, for(i -> 0 to N-1){ ... }, sum += Array[j], print(sum); no real-language syntax, never name a language, and describe the code in plain words.",
+        "Pick one everyday story for this class (a library, deliveries, a cricket scoreboard, a bank, a cinema) and use only it, with the same names, all the way through. It must differ from the previous class's story. Invent fresh data for it.",
+        "Never use, compare with or name an idea or formula before the card that teaches it. Teach it first, then use it.",
+        "The welcome is different every class: open with something specific to today's topic, such as a surprising number, a short puzzle or a problem from the last class. No stock opening, no recap list, and not the cinema story.",
+        "Every card with code says its time and space complexity (a bold \"Time and space.\" lead-in, not a sub-heading), and says whether a faster or leaner way exists or this is already the optimised one. A quiz card gives this after the answer.",
+        "The agenda lists only today's topics in order: no times and no welcome item.",
+    ]
+
+
+def _untimed_agenda(script) -> bool:
+    return any("no times" in r for r in _style_rules_for(script))
+
+
 def _agenda_timing_for(script, outline, whole_class: bool = False) -> list:
     """The class agenda, each item with the minutes of the cards that teach it, for the agenda card. whole_class adds the opening and the recap,
     so the minutes read aloud add up to the class length."""
@@ -2372,6 +2447,8 @@ def _agenda_timing_for(script, outline, whole_class: bool = False) -> list:
     _title, agendas, _outcomes = _script_scope(script)
     cards = [c for _sid, c in _outline_card_list(outline)]
     timing = agenda_timing(cards, agendas)
+    if _untimed_agenda(script):
+        return [{**t, "untimed": True} for t in timing]
     return with_class_segments(cards, timing) if whole_class else timing
 
 
@@ -2542,6 +2619,30 @@ def _outline_checks(script, outline_data):
                          required_topics=_opening_kit_topics(script), min_animations=min_animations_for(_track_name(script)),
                          beginner_pct=script.content_mix_beginner, code_ratio=script.code_ratio,
                          upcoming=_continuity_context(script, object_session(script))["upcoming"] if object_session(script) is not None else None)
+
+@app.post("/api/scripts/{script_id}/outline/repair", response_model=OutlineResponse)
+def repair_script_outline(script_id: int, _actor: User = Depends(script_guard(True)), db: Session = Depends(get_db)):
+    """Fix the saved outline by code, with no AI call: the same repairs that run after the AI drafts it (an own teaching card for every agenda item, the card count, the minutes,
+    the minimum visuals, the beginner/advanced split). Only an outline that has not been turned into cards yet can be repaired."""
+    script = db.query(Script).filter(Script.id == script_id).first()
+    if not script:
+        raise HTTPException(status_code=404, detail="Script not found")
+    if not script.outline_json:
+        raise HTTPException(status_code=404, detail="No outline found for this script")
+    if db.query(ScriptCard).filter(ScriptCard.script_id == script_id).count():
+        raise HTTPException(status_code=409, detail="The cards are already written, so the outline can no longer be repaired. Edit the cards instead.")
+    outline = json.loads(script.outline_json)
+    if isinstance(outline, dict) and outline.get("sections"):
+        from agents.outliner import shape_outline, min_animations_for
+        first, prev = _module_start(script, db)
+        outline = shape_outline(outline, _script_scope(script)[1], int(script.duration_minutes), program_opening=_program_opening(script),
+                                drop_note=not _program_opening(script), first_of_module=first, previous_module=prev, earlier_class=_earlier_title(script, db),
+                                beginner_pct=script.content_mix_beginner, code_ratio=script.code_ratio, kit_topics=_opening_kit_topics(script),
+                                min_animations=min_animations_for(_track_name(script)))
+        script.outline_json = json.dumps(outline)
+        db.commit()
+    return get_script_outline(script_id, _actor, db)
+
 
 @app.get("/api/scripts/{script_id}/outline", response_model=OutlineResponse)
 def get_script_outline(script_id: int, _actor: User = Depends(script_guard(False)), db: Session = Depends(get_db)):
@@ -2725,17 +2826,12 @@ def handle_outline_action(script_id: int, payload: OutlineApprovalRequest, _acto
             script_id=script.id
         )
         if isinstance(outline_data, dict) and outline_data.get("sections"):
-            from agents.outliner import enforce_card_count, ensure_animations, min_animations_for
-            from agents.outliner import merge_opening_cards
+            from agents.outliner import shape_outline, min_animations_for
             _first, _prev_mod = _module_start(script, db)
-            outline_data = merge_opening_cards(outline_data, int(script.duration_minutes), program_opening=_program_opening(script), first_of_module=_first, previous_module=_prev_mod,
-                                               earlier_class=_earlier_title(script, db))
-            from agents.outliner import ensure_topic_quizzes, ensure_agenda_taught
-            outline_data = ensure_agenda_taught(outline_data, _script_scope(script)[1], int(script.duration_minutes))
-            outline_data = ensure_topic_quizzes(outline_data, _script_scope(script)[1], int(script.duration_minutes))
-            outline_data = ensure_animations(enforce_card_count(outline_data, int(script.duration_minutes)), min_animations_for(trk_name))
-            from agents.outliner import finalize_plan
-            outline_data = finalize_plan(outline_data, script.content_mix_beginner, script.code_ratio, agendas=_script_scope(script)[1], target_minutes=int(script.duration_minutes), kit_topics=_opening_kit_topics(script))
+            outline_data = shape_outline(outline_data, _script_scope(script)[1], int(script.duration_minutes), program_opening=_program_opening(script),
+                                         drop_note=not _program_opening(script), first_of_module=_first, previous_module=_prev_mod, earlier_class=_earlier_title(script, db),
+                                         beginner_pct=script.content_mix_beginner, code_ratio=script.code_ratio, kit_topics=_opening_kit_topics(script),
+                                         min_animations=min_animations_for(trk_name))
             if (payload.revision_feedback or "").strip():             # remembered, so the next ReThink keeps honouring what was already asked
                 outline_data["sme_feedback"] = (((_old_outline or {}).get("sme_feedback") if isinstance(_old_outline, dict) else None) or [])[-4:] + [payload.revision_feedback.strip()]
         script.outline_json = json.dumps(outline_data)
@@ -3101,6 +3197,11 @@ def generate_section(
                 previous_script_context=script.previous_script_context)
             planned_visuals = [v for v in (outline_raw.get("visual_cards") or []) if v.get("parent_card_id") == spec.get("card_id")]
             spec = {**spec, "visuals": [{k: v.get(k) for k in ("visual_id", "kind", "title", "prompt")} for v in planned_visuals]}
+            style = _style_rules_for(script)
+            if style:
+                spec["style_rules"] = style
+            if str(spec.get("card_type") or "").lower() == "welcome":
+                spec["instructor_intro"] = bool(_program_opening(script))
             if spec.get("card_type") == "agenda":
                 spec["agenda_timing"] = _agenda_timing_for(script, outline_raw, whole_class=True)        # the agenda card reads these items and minutes aloud
             earlier = db.query(ScriptCard).filter(ScriptCard.script_id == script_id, ScriptCard.card_index < start_card) \
@@ -3108,6 +3209,13 @@ def generate_section(
             from agents.rule_checker import spoken_tail, spoken_text
             digest = [{"n": c.card_index, "title": c.title, "type": c.pedagogical_phase,
                        "gist": spoken_text(c.content_script)[:220], "ended_with": spoken_tail(c.content_script, 30)} for c in earlier[-8:]]
+            for d_, c_ in zip(digest, earlier[-8:]):
+                asked = _quiz_asked(c_)
+                if asked:
+                    d_["quiz_already_asked"] = asked                         # a new quiz asks about a different idea, so the writer sees every question already asked
+            all_asked = [x for x in (_quiz_asked(c_) for c_ in earlier[:-8]) if x]
+            if all_asked and digest:
+                digest[0]["earlier_quizzes_asked"] = all_asked[-6:]
             flow = _card_flow(earlier, start_card, flat_outline)
             if not flow.get("next"):                                             # the last card closes the class: it also says what the next class covers
                 flow["next_class"] = _next_class_preview(script, db)
@@ -3176,9 +3284,18 @@ def generate_section(
             from agents.rule_checker import normalise_typography
             from agents.rule_checker import clean_spoken
             body = clean_spoken(c.get("body_markdown") or c.get("content_script") or "")
+            if str(c.get("card_type") or "").lower() != "instructor_note":
+                from agents.plain_english import polish
+                body = polish(body, _plain_english_ask(script.id) if (llm_configured() and os.getenv("EXECUTION_MODE", "hybrid") != "mock") else None)      # simple English, whatever the model wrote
+            from agents.quiz_guard import looks_like_sample
+            if os.getenv("EXECUTION_MODE", "hybrid") != "mock" and looks_like_sample(body, json.dumps(c.get("quiz_json") or c.get("quiz") or "")):
+                raise HTTPException(status_code=502, detail="The writer returned built-in sample text instead of a real card, so this card was not saved. Try again.")
             if idx == 1 and str(c.get("card_type") or "").lower() == "instructor_note":
-                from agents.shared_context import INTRO_NOTE_BODY, intro_note_cue
-                body, c["instructor_note"], c["title"] = INTRO_NOTE_BODY, intro_note_cue(_program_opening(script)), "Instructor Introduction"      # card 1 is always the same short note
+                from agents.shared_context import INTRO_NOTE_BODY, intro_note_cue, INTRO_NOTE_BODY_LATER, INTRO_NOTE_CUE_LATER
+                if _program_opening(script):
+                    body, c["instructor_note"], c["title"] = INTRO_NOTE_BODY, intro_note_cue(True), "Instructor Introduction"      # a track's first class: the instructor introduces themself
+                else:
+                    body, c["instructor_note"], c["title"] = INTRO_NOTE_BODY_LATER, INTRO_NOTE_CUE_LATER, "Instructor Note"            # later classes: no introduction
             elif idx <= 3 and str(c.get("card_type") or "").lower() == "welcome" and _program_opening(script):
                 from agents.shared_context import ensure_opening_welcome
                 body = ensure_opening_welcome(body, _opening_welcome(script))         # a track's first welcome card starts with that track's spoken welcome
@@ -3300,6 +3417,13 @@ def generate_section(
         total_cards = sum(len(sec.get("cards", [])) for sec in outline_raw["sections"])
     elif isinstance(outline_raw, list):
         total_cards = len(outline_raw)
+    if llm_configured() and os.getenv("EXECUTION_MODE", "hybrid") != "mock":
+        try:
+            quiz_notes = _quiz_guard(script, db, [c_.card_index for c_ in persisted_cards], outline_raw)
+            db.commit()
+        except Exception as e:
+            quiz_notes = []
+            print(f"Quiz guard skipped: {str(e)[:120]}")
     written_cards = db.query(ScriptCard).filter(ScriptCard.script_id == script_id, ScriptCard.content_script != "").count()
     if total_cards and written_cards >= total_cards:
         _make_total_exact(script_id, db)               # the whole script is written: its cards fill the class time exactly
@@ -3310,6 +3434,7 @@ def generate_section(
         "total_cards": total_cards,
         "cards_written": written_cards,
         "script_complete": bool(total_cards) and written_cards >= total_cards,
+        "quiz_notes": locals().get("quiz_notes") or [],
         "status": "DRAFTED_AND_ATTACHED"
     }
 
@@ -3953,7 +4078,7 @@ def _run_review(script_id: int, _actor, db: Session, mode: str = "find", only_ca
                                      dismissed=_dismissed + _newly_dismissed, dropped_out=_newly_dismissed)
         return got
 
-    if do_prep and _load_setup(script) is None:  # a programming class gets its before-the-class checklist made along the way (best effort)
+    if do_prep and _setup_wanted(script) and _load_setup(script) is None:  # a programming class gets its before-the-class checklist made along the way (best effort)
         from agents.class_setup import is_programming
         if is_programming(_review_cards_dicts(db, script_id)):
             try:
@@ -4023,7 +4148,7 @@ def _run_review(script_id: int, _actor, db: Session, mode: str = "find", only_ca
         rule_review = as_review(check_script(cards_dicts, int(script.duration_minutes), agendas, outcomes, script.code_ratio,
                                              required_content=required_content, program_opening=opening, class_title=title,
                                              upcoming=continuity["upcoming"], known_terms=continuity["known_terms"], agenda_timing=agenda_timing_now,
-                                             previous_class=continuity["previous"] if (continuity["previous"] or {}).get("has_record") else None,
+                                             language_agnostic=_untimed_agenda(script), previous_class=continuity["previous"] if (continuity["previous"] or {}).get("has_record") else None,
                                              running_example=(json.loads(script.outline_json).get("running_example") if script.outline_json and isinstance(json.loads(script.outline_json), dict) else None)) + fit_findings)
         from agents.progress import add_partial
         add_partial(script_id, rule_review)
@@ -4690,7 +4815,17 @@ def _load_setup(script):
     return annotate_usage(data, _review_cards_dicts(db, script.id)) if (data and db is not None) else data
 
 
+def _setup_wanted(script) -> bool:
+    """A DSA class is taught with pseudocode, so it gets no before-the-class setup unless the SME's additional or reference materials say something is mandatory."""
+    if not _style_rules_for(script):
+        return True
+    notes = " ".join(filter(None, [script.additional_resources, script.api_docs, script.reference_urls]))
+    return bool(re.search(r"mandatory|prerequisite|must (?:install|have|be installed|set ?up)|before the class|set ?up|install", notes, re.I))
+
+
 def _load_setup_raw(script):
+    if not _setup_wanted(script):
+        return None
     try:
         data = json.loads(script.setup_json) if getattr(script, "setup_json", None) else None
     except ValueError:
@@ -4706,7 +4841,8 @@ def _make_setup(script, db: Session) -> dict:
     ctx = {"title": script.custom_class_title or (cls.title if cls else "Programming class"), "minutes": script.duration_minutes,
            "program": cls.module.track.program.name if cls and cls.module and cls.module.track and cls.module.track.program else "",
            "track": _track_name(script),
-           "notes": " ".join(filter(None, [script.additional_resources, script.api_docs, script.reference_urls]))}
+           "notes": " ".join(filter(None, [script.additional_resources, script.api_docs, script.reference_urls])),
+           "only_from_notes": bool(_style_rules_for(script))}
     kit = _opening_kit(script)
     if kit:
         env = {k: v for k, v in (kit.get("facts") or {}).items() if re.search(r"environment|ide|colab|setup|tools?", str(k), re.I)}
@@ -4725,7 +4861,7 @@ def get_setup(script_id: int, _actor: User = Depends(script_guard(False)), db: S
     if not script:
         raise HTTPException(status_code=404, detail="Script not found")
     setup = _load_setup(script)
-    return {"is_programming": is_programming(_review_cards_dicts(db, script_id)), "setup": setup, "html": setup_html(setup), "markdown": setup_markdown(setup) or ""}
+    return {"is_programming": _setup_wanted(script) and is_programming(_review_cards_dicts(db, script_id)), "setup": setup, "html": setup_html(setup), "markdown": setup_markdown(setup) or ""}
 
 
 @app.post("/api/scripts/{script_id}/setup/generate")
@@ -4736,6 +4872,8 @@ def generate_setup(script_id: int, _actor: User = Depends(script_guard(True)), d
     script = db.query(Script).filter(Script.id == script_id).first()
     if not script:
         raise HTTPException(status_code=404, detail="Script not found")
+    if not _setup_wanted(script):
+        raise HTTPException(status_code=409, detail="This class is taught with pseudocode, so it has no setup checklist. If something is mandatory, put it in the additional or reference materials.")
     if not is_programming(_review_cards_dicts(db, script_id)):
         raise HTTPException(status_code=409, detail="This class has no code yet, so there is nothing to set up. Write the code cards first.")
     if not (llm_configured() and os.getenv("EXECUTION_MODE", "hybrid") != "mock"):
@@ -4763,12 +4901,19 @@ def _quiz_card(db: Session, script_id: int, card_index: int) -> ScriptCard:
     return card
 
 
-def _quiz_of(card: ScriptCard):
+def _load_quiz(raw):
+    """A card's quiz as a dict. Some older cards keep it as JSON inside a JSON string, so a string is decoded once more."""
     try:
-        quiz = json.loads(card.quiz_json) if card.quiz_json else None
+        quiz = json.loads(raw) if raw else None
+        if isinstance(quiz, str):
+            quiz = json.loads(quiz)
     except ValueError:
         quiz = None
     return quiz if isinstance(quiz, dict) else None
+
+
+def _quiz_of(card: ScriptCard):
+    return _load_quiz(card.quiz_json)
 
 
 def _save_quiz(card: ScriptCard, quiz: dict, approved: bool = False) -> dict:
@@ -4803,6 +4948,11 @@ def regenerate_quiz(script_id: int, card_index: int, payload: QuizRegenerateRequ
                     _actor: User = Depends(script_guard(True)), db: Session = Depends(get_db)):
     """Make this card's quiz again. The AI is shown what the nearby cards taught, so the quiz tests only that, and the right answer is moved
     to a different place so it is not always the same letter."""
+    return _regenerate_quiz_core(script_id, card_index, payload.instruction, _actor, db)
+
+
+def _regenerate_quiz_core(script_id: int, card_index: int, instruction: Optional[str], _actor: Optional[User], db: Session):
+    """The work of regenerate_quiz, also used by the quiz guard while a script is being written (then there is no signed-in actor)."""
     bind_usage_script(script_id)
     from agents.quiz_format import clean_quiz, move_correct_option, quiz_problems
     from agents.rule_checker import clean_spoken, spoken_text
@@ -4820,7 +4970,9 @@ def regenerate_quiz(script_id: int, card_index: int, payload: QuizRegenerateRequ
         f"WHAT THE CLASS JUST TAUGHT (test only this, using only terms taught here or earlier):\n{taught_text}\n\n"
         f'THIS QUIZ CARD: "{card.title}". {spoken_text(card.content_script)[:300]}\n'
         + (f"THE CURRENT QUIZ (write a different one): {json.dumps({k: old.get(k) for k in ('question', 'options')})}\n" if old else "")
-        + (f"THE SME ASKS: {payload.instruction.strip()[:400]}\n" if (payload.instruction or "").strip() else "")
+        + ("OTHER QUIZZES IN THIS SCRIPT (ask about a different idea, never the same question or answer): " + " | ".join(x for x in (_quiz_asked(c_) for c_ in db.query(ScriptCard).filter(ScriptCard.script_id == script_id, ScriptCard.card_index != card_index).order_by(ScriptCard.card_index).all()) if x)[:900] + "\n"
+           if any(_quiz_asked(c_) for c_ in db.query(ScriptCard).filter(ScriptCard.script_id == script_id, ScriptCard.card_index != card_index).all()) else "")
+        + (f"THE SME ASKS: {instruction.strip()[:400]}\n" if (instruction or "").strip() else "")
         + "\nRules:\n"
           "- question: one or two short sentences. If it uses code, put the code in a fenced block, and the code must run as written (no input(), no network, no files).\n"
           "- options: exactly 4, each one short line of at most 12 words, with NO letter in front. The wrong options are the mistakes learners really make, tempting but clearly wrong once explained. No 'all of the above', no 'none of the above'.\n"

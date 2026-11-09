@@ -61,8 +61,8 @@ def _lang(card: Dict[str, Any]) -> str:
 
 
 def is_programming(cards: List[Dict[str, Any]]) -> bool:
-    """A class is a programming class when any of its cards carries code."""
-    return any((c.get("code_snippet") or "").strip() for c in cards)
+    """A class is a programming class when any of its cards carries code that can be run: pseudocode needs nothing installed."""
+    return any((c.get("code_snippet") or "").strip() and (c.get("code_language") or "").lower() != "pseudocode" for c in cards)
 
 
 def detect_stack(cards: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -104,6 +104,7 @@ def setup_prompt(ctx: Dict[str, Any], stack: Dict[str, Any]) -> str:
         f"VERSIONS THE CODE WAS ACTUALLY RUN WITH (tested): {'; '.join(f'{k}: {v}' for k, v in stack['tested_on'].items()) or 'unknown'}\n"
         f"THE SME'S OWN NOTES AND LINKS (use them, never contradict them): {(ctx.get('notes') or 'none')[:1200]}\n\n"
         "Rules:\n"
+        + ("- This class is taught with pseudocode: list ONLY what the SME's notes above say is mandatory, and nothing the code itself might suggest.\n" if ctx.get("only_from_notes") else "") +
         "- List the SOFTWARE, accounts, libraries and data the class CODE needs, and nothing else. Include the languages above. Do NOT list generic things such as an\n"
         "  internet connection, a video call tool, a laptop or a headset.\n"
         "- If the platform notes name a database or service (for example BigQuery), that is what the learners use. SQLite below is only what this server used to test the code.\n"

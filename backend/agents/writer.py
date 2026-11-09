@@ -46,9 +46,10 @@ its card_type.
 - WELCOME CARD: when the card_type is welcome, the card is the spoken welcome, nothing else: no agenda and no teaching. It is the FIRST thing the learners hear, so open by greeting them
   ("Hi everyone, welcome..."). The instructor note before it is for the instructor and is never spoken: do not refer to it, and never say the learners already know the instructor or
   have heard an introduction. Follow the card's plan note for how this class connects to what came before. Close by saying the instructor will say a quick word about themselves
-  and then go through the agenda. Do not say how many classes, weeks or hours the module has.
+  and then go through the agenda (only if instructor_intro is true; else just move on to the agenda). Do not say how many classes, weeks or hours the module has.
 - AGENDA CARD: when the spec has "agenda_timing", this is the agenda card and it holds ONLY the agenda. One sentence that introduces it, then the class agenda read
-  aloud as a short numbered list: every item in agenda_timing, in that order, each with its minutes in brackets after the item, for example "Why SQL now (14 minutes)", never written as "about N minutes". Use exactly those items and minutes, none added or dropped, then one sentence that moves on to the first topic. No welcome, no introduction, no learning outcomes and no teaching.
+  aloud as a short numbered list: every item in agenda_timing, in that order, each with its minutes in brackets after the item, for example "Why SQL now (14 minutes)", never written as "about N minutes". Use exactly those items and minutes, none added or dropped (untimed: no minutes), then one sentence that moves on to the first topic. No welcome, no introduction, no learning outcomes and no teaching.
+- STYLE: follow the spec's style_rules; they override the rules here.
 - LEVEL: the spec's "level" says how deep this card goes. beginner: plain words, define every term, one small step at a time, a simple everyday example before any
   definition, no internals. bridge: this is where the class steps up: say so in one sentence, recap the simple version, then add the first deeper idea. advanced:
   the learners have the basics, so go deeper: edge cases, how it works inside, trade-offs, failure modes, numbers. Put the deeper material under a "### Going deeper"
@@ -68,7 +69,7 @@ its card_type.
   lines, no tables, and no em dashes. Short paragraphs of 2 to 4 sentences.
 - LINKS: give a link only when you need one, write it as [what it is](https://full-address) (the page shows the source beside it), use only
   addresses from the approved sources and the opening kit, and add the same address to "sources" with its source name. Never invent an address.
-- Use no technical word that this class has not taught and the agenda does not cover (for example "hashing", "Master Theorem", "stack frame"); if you need one, explain it in one short sentence.
+- Use no technical word that this class has not taught and the agenda does not cover; if you need one, explain it in one short sentence.
   When you say a step is fast, slow or cheap, give the cost in Big-O with it ("building it once costs O(n); each lookup after that is O(1)").
 - Every wrong option in a quiz must be tempting: one a learner could really pick by a plausible mistake. Never write a wrong option that contradicts itself or the question's own setup.
 - The code goes ONLY in code_snippet, which the page shows in its own box with a Run button and a step-by-step player. Do not paste the same code into the spoken text. Put the
@@ -90,13 +91,13 @@ its card_type.
 - A quiz card with has_code true shows a short code_snippet (4 to 10 lines) at [[CODE]] before [[QUIZ]] and asks what it prints or costs; the right option equals the real output.
 - Say what the example is in plain words the first time it appears, for example "a simple seat-booking app, like BookMyShow, for a small cinema hall with 6 seats". After that say "our cinema hall"
   or "our booking app", never "the BookMyShow hall": the company is not a place.
-- A company or product is the setting, never the actor: write "our seat-search code" or "a BookMyShow-style booking app checks the seats", not "BookMyShow is searching". Say once that the example is
-  a simplified model when a real system would work differently (real systems use indexes and caches).
+- A company or product is the setting, never the actor: write "a BookMyShow-style app checks the seats", not "BookMyShow is searching". Say once that the example is
+  a simplified model when a real system would work differently.
 - Use the running example with identical names. Introduce no new running example. When the running example carries SHARED DATA, every example, code block, trace table
   and question uses exactly those names, rows and values: never invent other people, rows or numbers, and never change one.
 - Never write generator or production wording in the spoken text: no "option index", "zero-based", "quiz JSON", "Visual V01", "UNVERIFIED" or notes about how the script was made. The instructor reads only what is meant to be said.
-- Keep every term one thing all the way through (not a language in one card and a tool in another). Define a term once, in the card that introduces it, never again later.
-- Never write a year or "current release" beside a version unless a source here says so; say "a recent version".
+- Keep every term one thing all the way through. Define a term once, in the card that introduces it.
+- Never write a year or "current release" beside a version unless a source says so.
 - QUIZ CARD FORMAT: a lead-in of 2 to 4 sentences that does not give the answer; "Let's take a quiz."; the marker [[QUIZ]] alone on a line (the quiz is shown there with its question and options);
   "Type your answer in the chat." and [pause for replies]; then "The answer is X.", one reason and a lead into the next card. Never print the question or options and never write a Predict callout.
 - Every time given for an agenda item must add up to the class length, and a card never says "Hour 2" or similar unless the clock is there.

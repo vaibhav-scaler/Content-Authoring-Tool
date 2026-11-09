@@ -25,6 +25,7 @@ ROUTES = [
     ("DELETE", r"^/api/programs/(?P<id>\d+)$", "Program Deleted", "Deleted program '{name}'", "program", None),
     ("POST", r"^/api/scripts/(?P<id>\d+)/outline$", "Outline Generated", "Generated the outline for '{name}'", "script", None),
     ("POST", r"^/api/scripts/(?P<id>\d+)/outline/action$", "Outline Updated", "Changed or approved the outline for '{name}'", "script", None),
+    ("POST", r"^/api/scripts/(?P<id>\d+)/outline/repair$", "Outline Updated", "Fixed the outline checks for '{name}' by rule", "script", None),
     ("POST", r"^/api/scripts/(?P<id>\d+)/outline/card-assist$", "Outline Card Assist", "Asked the AI about an outline card in '{name}'", "script", None),
     ("POST", r"^/api/scripts/(?P<id>\d+)/generate-section$", "Cards Generated", "Generated script cards for '{name}'", "script", None),
     ("POST", r"^/api/scripts/(?P<id>\d+)/draft-all$", "Cards Generated", "Drafted all remaining cards for '{name}'", "script", None),

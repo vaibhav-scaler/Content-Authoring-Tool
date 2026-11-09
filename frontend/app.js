@@ -2556,6 +2556,7 @@ function renderOutlineVisualCards(grid, visualCards, cardIdByIndex, outlineData)
   const checkHtml = checks.length ? `
     <div class="outline-checks" style="margin: 10px 0; padding: 10px 14px; border: 1px solid var(--border-color, #f59e0b); border-radius: 8px;">
       <strong>Outline checks (${checks.length})</strong>
+      ${checks.some(c => c.level === "blocker" || c.level === "major") ? `<button type="button" class="btn btn-secondary" style="margin-left: 12px; padding: 2px 10px; font-size: 0.78rem;" onclick="repairOutline()" title="Fixes what can be fixed by rule, with no AI call">Fix these automatically</button>` : ""}
       <ul style="margin: 6px 0 0 18px;">${checks.map(c => `<li><em>${escapeHtml(c.level || "")}</em>: ${escapeHtml(c.problem || "")}</li>`).join("")}</ul>
     </div>` : `<div class="outline-checks" style="margin: 10px 0; color: var(--text-muted);">Outline checks: all agenda items and outcomes are mapped, and the minutes add up. ${visualCards.length} visual cards are planned, each shown after the card it sits on.</div>`;
   const box = document.createElement("div");
@@ -2650,6 +2651,21 @@ async function saveSingleCardEdit() {
 }
 
 window.saveSingleCardEdit = saveSingleCardEdit;
+
+// Fix the outline's checks by rule (card count, minutes, an own teaching card per agenda item, visuals, the level split). No AI call, so it costs nothing.
+async function repairOutline() {
+  try {
+    showLoader("Fixing the outline...");
+    const res = await fetch(`${API_BASE}/scripts/${currentScriptId}/outline/repair`, { method: "POST" });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.detail || `the server answered ${res.status}`);
+    currentOutlineCards = data.cards || [];
+    renderOutlineGate(data);
+  } catch (err) {
+    alert("The outline was not fixed. " + (err.message || err));
+  } finally { hideLoader(); }
+}
+window.repairOutline = repairOutline;
 
 // Single Card Chat Modal Handler
 function openSingleOutlineCardChat(cardIndex) {
@@ -3607,6 +3623,7 @@ window.makeClassSetup = makeClassSetup;
 
 // What happened when the card's code was run: a status, the output or the error, and a button to run it again.
 // ---- the code editor: type in the code, run what you typed, see the output underneath, save or put it back -------------------------------
+const isPseudocode = (c) => String((c && c.code_language) || "").toLowerCase() === "pseudocode";      // pseudocode cannot be run: no Run button, no output box
 const codeDrafts = {};            // card_index -> text typed but not saved, so a redraw of the page does not lose it
 
 function renderCodeEditor(c) {
@@ -3621,7 +3638,7 @@ function renderCodeEditor(c) {
       <div class="code-header">
         <span>Live Code (${lang}) <span class="ce-state" style="margin-left: 8px; color: #fbbf24;">${dirty ? "Edited, not saved" : ""}</span></span>
         <span style="display: flex; gap: 6px; flex-wrap: wrap;">
-          <button type="button" class="ce-run" style="${tool} background: #16a34a; border-color: #16a34a; font-weight: 700;" onclick="ceRun(this)" title="Run what is in the editor (Ctrl or Cmd + Enter)">&#9654; Run</button>
+          ${isPseudocode(c) ? "" : `<button type="button" class="ce-run" style="${tool} background: #16a34a; border-color: #16a34a; font-weight: 700;" onclick="ceRun(this)" title="Run what is in the editor (Ctrl or Cmd + Enter)">&#9654; Run</button>`}
           <button type="button" class="ce-save" style="${tool}" onclick="ceSave(this)" ${dirty ? "" : "disabled"} title="Keep your changes (Ctrl or Cmd + S)">Save changes</button>
           <button type="button" class="ce-revert" style="${tool}" onclick="ceRevert(this)" ${dirty ? "" : "disabled"}>Undo changes</button>
           <button type="button" style="${tool}" onclick="copyCodeFromBlock(this)">Copy Code</button>
@@ -3632,8 +3649,8 @@ function renderCodeEditor(c) {
         <textarea class="ce-area" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="Code editor"
           rows="${Math.min(Math.max(lines, 4), 26)}" data-saved="${escapeHtml(saved)}">${escapeHtml(text)}</textarea>
       </div>
-      <div class="ce-output">${codeRunHtml(c.code_run, c.card_index, true)}</div>
-      <div class="ce-trace">${renderCodeTrace(c)}</div>
+      ${isPseudocode(c) ? "" : `<div class="ce-output">${codeRunHtml(c.code_run, c.card_index, true)}</div>
+      <div class="ce-trace">${renderCodeTrace(c)}</div>`}
     </div>`;
 }
 
@@ -3657,6 +3674,7 @@ function ceRefresh(area) {
 
 async function ceRun(btn) {
   const p = ceParts(btn);
+  if (!p.run || !p.output) return;                         // pseudocode has no Run button and no output box
   const code = p.area.value;
   if (!code.trim()) { p.output.innerHTML = codeRunHtml({ status: "skipped", reason: "There is no code to run." }, p.index, false); return; }
   const label = p.run.innerHTML;
@@ -8250,8 +8268,8 @@ function inspectionCodeHtml(c) {
     <div class="code-header"><span>Code (${escapeHtml(c.code_language || "python")}), read only</span>
       <span><button type="button" style="padding: 2px 10px; font-size: 0.72rem; background: #1e293b; color: #e2e8f0; border: 1px solid #475569; border-radius: 6px; cursor: pointer;" onclick="copyCodeFromBlock(this)">Copy Code</button></span></div>
     <div class="ce-wrap"><pre class="ce-nums" aria-hidden="true">${nums}</pre><pre class="ce-area" style="margin:0; overflow-x:auto;"><code>${escapeHtml(c.code_snippet)}</code></pre></div>
-    <div class="ce-output">${codeRunHtml(c.code_run, c.card_index, false)}</div>
-    <div class="ce-trace">${renderCodeTrace(c)}</div>
+    ${isPseudocode(c) ? "" : `<div class="ce-output">${codeRunHtml(c.code_run, c.card_index, false)}</div>
+    <div class="ce-trace">${renderCodeTrace(c)}</div>`}
   </div>`;
 }
 

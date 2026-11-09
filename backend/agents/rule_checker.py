@@ -139,6 +139,32 @@ def check_numbers_match_output(cards: List[Dict[str, Any]]) -> List[Dict[str, An
 _BOLD_TERM = re.compile(r"\*\*([A-Za-z][A-Za-z0-9 \-]{2,30})\*\*")
 
 
+_SCOPE_LABELS = {"note", "key", "remember", "mistake", "predict", "going deeper", "time and space", "tip", "warning", "example", "answer"}
+
+
+def check_scope_terms(cards: List[Dict[str, Any]], agendas: Optional[List[str]], outcomes: Optional[str], class_title: str = "",
+                      known_terms: Optional[set] = None) -> List[Dict[str, Any]]:
+    """S10: a teaching card keeps to what this class teaches. A term it defines in bold must come from the class's agenda, outcomes or title, a card title, a term an earlier class
+    taught, or be used again in another card of the script (a supporting idea the script really builds on). A term that appears only once and belongs to none of those is a
+    topic from somewhere else. Minor: the author decides whether it is meant."""
+    scope = " ".join(list(agendas or []) + [_real_outcomes(outcomes) or "", class_title or ""] + [c.get("title") or "" for c in cards] + list(known_terms or []))
+    texts = {c.get("card_index"): spoken_text(c.get("content_script")).lower() for c in cards}
+    out: List[Dict[str, Any]] = []
+    for c in cards:
+        if _kind(c) not in ("concept", "problem", "walkthrough"):
+            continue
+        body = re.sub(r"```.*?```", " ", c.get("content_script") or "", flags=re.S)
+        for term in dict.fromkeys(x.strip() for x in _BOLD_TERM.findall(body)):
+            low = term.lower()
+            if low in _SCOPE_LABELS or len(low) < 4 or covered(term, [scope], threshold=0.6):
+                continue
+            if sum(1 for tx in texts.values() if re.search(rf"\b{re.escape(low)}\b", tx)) >= 2:
+                continue
+            out.append(_finding(c.get("card_index"), "S10", "minor", f'The card teaches "{term}", which is not in this class\'s agenda or outcomes, an earlier class, or any other card of the script.',
+                                "Cut it, or keep it to one sentence that points forward, so the card teaches only what this class covers.", quote=term))
+    return out
+
+
 def check_term_order(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """T6: a term a teaching card defines in bold should not be leaned on by an earlier teaching card. Quiz, welcome, agenda and note cards are left out
     (a quiz may ask before it teaches). Minor, because an earlier mention is sometimes a deliberate preview."""
@@ -221,6 +247,7 @@ def check_script(
     class_title: str = "",
     agenda_timing: Optional[List[Dict[str, Any]]] = None,
     running_example: Optional[str] = None,
+    language_agnostic: bool = False,
 ) -> List[Dict[str, Any]]:
     """Every [auto] rule that can be judged from the stored cards. `cards` are dicts with card_index, title,
     duration_mins, pedagogical_phase, content_script, code_snippet, quiz, sources, visual_type, visual_content."""
@@ -365,7 +392,7 @@ def check_script(
                 traces += 1
 
         # ---- A3 the code must run: judged from the real run saved with the card
-        if (c.get("code_snippet") or "").strip():
+        if (c.get("code_snippet") or "").strip() and (c.get("code_language") or "").lower() != "pseudocode":      # pseudocode has no runner
             run = c.get("code_run")
             if not run:
                 out.append(_finding(cid, "A3", "minor", "The code has not been run yet.", "Run the code from the card."))
@@ -380,12 +407,12 @@ def check_script(
                 out.append(_finding(cid, "A3", "minor", f"The code was not run: {run.get('reason') or 'no runner'}", "Check it by hand, or install the runtime."))
 
         # ---- A3 code names a platform and version somewhere in the card
-        if c.get("code_snippet") and not re.search(r"\b\d+(\.\d+)+\b|\bv\d+\b|version", body + " " + (c.get("code_snippet") or ""), re.I):
+        if c.get("code_snippet") and not language_agnostic and not re.search(r"\b\d+(\.\d+)+\b|\bv\d+\b|version", body + " " + (c.get("code_snippet") or ""), re.I):
             out.append(_finding(cid, "A3", "major", "The code has no platform or version stated beside it.",
                                 "State the platform and version the code runs on."))
 
         # ---- A7 a card that teaches a command or API cites a source
-        if kind in ("walkthrough", "concept", "problem") and c.get("code_snippet") and not [x for x in (c.get("sources") or []) if x.get("url_kind") != "kit"]:
+        if kind in ("walkthrough", "concept", "problem") and c.get("code_snippet") and (c.get("code_language") or "").lower() != "pseudocode" and not [x for x in (c.get("sources") or []) if x.get("url_kind") != "kit"]:
             out.append(_finding(cid, "A7", "major", "The card teaches code but cites no source.",
                                 "Add the official documentation source for each API or command used."))
 
@@ -467,7 +494,7 @@ def check_script(
                 if str(item).strip().lower() in real_agenda and not covered(real_agenda[str(item).strip().lower()], own, threshold=0.34):
                     out.append(_finding(c.get("card_index"), "S5", "minor", f'This card is planned to teach "{real_agenda[str(item).strip().lower()][:80]}" but its text never gets to it.',
                                         "Teach that agenda item in this card, with an example, or move it to a card that does."))
-    out.extend(check_script_craft(cards, running_example))
+    out.extend(check_script_craft(cards, None if language_agnostic else running_example))
     out.extend(check_cited_lines(cards))
     out.extend(check_company_as_place(cards))
     out.extend(check_repetition(cards))
@@ -476,6 +503,7 @@ def check_script(
     out.extend(check_spoken_polish(cards))
     out.extend(check_numbers_match_output(cards))
     out.extend(check_term_order(cards))
+    out.extend(check_scope_terms(cards, agendas, outcomes, class_title, known_terms))
     # ---- K6 the last card tells the learners what the next class covers
     if upcoming:
         spoken = [c for c in cards if _kind(c) != "instructor_note" and (c.get("content_script") or "").strip()]
@@ -492,7 +520,12 @@ def check_script(
 # ---- the good-script rules that can be judged from the text itself (PRD "Good script rules"): paragraphs, sub-headings, the recap, a branching diagram,
 # the running example, everyday analogies, no opening definition, unqualified claims, instructor notes, the card sequence
 _EXOTIC = re.compile(r"\b(fighter jets?|rockets?|spaceships?|particle physics|quantum (?:computer|physics)|black holes?)\b", re.I)
-_EVERYDAY = re.compile(r"\b(upi|whatsapp|zomato|swiggy|irctc|train|cricket|ipl|bank|atm|amazon|flipkart|uber|ola|google pay|phonepe|paytm|food delivery|cab|netflix|instagram|youtube|ticket|kirana|metro)\b", re.I)
+_FANCY_WORDS_SIMPLE = {"utilise": "use", "utilize": "use", "leverage": "use", "facilitate": "help", "subsequently": "then", "nevertheless": "but", "furthermore": "also", "moreover": "also",
+                       "commence": "start", "terminate": "stop", "endeavour": "try", "endeavor": "try", "ascertain": "find out", "approximately": "about",
+                       "comprehensive": "complete", "plethora": "many", "paradigm": "way of working", "robust": "strong", "seamless": "smooth", "ubiquitous": "everywhere",
+                       "myriad": "many", "obtain": "get", "numerous": "many", "sufficient": "enough", "prior to": "before", "in order to": "to"}
+_FANCY_WORDS = re.compile(r"\b(" + "|".join(sorted((re.escape(w) for w in _FANCY_WORDS_SIMPLE), key=len, reverse=True)) + r")\b", re.I)
+_EVERYDAY = re.compile(r"\b(upi|whatsapp|zomato|swiggy|irctc|train|cricket|ipl|bank|atm|amazon|flipkart|uber|ola|google pay|phonepe|paytm|food delivery|cab|netflix|instagram|youtube|ticket|kirana|metro|shop|store|library|school|restaurant|grocery|market)\b", re.I)
 _DEFINITION_OPEN = re.compile(r"^(?:a|an|the)?\s*[\w' -]{2,40}?\s+(?:is|are|means|refers to)\s+(?:a|an|the|when|used|defined|short for|known as)\b", re.I)
 _ABSOLUTE = re.compile(r"\b(?:guaranteed|always works|never fails|100% (?:safe|secure|accurate)|completely safe|fully automatic(?:ally)?|works everywhere|cannot fail)\b", re.I)
 
@@ -522,6 +555,28 @@ def check_repetition(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             if wa and wb and len(wa & wb) / min(len(wa), len(wb)) >= 0.7:
                 out.append(_finding(b.get("card_index"), "Q5", "major", f"This quiz asks almost the same question as card {a.get('card_index')}.",
                                     "Ask about a different idea, or use a fresh case.", (b["quiz"]["question"] or "")[:100]))
+    # the same idea asked again in other words: the question plus its right answer, across quiz cards and Predict callouts inside teaching cards
+    asked = []
+    for c in cards:
+        q = c.get("quiz") if isinstance(c.get("quiz"), dict) else None
+        if q and (q.get("question") or "").strip():
+            opts, i = q.get("options") or [], q.get("correct_option_index")
+            asked.append((c.get("card_index"), "quiz", f"{q['question']} {opts[i] if isinstance(i, int) and 0 <= i < len(opts) else ''}"))
+        for m in re.finditer(r"^>\s*\*\*Predict:?\*\*:?\s*\n?((?:>.*\n?)*)", c.get("content_script") or "", re.M):
+            block = re.sub(r"^>\s?", "", m.group(1), flags=re.M).strip()
+            line = " ".join(x for x in block.splitlines() if x.strip() and not re.match(r"^[A-D][.)]", x.strip()))
+            if line:
+                asked.append((c.get("card_index"), "predict", line))
+    reported = {(f.get("card_id")) for f in out if f.get("rule") == "Q5"}
+    for k, a in enumerate(asked):
+        for b in asked[k + 1:]:
+            if a[0] == b[0] or b[0] in reported:
+                continue
+            wa, wb = _topic_words(a[2]), _topic_words(b[2])
+            if wa and wb and len(wa & wb) / min(len(wa), len(wb)) >= 0.8:
+                out.append(_finding(b[0], "Q5", "major", f"This {b[1]} tests the same idea as the {a[1]} in card {a[0]}.",
+                                    "Ask about a different idea, or use a different case.", quote=b[2][:100]))
+                reported.add(b[0])
     seen: Dict[str, Any] = {}
     for c in cards:
         run = c.get("code_run")
@@ -674,12 +729,16 @@ def check_script_craft(cards: List[Dict[str, Any]], running_example: Optional[st
             lengths = [len(s_.split()) for s_ in sentences]
             if lengths:
                 longest = max(lengths)
-                if longest > 30:
-                    out.append(_finding(cid, "R14", "minor", f"A sentence has {longest} words; keep sentences to about 15 words and none over 30.",
+                if longest > 25:
+                    out.append(_finding(cid, "R14", "minor", f"A sentence has {longest} words; keep sentences to about 15 words and none over 25.",
                                         "Split it into two or three short sentences, or cut what the learner does not need.", quote=sentences[lengths.index(longest)][:100]))
-                elif len(lengths) >= 4 and sum(lengths) / len(lengths) > 22:
+                elif len(lengths) >= 4 and sum(lengths) / len(lengths) > 18:
                     out.append(_finding(cid, "R14", "minor", f"The sentences average {sum(lengths) / len(lengths):.0f} words; aim for about 15.",
                                         "Use shorter sentences and everyday words."))
+            fancy = _FANCY_WORDS.search(prose)
+            if fancy:
+                out.append(_finding(cid, "R14", "minor", f"The card uses a fancy word (\"{fancy.group(0)}\"); use the everyday word: {_FANCY_WORDS_SIMPLE[fancy.group(0).lower()]}.",
+                                    "Write it in simple English.", quote=prose[max(0, fancy.start() - 40):fancy.end() + 40]))
         if kind in ("concept", "problem", "walkthrough") and float(c.get("duration_mins") or 0) >= 4:
             # R10 two to four sub-headings on a teaching card
             heads = len(re.findall(r"^\s*#{1,6}\s+\S|^\s*\*\*[^*\n]{2,80}\*\*:?\s*$", prose, re.M))
@@ -884,6 +943,19 @@ def check_visuals_and_quizzes(cards: List[Dict[str, Any]]) -> List[Dict[str, Any
                 if _ratio(qw, script_words) < 0.5:
                     out.append(_finding(cid, "Q3", "major", "The quiz asks about something this script does not teach.",
                                         "Write the quiz from what the cards say.", quote=(q.get("question") or "")[:100]))
+                else:
+                    # it must also be about the cards around it: the next teaching card (a quiz asks first) or the one before it
+                    pos = next((n for n, x in enumerate(cards) if x is c), None)
+                    near = [x for x in (cards[pos + 1:] if pos is not None else []) if _kind(x) in ("concept", "problem", "walkthrough")][:1] \
+                        + [x for x in reversed(cards[:pos] if pos is not None else []) if _kind(x) in ("concept", "problem", "walkthrough")][:1]
+                    if near:
+                        ci = q.get("correct_option_index")
+                        right = opts[ci] if isinstance(ci, int) and 0 <= ci < len(opts) else ""
+                        quiz_words = _topic_words(" ".join([q.get("question") or "", str(right), q.get("explanation") or ""]))
+                        best = max(_ratio(quiz_words, _topic_words(x.get("content_script") or "")) for x in near)
+                        if quiz_words and best < 0.35:
+                            out.append(_finding(cid, "Q3", "major", "The quiz is not about the cards next to it: it does not match the idea taught just after it or just before it.",
+                                                "Ask about what the next card teaches, so the quiz and the teaching belong together.", quote=(q.get("question") or "")[:100]))
     return out
 
 
@@ -1199,8 +1271,15 @@ def check_outline(outline: Dict[str, Any], target_minutes: int, agendas: Optiona
     if abs(total - target_minutes) > 0.5:
         out.append({"level": "blocker", "problem": f"Card minutes add up to {total}, not {target_minutes}."})
     lo, hi = cards_for_duration(target_minutes)
-    if not lo <= len(cards) <= hi:
-        out.append({"level": "major", "problem": f"{len(cards)} cards planned; a {target_minutes} minute class needs {lo} to {hi}."})
+    from agents.shared_context import HOUSEKEEPING_CARDS, card_limit_for, housekeeping_minutes
+    housekeeping = sum(1 for c in cards if c.get("card_type") in HOUSEKEEPING_CARDS)
+    items = [str(a).strip() for a in (agendas or []) if str(a).strip()]
+    _, hi_real = card_limit_for(target_minutes, housekeeping, len(items), housekeeping_minutes(cards))
+    if not lo <= len(cards) <= hi_real:
+        out.append({"level": "major", "problem": f"{len(cards)} cards planned; a {target_minutes} minute class needs {lo} to {hi_real}."})
+    elif len(cards) > hi:
+        out.append({"level": "minor", "problem": f"{len(cards)} cards planned. A {target_minutes} minute class usually has {lo} to {hi}, but this one has {housekeeping} fixed opening and closing cards "
+                                                 f"and {len(items)} agenda items, so up to {hi_real} are accepted. A longer class or fewer agenda items would give a lighter plan."})
 
     for c in cards:
         kind = _kind({"card_type": c.get("card_type")})
@@ -1239,7 +1318,7 @@ def check_outline(outline: Dict[str, Any], target_minutes: int, agendas: Optiona
 
     # every agenda item is taught by a concept, problem or walkthrough card: a quiz, the agenda card or the recap that names it is not teaching
     for item in [a for a in (agendas or []) if str(a).strip()]:
-        if not any(c.get("card_type") in ("concept", "problem", "walkthrough") and covered(item, [" ".join(c.get("agenda_items") or [])], threshold=0.6) for c in cards):
+        if not any(c.get("card_type") in ("concept", "problem", "walkthrough") and any(covered(item, [str(x)], threshold=0.6) for x in (c.get("agenda_items") or [])) for c in cards):
             out.append({"level": "major", "problem": f'The agenda item "{item[:80]}" has no teaching card of its own: only a quiz or the recap names it. Plan a concept, problem or walkthrough card for it.'})
 
     # the opening kit lists what an opening class must cover; most of it has to be planned as cards

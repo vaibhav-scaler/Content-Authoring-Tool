@@ -76,6 +76,32 @@ def cards_for_duration(duration_minutes: int) -> Tuple[int, int]:
     return round(duration_minutes / slow), round(duration_minutes / fast)
 
 
+HOUSEKEEPING_CARDS = ("instructor_note", "welcome", "agenda", "faq", "recap")
+
+
+def housekeeping_minutes(cards: List[Dict[str, Any]]) -> float:
+    """The least time the fixed cards of a class can take: a note, welcome or agenda card at its minimum, a program FAQ or recap at the teaching minimum."""
+    total = 0.0
+    for c in cards:
+        kind = c.get("card_type")
+        if kind in ("instructor_note", "welcome", "agenda"):
+            total += LIMITS["note_card_minutes"][0]
+        elif kind in ("faq", "recap"):
+            total += LIMITS["teaching_card_minutes"][0]
+    return total
+
+
+def card_limit_for(duration_minutes: int, housekeeping: int, agenda_items: int, housekeeping_mins: float = 0.0) -> Tuple[int, int]:
+    """(lowest, highest) card count that is realistic for this class. The length rule (S1) gives 5 to 6 cards for 30 minutes, but the opening and closing cards of a class
+    (note, welcome, agenda, program FAQ, recap) are fixed. The highest count is never below them plus the minimum quizzes plus as many teaching cards as the minutes can hold
+    (at their minimum length, one per agenda item at most; the rest of the items share a card)."""
+    lo, hi = cards_for_duration(duration_minutes)
+    teaching_min, quiz_min = LIMITS["teaching_card_minutes"][0], LIMITS["quiz_card_minutes"][0]
+    left = duration_minutes - housekeeping_mins - LIMITS["min_quizzes"] * quiz_min
+    teaching = min(agenda_items, max(1, int(left // teaching_min))) if housekeeping_mins else (agenda_items + 1) // 2
+    return lo, max(hi, housekeeping + teaching + LIMITS["min_quizzes"])
+
+
 _t_lo, _t_hi = LIMITS["teaching_card_minutes"]
 _q_lo, _q_hi = LIMITS["quiz_card_minutes"]
 _n_lo, _n_hi = LIMITS["note_card_minutes"]
@@ -120,8 +146,8 @@ RULES: List[Rule] = [
     Rule("T3", "TEACHING SHAPE", "review",
          "Every claim gets its 'so what' (a number or a consequence) in the next sentence."),
     Rule("T4", "TEACHING SHAPE", "review",
-         "Use one running example for the whole class, grown visually, with identical names every time. If Block A "
-         "gives a running example from the previous class, continue it. Do not reset it."),
+         "Use one running example or analogy for the whole class, grown visually, with identical names. "
+         "Choose a new one for each class; never carry the previous class's into the next."),
     Rule("T5", "TEACHING SHAPE", "review",
          "Bring an idea back in a new form each time (words, then diagram, then quiz, then applied). Never repeat a form."),
     Rule("T6", "TEACHING SHAPE", "review",
@@ -153,8 +179,9 @@ RULES: List[Rule] = [
          f"Keep paragraphs to {_p_lo} to {_p_hi} sentences."),
     Rule("R13", "READABILITY", "auto",
          f"A teaching card has {_h_lo} to {_h_hi} short sub-headings, so a learner can skim it."),
+    Rule("S10", "SCOPE", "auto", "Teach only what the agenda and outcomes cover."),
     Rule("R14", "READABILITY", "auto",
-         "Write in simple English, as you would explain it to a friend: short sentences (about 15 words, none over 30), everyday words, one idea per sentence, no idioms or slang, "
+         "Write in simple English, as to a friend: short sentences (about 15 words, none over 25), everyday words (say \"use\", not \"utilise\"), one idea per sentence, no idioms or slang, "
          "and explain every technical word the first time you use it."),
     Rule("K6", "STRUCTURE", "auto",
          "The last card ends the class by telling the learners what the next class covers, taken from the next class's own agenda. When that agenda is not written yet, name the class and say nothing about its topics."),
@@ -655,7 +682,7 @@ def render_block_a(d: Dict[str, Any], kit_focus: Optional[str] = None) -> str:
 
     out.append("<continuity>")
     if d["running_example"]:
-        out.append(f"Running example from the previous class: {d['running_example']}. Continue it with the same names.")
+        out.append(f"Running example of the previous class: {d['running_example']}. Do not reuse it. Choose a new example or analogy for this class and keep to it throughout.")
     else:
         out.append("Running example: none yet. Choose one everyday system for the whole class (rules T4 and E4).")
     if d["cliffhanger"]:
@@ -778,6 +805,10 @@ def intro_note_cue(program_opening: bool) -> str:
     return INTRO_NOTE_CUE if program_opening else INTRO_NOTE_CUE_PLAIN
 INTRO_NOTE_BODY = ("Introduce yourself to the learners in about a minute: who you are, what you do, how long you have worked in this field, and why you teach this course.\n\n"
                    "[[FROM_SME: instructor name, current role, years of experience, and one line on why you teach this]]")
+
+
+INTRO_NOTE_BODY_LATER = ("No personal introduction is needed in this class: the learners already know you. Go straight from the welcome to the agenda.")
+INTRO_NOTE_CUE_LATER = "You introduced yourself in the track's first class, so skip the introduction here."
 
 
 def track_welcome_text(track: str) -> str:

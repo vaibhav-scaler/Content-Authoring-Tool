@@ -448,7 +448,7 @@ INTRO_TITLE = "Instructor Introduction"
 
 
 def merge_opening_cards(outline: Dict[str, Any], target_minutes: int, program_opening: bool = True, first_of_module: bool = False,
-                        previous_module: Optional[str] = None, earlier_class: Optional[str] = None) -> Dict[str, Any]:
+                        previous_module: Optional[str] = None, earlier_class: Optional[str] = None, drop_note: bool = False) -> Dict[str, Any]:
     """Every class opens the same way: the mandatory setup, then three cards. Card 1 is a short instructor note "Instructor Introduction" (the instructor
     prepares to introduce themselves). Card 2 is "Welcome & Introductions" (card_type welcome): the spoken welcome and the introduction. Card 3 is
     "Today's Agenda" (card_type agenda): only the agenda with its times. The Outliner's own first note card becomes card 1 and an agenda card it made
@@ -499,11 +499,17 @@ def merge_opening_cards(outline: Dict[str, Any], target_minutes: int, program_op
                                       else f"A warm welcome back. In one or two spoken sentences say that this class builds on '{earlier_class}', which the learners already took, and goes deeper. Do not teach it again here."
                                       if follow_up else "A warm welcome to this module and its first class. In one or two spoken sentences say how it follows on from the previous module"
                                            + (f" ('{previous_module}')" if previous_module else "") + ". Do not refer to a previous class of this module, and do not teach."
-                                      if new_module else "A warm welcome back and a few sentences on where the last class stopped.")
+                                      if new_module else "A warm welcome back that opens with something specific to today's topic (a surprising number, a short puzzle or a problem the learners will meet today), then one or two sentences on how it follows the last class. No stock opening, and not the class's running-example story.")
     agenda["title"] = "Today's Agenda"
     agenda["duration_sec"] = min(float(agenda.get("duration_sec") or 90), 120)
     agenda["teaching_shape_note"] = "Only the agenda: read aloud as a short numbered list, each item with about how many minutes it takes."
     agenda["agenda_items"] = list(dict.fromkeys(carried + list(agenda.get("agenda_items") or [])))
+    if drop_note:                                             # a class that is not the track's first: the instructor does not introduce themself, so no note card
+        for s_ in sections:
+            if first in s_.get("cards", []):
+                s_["cards"].remove(first)
+        welcome["duration_sec"] = float(welcome.get("duration_sec") or 0) + float(first.get("duration_sec") or 0)
+        welcome["teaching_shape_note"] = welcome["teaching_shape_note"] + " The instructor does not introduce themself in this class."
     adj = outline.setdefault("auto_adjustments", [])
     note = "The class opens with the instructor note (Instructor Introduction), the spoken Welcome & Introductions card, then a card with only the agenda."
     if note not in adj:
@@ -667,13 +673,13 @@ def ensure_agenda_taught(outline: Dict[str, Any], agendas: Optional[List[str]], 
     if not agendas or not isinstance(outline, dict) or not outline.get("sections"):
         return outline
     teaching = ("concept", "problem", "walkthrough")
-    items_of = lambda c: " ".join(c.get("agenda_items") or [])
+    names = lambda item, c: any(covered(item, [str(x)], threshold=0.6) for x in (c.get("agenda_items") or []))      # one listed string at a time: an outcome sharing a few words must not count
     added = []
     for item in agendas:
         cards = _cards_in_order(outline)
-        if any(c.get("card_type") in teaching and covered(item, [items_of(c)], threshold=0.6) for c in cards):
+        if any(c.get("card_type") in teaching and names(item, c) for c in cards):
             continue
-        quiz = next((c for c in cards if c.get("card_type") == "quiz" and covered(item, [items_of(c)], threshold=0.6)), None)
+        quiz = next((c for c in cards if c.get("card_type") == "quiz" and names(item, c)), None)
         recap = next((c for c in reversed(cards) if c.get("card_type") == "recap"), None)
         anchor, after = (quiz, True) if quiz is not None else (recap, False)
         if anchor is None and cards:
@@ -697,7 +703,7 @@ def ensure_agenda_taught(outline: Dict[str, Any], agendas: Optional[List[str]], 
     return outline
 
 
-def ensure_topic_quizzes(outline: Dict[str, Any], agendas: Optional[List[str]], target_minutes: int) -> Dict[str, Any]:
+def ensure_topic_quizzes(outline: Dict[str, Any], agendas: Optional[List[str]], target_minutes: int, max_cards: Optional[int] = None) -> Dict[str, Any]:
     """The instructor asks first and then teaches, for every agenda topic. A topic that has teaching cards but no quiz of its own gets a short quiz card (2.5 minutes)
     planned right before its first teaching card. The durations are then rebalanced so the class still adds up. The quiz is written later like any other card.
     No model call. Safe to run twice."""
@@ -706,13 +712,15 @@ def ensure_topic_quizzes(outline: Dict[str, Any], agendas: Optional[List[str]], 
     if not agendas or not isinstance(outline, dict) or not outline.get("sections"):
         return outline
     teaching = ("concept", "problem", "walkthrough")
-    items_of = lambda c: " ".join(c.get("agenda_items") or [])
+    names = lambda item, c: any(covered(item, [str(x)], threshold=0.6) for x in (c.get("agenda_items") or []))
     added = []
     for item in agendas:
         cards = _cards_in_order(outline)
-        serving = [c for c in cards if c.get("card_type") in teaching and covered(item, [items_of(c)], threshold=0.6)]
-        if not serving or any(c.get("card_type") == "quiz" and covered(item, [items_of(c)], threshold=0.6) for c in cards):
+        serving = [c for c in cards if c.get("card_type") in teaching and names(item, c)]
+        if not serving or any(c.get("card_type") == "quiz" and names(item, c) for c in cards):
             continue
+        if max_cards is not None and len(cards) >= max_cards and sum(1 for c in cards if c.get("card_type") == "quiz") >= LIMITS["min_quizzes"]:
+            break                                                    # the class has no room for more cards: teaching cards come first, quizzes fill what is left
         first = serving[0]
         ids = {str(c.get("card_id")) for c in cards}
         n = 1
@@ -800,6 +808,7 @@ def fit_outline_to_rules(outline: Dict[str, Any], target_minutes: int, agendas: 
         if asked and any(words(asked) and len(words(asked) & words(a)) / len(words(asked)) >= 0.8 for a in (agendas or [])):
             nxt = next((c for c in cards[k + 1:] if c.get("card_type") in ("concept", "problem", "walkthrough")), None)
             topic = _short_topic(nxt.get("title")) if nxt else " ".join(asked.split()[:5])
+            topic = re.sub(r"^(?:what|why|how)\s+(?:is|are|do|does)\s+", "", topic.strip().rstrip("?!. "), flags=re.I) or topic   # "What Is Logic?" asks about "Logic", with no second question mark
             q["title"] = f"Predict: What Do You Already Know About {topic}?"[:120]
     # 4. minutes: caps first, then the total
     quizzes = [c for c in cards if c.get("card_type") == "quiz"]
@@ -837,6 +846,18 @@ def fit_outline_to_rules(outline: Dict[str, Any], target_minutes: int, agendas: 
             if pick is None:
                 break
             pick["duration_sec"] = secs(pick) - step
+    # the teaching cards are full and minutes are still missing: the opening cards and the recap take them (within their own ranges), so the class still adds up
+    for kinds, cap in ((("welcome", "agenda", "instructor_note"), 150), (("recap",), int(6.5 * 60)), (("quiz",), int(0.22 * want))):
+        group = [c for c in cards if c.get("card_type") in kinds]
+        for _ in range(20000):
+            diff = want - sum(secs(c) for c in cards)
+            if diff < step // 2 + 1 or not group:
+                break
+            room = [c for c in group if secs(c) + step <= (cap if kinds != ("quiz",) else min(lo_hi["quiz"][1] * 60, cap // max(1, len(group))))]
+            if not room:
+                break
+            pick = min(room, key=secs)
+            pick["duration_sec"] = secs(pick) + step
     outline["total_duration_sec"] = sum(secs(c) for c in cards)
     return outline
 
@@ -898,13 +919,15 @@ def apply_flat_edits(outline: Dict[str, Any], edits: List[Dict[str, Any]]) -> Di
     return outline
 
 
-def enforce_card_count(outline: Dict[str, Any], target_minutes: int) -> Dict[str, Any]:
+def enforce_card_count(outline: Dict[str, Any], target_minutes: int, agendas: Optional[List[str]] = None) -> Dict[str, Any]:
     """When the outline still has more cards than the class length allows (rule S1), merge the weakest cards into a neighbour until it fits.
     A merged card's agenda items, outcomes and visual move to the card that takes it over, so nothing in the scope is lost. Never touches
     the first two cards or the closing recap and FAQ, and keeps enough quizzes. Durations are rebalanced afterwards. No model call."""
-    lo, hi = cards_for_duration(target_minutes)
+    from agents.shared_context import HOUSEKEEPING_CARDS, card_limit_for, housekeeping_minutes
     sections = outline.get("sections", [])
     flat = lambda: [(si, ci, c) for si, s_ in enumerate(sections) for ci, c in enumerate(s_.get("cards", []))]
+    n_items = len([a for a in (agendas or []) if str(a).strip()])
+    lo, hi = card_limit_for(target_minutes, sum(1 for _, _, c in flat() if c.get("card_type") in HOUSEKEEPING_CARDS), n_items, housekeeping_minutes([c for _, _, c in flat()])) if n_items else cards_for_duration(target_minutes)
     notes = []
     for _ in range(60):
         cards = flat()
@@ -925,9 +948,14 @@ def enforce_card_count(outline: Dict[str, Any], target_minutes: int) -> Dict[str
         if not scored:
             break
         _, n, si, ci, weak = max(scored, key=lambda t: t[0])
-        # the neighbour that takes it over: the previous teaching card in the same section, else the next card
+        # the card that takes it over is always a teaching card (never a quiz, which would lose the only card that teaches the topic): the nearest one before it, else after it
+        order = [c for _, _, c in cards]
+        before = [c for c in order[:n] if c.get("card_type") in TEACHING_CARD_TYPES and c.get("card_type") not in ("recap", "faq")]
+        after = [c for c in order[n + 1:] if c.get("card_type") in TEACHING_CARD_TYPES and c.get("card_type") not in ("recap", "faq")]
+        into = before[-1] if before else (after[0] if after else None)
         sibling = sections[si]["cards"]
-        into = sibling[ci - 1] if ci > 0 and sibling[ci - 1].get("card_type") in TEACHING_CARD_TYPES else (sibling[ci + 1] if ci + 1 < len(sibling) else cards[n - 1][2])
+        if into is None or into is weak:
+            break
         for key in ("agenda_items", "outcomes"):
             into[key] = list(dict.fromkeys(list(into.get(key) or []) + list(weak.get(key) or [])))
         into["teaching_shape_note"] = (into.get("teaching_shape_note") or "").rstrip(". ") + f". Also cover: {weak.get('title')}."
@@ -945,6 +973,185 @@ def enforce_card_count(outline: Dict[str, Any], target_minutes: int) -> Dict[str
         outline.setdefault("auto_adjustments", []).extend(notes)
         outline = _normalize_outline_duration(outline, target_minutes)
         outline = normalize_visual_cards(outline)
+    return outline
+
+
+def ensure_min_visuals(outline: Dict[str, Any]) -> Dict[str, Any]:
+    """The outline needs at least LIMITS["min_diagrams"] visual cards. When merging cards or a failed planner left it short, plan the missing ones by code: one flow
+    diagram for each teaching card (then quiz, then other card) that has none yet. The wording is a plain request that the visual writer expands later. No model call."""
+    visuals = list(outline.get("visual_cards") or [])
+    need = LIMITS["min_diagrams"] - len(visuals)
+    cards = _cards_in_order(outline)
+    if need <= 0 or not cards:
+        return outline
+    taken = {v.get("parent_card_id") for v in visuals}
+    rank = {"walkthrough": 0, "concept": 0, "problem": 0, "recap": 1, "quiz": 2, "faq": 3}
+    eligible = sorted((c for c in cards if c.get("card_id") not in taken and c.get("card_type") in rank), key=lambda c: rank[c["card_type"]])
+    eligible += [c for c in cards if c.get("card_id") in taken and c.get("card_type") in ("concept", "walkthrough", "problem")]
+    added = []
+    for c in eligible[:need]:
+        topic = _short_topic(c.get("title") or "this topic")
+        used = {str(v.get("visual_id")) for v in visuals}
+        n = len(visuals) + 1
+        while f"V{n:02d}" in used:
+            n += 1
+        vid = f"V{n:02d}"
+        visuals.append({"visual_id": vid, "parent_card_id": c.get("card_id"), "kind": "diagram", "title": f"{topic}: how it works",
+                        "prompt": f"A simple flow diagram of how {topic} works, using the class's running example.", "elements": []})
+        added.append(vid)
+    if added:
+        outline["visual_cards"] = visuals
+        outline.setdefault("auto_adjustments", []).append(f"Planned visual card(s) {', '.join(added)} to reach the {LIMITS['min_diagrams']} diagrams a class needs.")
+        outline = normalize_visual_cards(outline)
+    return outline
+
+
+def _beginner_share(outline: Dict[str, Any]) -> Optional[float]:
+    """The share of teaching minutes at beginner level, counted as the outline check counts it (a bridge card is half beginner)."""
+    teaching = [c for c in _cards_in_order(outline) if c.get("card_type") in LEVEL_CARD_TYPES]
+    total = sum(float(c.get("duration_sec") or 0) for c in teaching)
+    if not teaching or total <= 0:
+        return None
+    return 100.0 * sum(float(c.get("duration_sec") or 0) * {"beginner": 1.0, "bridge": 0.5}.get(c.get("level"), 0.0) for c in teaching) / total
+
+
+def split_for_levels(outline: Dict[str, Any], agendas: Optional[List[str]], beginner_pct: Optional[int], target_minutes: int) -> Dict[str, Any]:
+    """The SME's beginner/advanced split cannot be met when one teaching card carries several agenda items: a card has one level. Split the biggest such card in two,
+    the first agenda items in the first part (the order of the agenda), until the split is within the check's tolerance or no card can be split. Never splits below
+    the minimum card length, and keeps the card count inside what the class can hold. No model call."""
+    from agents.shared_context import HOUSEKEEPING_CARDS, card_limit_for, housekeeping_minutes
+    if beginner_pct is None or not isinstance(outline, dict) or not outline.get("sections"):
+        return outline
+    items = [str(a).strip() for a in (agendas or []) if str(a).strip()]
+    order = {a.lower(): i for i, a in enumerate(items)}
+    min_secs = LIMITS["teaching_card_minutes"][0] * 60
+    for _ in range(3):
+        plan_levels(outline, beginner_pct)
+        share = _beginner_share(outline)
+        cards = _cards_in_order(outline)
+        _, hi = card_limit_for(target_minutes, sum(1 for c in cards if c.get("card_type") in HOUSEKEEPING_CARDS), len(items), housekeeping_minutes(cards))
+        if share is None or abs(share - beginner_pct) <= 12 or len(cards) >= hi:
+            break
+        real = lambda c: sorted({str(a).strip() for a in (c.get("agenda_items") or []) if str(a).strip().lower() in order}, key=lambda a: order[a.lower()])
+        candidates = [c for c in cards if c.get("card_type") in LEVEL_CARD_TYPES and not is_logistics(c) and len(real(c)) >= 2 and float(c.get("duration_sec") or 0) >= 2 * min_secs]
+        if not candidates:
+            break
+        big = max(candidates, key=lambda c: float(c.get("duration_sec") or 0))
+        mine = real(big)
+        first_items, rest = mine[:1], mine[1:]
+        total = float(big.get("duration_sec") or 0)
+        first_secs = int(round(max(min_secs, min(total - min_secs, total * len(first_items) / len(mine))) / 6.0) * 6)
+        ids = {str(c.get("card_id")) for c in cards}
+        new_id = f"{big.get('card_id')}b"
+        while new_id in ids:
+            new_id += "b"
+        others = [a for a in (big.get("agenda_items") or []) if str(a).strip().lower() not in order]
+        second = dict(big, card_id=new_id, title=_short_topic(rest[0]) if len(rest) == 1 else big.get("title"), duration_sec=int(total - first_secs),
+                      agenda_items=rest + others, visuals_planned=[])
+        big["agenda_items"] = first_items
+        big["title"] = _short_topic(first_items[0])
+        big["duration_sec"] = first_secs
+        second["teaching_shape_note"] = (big.get("teaching_shape_note") or "").rstrip(". ") + f". This card covers: {', '.join(rest)}."
+        for sec in outline["sections"]:
+            if big in sec.get("cards", []):
+                sec["cards"].insert(sec["cards"].index(big) + 1, second)
+                break
+        for v in outline.get("visual_cards") or []:                         # a visual goes with the part that teaches what it shows
+            if v.get("parent_card_id") == big.get("card_id"):
+                serves = {str(x).strip().lower() for x in (v.get("serves_agenda_items") or [])}
+                if serves & {r.lower() for r in rest} and not serves & {f.lower() for f in first_items}:
+                    v["parent_card_id"] = new_id
+        outline.setdefault("auto_adjustments", []).append(f"Split \"{big.get('title')}\" into two cards so the beginner/advanced split can be met.")
+        outline = normalize_visual_cards(outline)
+    plan_levels(outline, beginner_pct)
+    return outline
+
+
+def tidy_quiz_items(outline: Dict[str, Any], agendas: Optional[List[str]]) -> Dict[str, Any]:
+    """A quiz asks about one topic. After cards were merged, a quiz can list every agenda item and outcome of the class, which puts it in the wrong place in the order. Keep
+    only the first agenda item it lists."""
+    order = {str(a).strip().lower(): str(a).strip() for a in (agendas or []) if str(a).strip()}
+    for c in _cards_in_order(outline):
+        if c.get("card_type") != "quiz":
+            continue
+        real = [x for x in (c.get("agenda_items") or []) if str(x).strip().lower() in order]
+        if len(real) > 1 or (real and len(c.get("agenda_items") or []) > len(real)):
+            c["agenda_items"] = real[:1]
+    return outline
+
+
+def align_visuals(outline: Dict[str, Any]) -> Dict[str, Any]:
+    """A visual belongs on the card that teaches what it shows. After cards were merged or split, one can sit on a card that does not teach its topic, and a diagram on a quiz card
+    gives the answer away before the question is asked. Move such a visual to the teaching card that names the agenda items it serves. No model call."""
+    cards = _cards_in_order(outline)
+    by_id = {c.get("card_id"): c for c in cards}
+    norm = lambda items: {str(x).strip().lower() for x in (items or []) if str(x).strip()}
+    teaching = [c for c in cards if c.get("card_type") in ("concept", "problem", "walkthrough")]
+    moved = []
+    for v in outline.get("visual_cards") or []:
+        parent = by_id.get(v.get("parent_card_id"))
+        serves = norm(v.get("serves_agenda_items"))
+        if parent is None or not serves:
+            continue
+        overlap = lambda c: len(serves & norm(c.get("agenda_items")))
+        if parent.get("card_type") in ("recap", "agenda", "faq") or (parent.get("card_type") in ("concept", "problem", "walkthrough") and overlap(parent)):
+            continue
+        best = max(teaching, key=lambda c: (overlap(c), -abs(cards.index(c) - cards.index(parent))), default=None)
+        if best is not None and overlap(best) and best is not parent:
+            v["parent_card_id"] = best.get("card_id")
+            moved.append(str(v.get("visual_id")))
+    # a teaching card with two visuals while another teaching card has none: the plainer visual (a generic one, with no elements) is replanned for the card without one
+    visuals = outline.get("visual_cards") or []
+    for _ in range(4):
+        count = {c.get("card_id"): sum(1 for v in visuals if v.get("parent_card_id") == c.get("card_id")) for c in teaching}
+        empty = next((c for c in teaching if count.get(c.get("card_id")) == 0), None)
+        crowded = [c for c in teaching if count.get(c.get("card_id"), 0) >= 2]
+        if empty is None or not crowded:
+            break
+        host = crowded[0]
+        mine = [v for v in visuals if v.get("parent_card_id") == host.get("card_id")]
+        plain = min(mine, key=lambda v: (len(v.get("elements") or []), v.get("kind") == "animation"))
+        topic = _short_topic(empty.get("title") or "this topic")
+        plain.update({"parent_card_id": empty.get("card_id"), "title": f"{topic}: how it works", "kind": "diagram",
+                      "prompt": f"A simple flow diagram of how {topic} works, using the class's running example.",
+                      "serves_agenda_items": list(empty.get("agenda_items") or []), "elements": []})
+        moved.append(str(plain.get("visual_id")))
+    if moved:
+        outline.setdefault("auto_adjustments", []).append(f"Moved visual card(s) {', '.join(moved)} onto the card that teaches what they show.")
+        outline = normalize_visual_cards(outline)
+    return outline
+
+
+def shape_outline(outline: Dict[str, Any], agendas: Optional[List[str]], target_minutes: int, *, program_opening: bool, drop_note: bool, first_of_module: bool,
+                  previous_module: Optional[str], earlier_class: Optional[str], beginner_pct: Optional[int], code_ratio: Optional[int],
+                  kit_topics: Optional[List[str]], min_animations: int) -> Dict[str, Any]:
+    """Everything done to an outline after the model drafts it, in one place so a new outline and a regenerated one are treated alike. By code, no model call:
+    the opening cards, an own teaching card and a quiz for every agenda item, the card count, animations, the minimum visuals, and the SME's split and code ratio."""
+    if not isinstance(outline, dict) or not outline.get("sections"):
+        return outline
+    outline = merge_opening_cards(outline, target_minutes, program_opening=program_opening, drop_note=drop_note, first_of_module=first_of_module,
+                                  previous_module=previous_module, earlier_class=earlier_class)
+    outline = ensure_agenda_taught(outline, agendas, target_minutes)
+    outline = tidy_quiz_items(outline, agendas)
+    from agents.shared_context import HOUSEKEEPING_CARDS, card_limit_for, housekeeping_minutes
+    _cards = _cards_in_order(outline)
+    _, room = card_limit_for(target_minutes, sum(1 for c in _cards if c.get("card_type") in HOUSEKEEPING_CARDS), len([a for a in (agendas or []) if str(a).strip()]), housekeeping_minutes(_cards))
+    outline = ensure_topic_quizzes(outline, agendas, target_minutes, max_cards=room)
+    outline = enforce_card_count(outline, target_minutes, agendas)
+    outline = ensure_agenda_taught(outline, agendas, target_minutes)             # a merge must never leave an agenda item without its own teaching card
+    outline = split_for_levels(outline, agendas, beginner_pct, target_minutes)
+    outline = align_visuals(outline)
+    outline = ensure_min_visuals(outline)
+    outline = ensure_animations(outline, min_animations)
+    outline = finalize_plan(outline, beginner_pct, code_ratio, agendas=agendas, target_minutes=target_minutes, kit_topics=kit_topics)
+    if sum(1 for c in _cards_in_order(outline) if c.get("card_type") == "quiz") < LIMITS["min_quizzes"]:
+        # finishing the plan folds two quizzes that sit before the same card into one, which can leave fewer quizzes than the class needs: add one before a topic that has none, then trim again
+        outline = ensure_topic_quizzes(outline, agendas, target_minutes, max_cards=None)
+        outline = enforce_card_count(outline, target_minutes, agendas)
+        outline = ensure_agenda_taught(outline, agendas, target_minutes)
+        outline = ensure_min_visuals(outline)
+        outline = ensure_animations(outline, min_animations)
+        outline = finalize_plan(outline, beginner_pct, code_ratio, agendas=agendas, target_minutes=target_minutes, kit_topics=kit_topics)
     return outline
 
 
