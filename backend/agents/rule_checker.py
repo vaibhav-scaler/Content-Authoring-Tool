@@ -1296,6 +1296,23 @@ def check_outline(outline: Dict[str, Any], target_minutes: int, agendas: Optiona
             if not covered(item, mapped, threshold=0.6):
                 out.append({"level": "blocker", "problem": f"The {label} \"{item[:90]}\" is not mapped to any card."})
 
+    # an agenda item the SME wrote keeps the SME's words: a card that lists a reworded version of one is reported (a clear rewording is put back by code first)
+    items_real = [str(a).strip() for a in (agendas or []) if str(a).strip()]
+    if items_real:
+        exact_items = {re.sub(r"\s+", " ", a).lower() for a in items_real}
+        outcome_lines = {re.sub(r"\s+", " ", x).lower() for x in split_items(_real_outcomes(outcomes))}
+        seen_reworded = set()
+        for c in cards:
+            for x in c.get("agenda_items") or []:
+                key = re.sub(r"\s+", " ", str(x).strip()).lower()
+                if key in exact_items or key in outcome_lines or key in seen_reworded:
+                    continue
+                close = max(items_real, key=lambda a: len(words(str(x)) & words(a)) / max(1, min(len(words(str(x))), len(words(a)))))
+                share = len(words(str(x)) & words(close)) / max(1, min(len(words(str(x))), len(words(close))))
+                if 0.25 <= share < 1.0 and not re.match(r"(?i)learners?\b|^(?:explain|identify|apply|understand|describe|build|write)\b", str(x).strip()):
+                    seen_reworded.add(key)
+                    out.append({"level": "major", "problem": f"Card \"{c.get('title')}\" lists \"{str(x)[:80]}\", which looks like a reworded version of the SME's agenda item \"{close[:80]}\". Use the SME's wording and keep to what that item asks for."})
+
     # the other way round: every teaching card serves something the author asked for. The class title is a label, so a topic that is only in the title is outside the scope.
     scope_items = list(agendas or []) + split_items(outcomes)
     if scope_items:

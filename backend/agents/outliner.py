@@ -1122,6 +1122,48 @@ def align_visuals(outline: Dict[str, Any]) -> Dict[str, Any]:
     return outline
 
 
+def _wording_ratio(a: str, b: str) -> float:
+    """How much of the shorter of two titles appears in the other (significant words, plurals folded)."""
+    from agents.rule_checker import _topic_words
+    wa, wb = _topic_words(a), _topic_words(b)
+    return len(wa & wb) / min(len(wa), len(wb)) if wa and wb else 0.0
+
+
+def snap_agenda_wording(outline: Dict[str, Any], agendas: Optional[List[str]]) -> Dict[str, Any]:
+    """The SME's agenda items keep the SME's own words. The model sometimes rewrites them ("Common Pitfalls, Hallucinations, and Best Practices" becomes "Common AI Pitfalls:
+    Hallucinations, Bias, and Context Window Limits"). Every listed item that is a rewording of one agenda item (at least half its significant words in common, and clearly closer
+    to that item than to any other) is put back to the SME's text, and the agenda card lists the SME's items exactly, in the SME's order. A rewording that is too far from any item
+    is left for the outline check to report. No model call."""
+    items = [str(a).strip() for a in (agendas or []) if str(a).strip()]
+    if not items or not isinstance(outline, dict) or not outline.get("sections"):
+        return outline
+    exact = {re.sub(r"\s+", " ", a).lower(): a for a in items}
+    fixed = 0
+    for c in _cards_in_order(outline):
+        if c.get("card_type") == "agenda":
+            if list(c.get("agenda_items") or []) != items:
+                c["agenda_items"] = list(items)
+                fixed += 1
+            continue
+        new = []
+        for x in c.get("agenda_items") or []:
+            key = re.sub(r"\s+", " ", str(x).strip()).lower()
+            if key in exact:
+                new.append(exact[key])
+                continue
+            scored = sorted(((_wording_ratio(str(x), a), a) for a in items), reverse=True)
+            best, runner = scored[0], (scored[1][0] if len(scored) > 1 else 0.0)
+            if best[0] >= 0.5 and best[0] - runner >= 0.15:
+                new.append(best[1])
+                fixed += 1
+            else:
+                new.append(x)
+        c["agenda_items"] = list(dict.fromkeys(new))
+    if fixed:
+        outline.setdefault("auto_adjustments", []).append("Put the SME's own wording back on the agenda items the model had reworded.")
+    return outline
+
+
 def shape_outline(outline: Dict[str, Any], agendas: Optional[List[str]], target_minutes: int, *, program_opening: bool, drop_note: bool, first_of_module: bool,
                   previous_module: Optional[str], earlier_class: Optional[str], beginner_pct: Optional[int], code_ratio: Optional[int],
                   kit_topics: Optional[List[str]], min_animations: int) -> Dict[str, Any]:
@@ -1131,6 +1173,7 @@ def shape_outline(outline: Dict[str, Any], agendas: Optional[List[str]], target_
         return outline
     outline = merge_opening_cards(outline, target_minutes, program_opening=program_opening, drop_note=drop_note, first_of_module=first_of_module,
                                   previous_module=previous_module, earlier_class=earlier_class)
+    outline = snap_agenda_wording(outline, agendas)
     outline = ensure_agenda_taught(outline, agendas, target_minutes)
     outline = tidy_quiz_items(outline, agendas)
     from agents.shared_context import HOUSEKEEPING_CARDS, card_limit_for, housekeeping_minutes

@@ -2395,7 +2395,8 @@ async function onInitScript() {
 
     updateScriptStatusBadge("Script WIP", "status-wip");
 
-    showLoader("Claude Sonnet Architecting 14-18 Card Outline...");
+    const cardLo = Math.round(duration / 6.4), cardHi = Math.round(duration / 5);        // the same rule the server plans by: about one card for every 5 to 6.4 minutes
+    showLoader(duration >= 60 ? `Claude Sonnet is planning a ${cardLo}-${cardHi} card outline for ${duration} minutes...` : `Claude Sonnet is planning the outline for ${duration} minutes (about ${cardLo + 2}-${cardHi + 4} cards, with the fixed opening and closing cards)...`);
     const outlineRes = await fetch(`${API_BASE}/scripts/${currentScriptId}/outline`, {
       method: "POST"
     });
@@ -2637,12 +2638,20 @@ async function saveSingleCardEdit() {
       })
     });
     if (!res.ok) throw new Error("Failed to save outline card edit");
-    
-    renderOutlineGate({
-      total_duration_mins: currentOutlineCards.reduce((acc, c) => acc + (c.duration_mins || 0), 0),
-      total_cards: currentOutlineCards.length,
-      cards: currentOutlineCards
-    });
+
+    // the server brings the other cards' minutes back to the class length, so show what it saved and not the local numbers
+    const fresh = await fetch(`${API_BASE}/scripts/${currentScriptId}/outline`);
+    if (fresh.ok) {
+      const data = await fresh.json();
+      currentOutlineCards = data.cards || currentOutlineCards;
+      renderOutlineGate(data);
+    } else {
+      renderOutlineGate({
+        total_duration_mins: currentOutlineCards.reduce((acc, c) => acc + (c.duration_mins || 0), 0),
+        total_cards: currentOutlineCards.length,
+        cards: currentOutlineCards
+      });
+    }
   } catch (err) {
     alert("Error updating card: " + err.message);
   } finally {

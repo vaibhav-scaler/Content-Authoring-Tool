@@ -2721,8 +2721,10 @@ def get_script_outline(script_id: int, _actor: User = Depends(script_guard(False
 
 def _save_flat_edits(script, modified_cards):
     """The outline screen sends its cards as a flat list. Fold the edits into the structured outline instead of replacing it, so the
-    sections, running example, agenda mapping and visual cards (everything the Writer is prompted with) are kept."""
+    sections, running example, agenda mapping and visual cards (everything the Writer is prompted with) are kept. The minutes the SME set stay as set, and the other
+    cards take up the difference so the class still adds up to its length."""
     from agents.outliner import apply_flat_edits
+    import copy
     edits = [c.dict() for c in modified_cards]
     try:
         current = json.loads(script.outline_json) if script.outline_json else None
@@ -2730,9 +2732,25 @@ def _save_flat_edits(script, modified_cards):
         current = None
     if isinstance(current, dict) and current.get("sections"):
         from agents.outliner import finalize_plan
-        script.outline_json = json.dumps(finalize_plan(apply_flat_edits(current, edits), script.content_mix_beginner, script.code_ratio, reorder=not script.cards, agendas=_script_scope(script)[1], target_minutes=int(script.duration_minutes), kit_topics=_opening_kit_topics(script)))
+        before = copy.deepcopy(current)
+        edited = finalize_plan(apply_flat_edits(current, edits), script.content_mix_beginner, script.code_ratio, reorder=not script.cards, agendas=_script_scope(script)[1])
+        _rebalance_total(edited, int(script.duration_minutes), pinned=_changed_minutes(before, edited))
+        script.outline_json = json.dumps(edited)
     else:
         script.outline_json = json.dumps(edits)          # an older flat outline has no structure to keep
+
+
+def _save_edited_sections(script, sections, normalise_visuals: bool = False):
+    """Sections sent back whole by the SME's edit: kept as sent, then the minutes are brought back to the class length (the cards whose time changed keep it)."""
+    import copy
+    curr = json.loads(script.outline_json) if script.outline_json else {}
+    before = copy.deepcopy(curr)
+    curr["sections"] = sections
+    if normalise_visuals:
+        from agents.outliner import normalize_visual_cards
+        curr = normalize_visual_cards(curr)
+    _rebalance_total(curr, int(script.duration_minutes), pinned=_changed_minutes(before, curr))
+    script.outline_json = json.dumps(curr)
 
 
 @app.post("/api/scripts/{script_id}/outline/action")
@@ -2756,12 +2774,9 @@ def handle_outline_action(script_id: int, payload: OutlineApprovalRequest, _acto
         script.outline_approved = True
         if payload.modified_sections:
             try:
-                curr = json.loads(script.outline_json) if script.outline_json else {}
-                curr["sections"] = payload.modified_sections
-                from agents.outliner import normalize_visual_cards
-                script.outline_json = json.dumps(normalize_visual_cards(curr))
-            except Exception:
-                pass
+                _save_edited_sections(script, payload.modified_sections, normalise_visuals=True)
+            except Exception as e:
+                print(f"Edited sections not saved ({str(e)[:100]})")
         elif payload.modified_cards:
             _save_flat_edits(script, payload.modified_cards)
         db.commit()
@@ -2770,11 +2785,9 @@ def handle_outline_action(script_id: int, payload: OutlineApprovalRequest, _acto
     elif action == "EDIT":
         if payload.modified_sections:
             try:
-                curr = json.loads(script.outline_json) if script.outline_json else {}
-                curr["sections"] = payload.modified_sections
-                script.outline_json = json.dumps(curr)
-            except Exception:
-                pass
+                _save_edited_sections(script, payload.modified_sections)
+            except Exception as e:
+                print(f"Edited sections not saved ({str(e)[:100]})")
         elif payload.modified_cards:
             _save_flat_edits(script, payload.modified_cards)
         db.commit()
@@ -3006,31 +3019,52 @@ def _keep_what_was_not_asked(before: dict, card: dict, directive: str) -> None:
 
 
 def _rebalance_after_edit(outline_data: dict, edited: dict, target_minutes: int) -> None:
-    """After an edit: the edited card is held inside the range for its type, and the other teaching and quiz cards take up the difference in 6 second steps so the class
-    adds up to exactly its length again. Notes, welcome and agenda cards keep their time. If there is no room, nothing is forced."""
+    """After a chat edit of one card: see _rebalance_total."""
+    _rebalance_total(outline_data, target_minutes, pinned=[edited])
+
+
+def _rebalance_total(outline_data: dict, target_minutes: int, pinned: list = ()) -> None:
+    """Keep the class adding up to exactly its length after the SME changed the outline. The cards the SME just changed (`pinned`) keep the time they were given, held inside the
+    range for their type. The difference goes to the other teaching and quiz cards first, then to the welcome, agenda and note cards, in 6 second steps that keep each card inside its
+    range. Only when nothing else has room do the pinned cards give or take the rest. If the class still cannot add up (every card is at its limit), nothing more is forced and
+    the outline check says so."""
     from agents.shared_context import LIMITS, TEACHING_CARD_TYPES
     cards = [c for s in outline_data.get("sections", []) or [] for c in s.get("cards", []) or []]
     if not cards:
         return
+    teaching_kinds = set(TEACHING_CARD_TYPES)
 
     def span(c):
         k = str(c.get("card_type") or "")
-        lo, hi = LIMITS["teaching_card_minutes"] if k in TEACHING_CARD_TYPES else LIMITS["quiz_card_minutes"] if k == "quiz" else LIMITS["note_card_minutes"]
+        lo, hi = LIMITS["teaching_card_minutes"] if k in teaching_kinds else LIMITS["quiz_card_minutes"] if k == "quiz" else LIMITS["note_card_minutes"]
         return int(lo * 60), int(hi * 60)
-    lo, hi = span(edited)
-    edited["duration_sec"] = max(lo, min(hi, int(edited.get("duration_sec") or lo)))
-    others = [c for c in cards if c is not edited and str(c.get("card_type")) in set(TEACHING_CARD_TYPES) | {"quiz"}]
-    for _ in range(2000):
-        gap = target_minutes * 60 - sum(int(c.get("duration_sec") or 0) for c in cards)
-        if abs(gap) < 3:
-            break
-        up = gap > 0
-        room = [(span(c)[1] - c["duration_sec"]) if up else (c["duration_sec"] - span(c)[0]) for c in others]
-        if not others or max(room) < 6:
-            break
-        best = max(range(len(others)), key=lambda i: room[i])
-        others[best]["duration_sec"] += 6 if up else -6
-    outline_data["total_duration_sec"] = sum(int(c.get("duration_sec") or 0) for c in cards)
+    secs = lambda c: int(c.get("duration_sec") or 0)
+    for c in pinned:
+        lo, hi = span(c)
+        c["duration_sec"] = max(lo, min(hi, secs(c) or lo))
+    pinned_ids = {id(c) for c in pinned}
+    free = [c for c in cards if id(c) not in pinned_ids]
+    tiers = [[c for c in free if str(c.get("card_type")) in teaching_kinds | {"quiz"}],
+             [c for c in free if str(c.get("card_type")) in ("welcome", "agenda", "instructor_note")],
+             [c for c in cards if id(c) in pinned_ids]]
+    for tier in tiers:
+        for _ in range(4000):
+            gap = target_minutes * 60 - sum(secs(c) for c in cards)
+            if abs(gap) < 3 or not tier:
+                break
+            up = gap > 0
+            room = [(span(c)[1] - secs(c)) if up else (secs(c) - span(c)[0]) for c in tier]
+            if max(room) < 6:
+                break
+            best = max(range(len(tier)), key=lambda k: room[k])
+            tier[best]["duration_sec"] = secs(tier[best]) + (6 if up else -6)
+    outline_data["total_duration_sec"] = sum(secs(c) for c in cards)
+
+
+def _changed_minutes(before_outline, after_outline) -> list:
+    """The cards of `after_outline` whose planned time differs from the same card (by id) in `before_outline`: what the SME just set by hand."""
+    old = {str(c.get("card_id")): int(c.get("duration_sec") or 0) for _sid, c in _outline_card_list(before_outline)} if isinstance(before_outline, dict) else {}
+    return [c for _sid, c in _outline_card_list(after_outline) if str(c.get("card_id")) in old and int(c.get("duration_sec") or 0) != old[str(c.get("card_id"))]]
 
 
 def _apply_local_card_directive(target_card: dict, user_prompt: str):
