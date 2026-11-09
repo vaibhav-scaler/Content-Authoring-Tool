@@ -70,5 +70,8 @@ def get_db():
     session = SyncSessionLocal()
     try:
         yield session
+    except Exception:
+        session.rollback()            # a failed request leaves nothing half-saved
+        raise
     finally:
         session.close()

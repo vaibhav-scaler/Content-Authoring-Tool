@@ -125,6 +125,18 @@ app = FastAPI(
 async def llm_unavailable_handler(request, exc):
     return JSONResponse(status_code=503, content={"detail": str(exc)})
 
+
+@app.exception_handler(Exception)
+async def unexpected_error_handler(request, exc):
+    """Anything a route did not handle: the screen gets a clear message with a reference instead of a bare "Internal Server Error", and the full error goes to the log under
+    that reference so it can be found."""
+    import traceback
+    ref = uuid.uuid4().hex[:8]
+    print(f"[error {ref}] {request.method} {request.url.path}: {type(exc).__name__}: {str(exc)[:300]}")
+    traceback.print_exception(type(exc), exc, exc.__traceback__)
+    return JSONResponse(status_code=500, content={"detail": f"Something went wrong on the server, and it was logged (reference {ref}). Try again. If it keeps happening, send this reference.",
+                                                  "reference": ref})
+
 # CORS configuration. CORS_ORIGINS (comma separated) limits which websites may call the API; the page is served from the same address, so it is not needed for it
 app.add_middleware(
     CORSMiddleware,
