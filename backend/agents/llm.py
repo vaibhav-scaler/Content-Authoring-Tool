@@ -162,8 +162,8 @@ def reserve_budget(estimate: float) -> float:
     limit = budget_usd()
     if limit <= 0:
         return 0.0
-    spent = spent_usd()
-    with _reserve_lock:
+    with _reserve_lock:                      # the spend is read inside the lock, so two calls arriving together cannot both see the same room
+        spent = spent_usd()
         if spent + _reserved_usd + estimate > limit:
             left = max(0.0, limit - spent - _reserved_usd)
             raise LLMBudgetExceeded(
@@ -287,7 +287,19 @@ def record_api_usage(
 
 # ---- the request ---------------------------------------------------------------------------------------------------
 
-_last_reply: Dict[str, Any] = {}      # the most recent reply, kept so a parse failure can say what came back
+class _ReplyNote(threading.local):
+    """The most recent reply of THIS request thread, kept so a parse failure can say what came back. Per thread, so two authors' requests never read each other's."""
+    def __init__(self):
+        self.data: Dict[str, Any] = {}
+
+    def update(self, **kw) -> None:
+        self.data.update(kw)
+
+    def get(self, key, default=None):
+        return self.data.get(key, default)
+
+
+_last_reply = _ReplyNote()
 
 
 def _status_of(e: Exception) -> Optional[int]:
@@ -536,14 +548,19 @@ def call_llm_chat(
     if not llm_configured(effective_provider):
         key_name = "OPENROUTER_API_KEY" if effective_provider == "openrouter" else ("ANTHROPIC_API_KEY" if effective_provider == "anthropic" else "GEMINI_API_KEY")
         raise LLMUnavailable(f"{_names(effective_provider)} is not configured. Set {key_name} in backend/.env and restart.")
-    held = 0.0
-    if effective_provider in ("anthropic", "openrouter"):    # the paid calls this log tracks
-        model_name = claude_model() if effective_provider == "anthropic" else openrouter_model()
-        held = reserve_budget(worst_case_cost(model_name, messages, system, max_tokens))
+    from agents.concurrency import llm_gate
     try:
-        return _call_with_retries(effective_provider, messages, system, max_tokens, temperature, json_mode, agent, script_id)
-    finally:
-        release_budget(held)
+        with llm_gate.slot():                    # at most LLM_MAX_CONCURRENT calls at once; a burst of authors waits its turn instead of hitting the provider's rate limit together
+            held = 0.0
+            if effective_provider in ("anthropic", "openrouter"):    # the paid calls this log tracks
+                model_name = claude_model() if effective_provider == "anthropic" else openrouter_model()
+                held = reserve_budget(worst_case_cost(model_name, messages, system, max_tokens))
+            try:
+                return _call_with_retries(effective_provider, messages, system, max_tokens, temperature, json_mode, agent, script_id)
+            finally:
+                release_budget(held)
+    except TimeoutError as err:
+        raise LLMUnavailable(f"The AI is handling a lot of requests right now and your request {err}. Please try again in a minute.")
 
 
 def _call_with_retries(effective_provider, messages, system, max_tokens, temperature, json_mode, agent, script_id) -> str:

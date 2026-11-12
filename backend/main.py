@@ -484,6 +484,22 @@ def log_activity(db: Session, user_name: str, action_type: str, description: str
         print(f"Error logging activity: {e}")
 
 @app.middleware("http")
+async def one_ai_job_per_script(request, call_next):
+    """A second AI request of the same kind on the same script (a double click, two tabs, two authors) is turned away with a clear message instead of doing the work twice.
+    Different scripts never wait for each other. See agents/concurrency.py."""
+    from agents.concurrency import busy_message, job_key, jobs
+    key = job_key(request.method, request.url.path)
+    if key is None:
+        return await call_next(request)
+    if not jobs.try_start(key):
+        return JSONResponse(status_code=409, content={"detail": busy_message(key)})
+    try:
+        return await call_next(request)
+    finally:
+        jobs.finish(key)
+
+
+@app.middleware("http")
 async def track_user_activity(request, call_next):
     """Record what each signed-in person does (see activity_tracker.py), with what changed and a link to the item. It never changes the response."""
     from activity_tracker import classify, entity_name, record, snapshot, diff, enrich_explicit
