@@ -191,6 +191,19 @@ class ScriptCard(Base):
     script = relationship("Script", back_populates="cards")
     visual_assets = relationship("VisualAsset", back_populates="card", cascade="all, delete-orphan")
 
+class CardHistory(Base):
+    """What a card said before each change, so the author can Undo and Redo. One row is one saved state of the card's words (see agents/card_history.py).
+    `stack` is "undo" (older states, newest last) or "redo" (states Undo stepped back from). A new table, so a database without it gets it from create_all."""
+    __tablename__ = "card_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    card_id = Column(Integer, nullable=False, index=True)
+    script_id = Column(Integer, nullable=False, index=True)
+    stack = Column(String(8), nullable=False)
+    snapshot = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+
 class MemoryLedger(Base):
     __tablename__ = "memory_ledgers"
 

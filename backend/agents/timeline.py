@@ -12,6 +12,7 @@ import re
 from typing import Any, Dict, List, Optional
 
 from agents.rule_checker import covered, spoken_text
+from agents.shared_context import is_break_card, is_break_text
 
 NOT_TEACHING = ("instructor_note", "welcome", "agenda", "faq", "recap")
 
@@ -51,9 +52,13 @@ def agenda_timing(outline_cards: List[Dict[str, Any]], agendas: Optional[List[st
             if any(a.strip().lower() == item.strip().lower() for a in named) or (named and covered(item, [" ".join(named)], threshold=0.7)):
                 serving[i].append(n)
     shares = {n: sum(1 for lst in serving.values() if n in lst) for n in range(len(teaching))}
-    intro = sum(float(c.get("duration_sec") or 0) / 60.0 for c in outline_cards if c.get("card_type") in ("instructor_note", "welcome", "agenda"))
+    intro = sum(float(c.get("duration_sec") or 0) / 60.0 for c in outline_cards if c.get("card_type") in ("instructor_note", "welcome", "agenda") and not is_break_card(c))
+    break_cards = [c for c in outline_cards if is_break_card(c)]
     out = []
     for i, item in enumerate(items):
+        if is_break_text(item) and break_cards:
+            out.append({"item": item.strip(), "minutes": round(sum(float(c.get("duration_sec") or 0) / 60.0 for c in break_cards), 1), "cards": [c.get("card_id") for c in break_cards]})
+            continue
         minutes = sum((float(teaching[n].get("duration_sec") or 0) / 60.0) / max(1, shares[n]) for n in serving[i])
         if minutes <= 0 and not serving[i] and re.search(r"\b(warm|welcome|intro|getting to know|icebreak)", item, re.I):
             minutes = intro                                  # the opening is the note, welcome and agenda cards
@@ -66,6 +71,15 @@ def _short_title(title: str) -> str:
     return (re.split(r"\s+[\u2014\u2013-]\s+|:\s+|\s*\(", title or "", maxsplit=1)[0].strip() or (title or "").strip())
 
 
+def _faq_label(title: str) -> str:
+    """How a FAQ card is named in the agenda: the program FAQ by its name ("How This Program Works"), a bare "FAQ: Top Questions About X" as "FAQ: Top Questions About X"."""
+    head = _short_title(title)
+    if head.lower() in ("faq", "faqs", "q&a", "questions and answers", "frequently asked questions"):
+        rest = re.sub(r"^\s*(?:faqs?|q&a)\s*[:\u2014\u2013-]\s*", "", title or "", flags=re.I).strip()
+        return (f"FAQ: {rest}" if rest else "FAQ")[:70]
+    return head
+
+
 def with_class_segments(outline_cards: List[Dict[str, Any]], timing: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """The agenda items with the rest of the class around them, so the minutes read aloud add up to the class length: the opening (note, welcome and agenda cards) first, then each
     program FAQ card under its own name, then the items, then the recap, and whatever time no row claims goes to the last row. Whole minutes that add up exactly (largest remainder)."""
@@ -75,14 +89,20 @@ def with_class_segments(outline_cards: List[Dict[str, Any]], timing: List[Dict[s
     total = sum(secs(c) for c in outline_cards)
     if total <= 0:
         return timing
-    opening = sum(secs(c) for c in outline_cards if c.get("card_type") in ("instructor_note", "welcome", "agenda"))
-    faqs = [(_short_title(c.get("title")), secs(c)) for c in outline_cards if c.get("card_type") == "faq"]
+    opening = sum(secs(c) for c in outline_cards if c.get("card_type") in ("instructor_note", "welcome", "agenda") and not is_break_card(c))
+    has_intro = any(c.get("card_type") == "instructor_note" and not is_break_card(c) for c in outline_cards)             # only a track's first class has the instructor's introduction
+    first_teaching = next((n for n, c in enumerate(outline_cards) if c.get("card_type") in ("concept", "problem", "walkthrough", "quiz")), len(outline_cards))
+    early_faqs, late_faqs = [], []
+    for n, c in enumerate(outline_cards):
+        if c.get("card_type") == "faq":
+            (early_faqs if n < first_teaching else late_faqs).append((_faq_label(c.get("title")), secs(c)))
     recap = sum(secs(c) for c in outline_cards if c.get("card_type") == "recap")
     rows: List[List[Any]] = []                                   # [label, minutes, cards]
     if opening > 0:
-        rows.append(["Welcome, introductions and agenda", opening, []])
-    rows += [[name, mins, []] for name, mins in faqs]
+        rows.append(["Welcome, introductions and agenda" if has_intro else "Welcome back and agenda", opening, []])
+    rows += [[name, mins, []] for name, mins in early_faqs]                                      # the program FAQ comes right after the opening
     rows += [[t["item"], float(t["minutes"]), t.get("cards", [])] for t in timing]
+    rows += [[name, mins, []] for name, mins in late_faqs]                                       # a FAQ about the topics comes after them, as in the plan
     rows.append(["Recap and what's next", recap, []])
     leftover = total - sum(r[1] for r in rows)
     if abs(leftover) > 0.05:
@@ -114,12 +134,24 @@ def _minutes_text(m: float) -> str:
     return f"{whole} minute" + ("" if whole == 1 else "s")
 
 
+_OWN_MINUTES = re.compile(r"(?:,\s*|\s+)?\b(?:about\s+)?\d+\s*(?:minutes?|mins?)\b", re.I)
+
+
+def item_label(item: str) -> str:
+    """An agenda item as it is read aloud next to its planned time. The SME's own minutes in it ("(live poll, 8 min)") are taken out, so a line carries one time, not two:
+    "Opening (live poll, 8 min)" reads "Opening (live poll)", and "Break (5 min)" reads "Break". The rest of the SME's wording is kept."""
+    def tidy(m):
+        inner = _OWN_MINUTES.sub("", m.group(1)).strip(" ,;")
+        return f" ({inner})" if inner else ""
+    return re.sub(r"\s*\(([^()]*?\d+\s*(?:minutes?|mins?)[^()]*?)\)\s*$", tidy, str(item or "").strip(), flags=re.I).strip()
+
+
 def agenda_block(timing: List[Dict[str, Any]]) -> str:
     """The agenda as the instructor reads it aloud: every item, in order, with its time."""
     untimed = bool(timing) and all(t.get("untimed") for t in timing)
     lines = ["Here is what we will do today." if untimed else "Here is what we will do today, and how long each part takes.", ""]
     for n, t in enumerate(timing, start=1):
-        lines.append(f"{n}. {t['item']}" + ("" if untimed else f" ({_minutes_text(t['minutes'])})"))
+        lines.append(f"{n}. {t['item'] if untimed else item_label(t['item'])}" + ("" if untimed else f" ({_minutes_text(t['minutes'])})"))
     return "\n".join(lines)
 
 
@@ -135,11 +167,11 @@ def agenda_is_complete(body: str, timing: List[Dict[str, Any]]) -> bool:
     return named == len(timing) and timed >= max(1, len(timing) // 2)
 
 
-def ensure_agenda_block(body: str, timing: List[Dict[str, Any]]) -> str:
+def ensure_agenda_block(body: str, timing: List[Dict[str, Any]], force: bool = False) -> str:
     """The agenda card's text, with the agenda and its times added after what is there when the card does not already give them. The welcome stays first."""
     if timing and all(t.get("untimed") for t in timing):
         body = re.sub(r"(?m)^(\s*(?:\d+[.)]|[-*])\s+.*?)\s*\((?:about\s+)?\d+\s*(?:minutes?|mins?)\)\s*$", r"\1", body or "")      # an untimed agenda carries no minutes
-    if not timing or agenda_is_complete(body, timing):
+    if not timing or (agenda_is_complete(body, timing) and not force):
         return body
     lines = (body or "").split("\n")
     item_re = re.compile(r"^\s*(?:\d+[.)]|[-*])\s+")
@@ -151,7 +183,7 @@ def ensure_agenda_block(body: str, timing: List[Dict[str, Any]]) -> str:
                 end += 1
             text = " ".join(lines[n:end])
             if sum(1 for t in timing if covered(t["item"], [text], threshold=0.6)) >= max(2, len(timing) // 2):
-                new = [f"{k}. {t['item']}" + ("" if t.get("untimed") else f" ({_minutes_text(t['minutes'])})") for k, t in enumerate(timing, start=1)]
+                new = [f"{k}. {t['item'] if t.get('untimed') else item_label(t['item'])}" + ("" if t.get("untimed") else f" ({_minutes_text(t['minutes'])})") for k, t in enumerate(timing, start=1)]
                 return "\n".join(lines[:n] + new + lines[end:])
             n = end
         else:

@@ -42,14 +42,14 @@ def tat_days(approved_at: Optional[datetime.datetime], kickoff: Optional[datetim
     return round(max(0.0, (approved_at - kickoff).total_seconds() / 86400.0), 1)
 
 
-def author_minutes(db: Session, script: Script) -> int:
-    """The author's working time on one script, from the activity log (see the module note)."""
+def author_minutes(db: Session, script: Script, until: Optional[datetime.datetime] = None) -> int:
+    """The author's working time on one script, from the activity log (see the module note). With `until`, only actions up to that moment count."""
     sid = script.id
     rows = (db.query(UserActivity.user_name, UserActivity.created_at)
             .filter(or_(UserActivity.details.like(f'%"kind": "script", "id": {sid}}}%'), UserActivity.description.like(f"%script #{sid} %"), UserActivity.description.like(f"%script #{sid}'%")))
             .order_by(UserActivity.created_at).all())
     author = _plain(script.sme_name or (script.user.name if script.user else ""))
-    times = [t for n, t in rows if t and (not author or _plain(n) == author)]
+    times = [t for n, t in rows if t and (not author or _plain(n) == author) and (until is None or t <= until)]
     if not times:
         return 0
     total, start, last = 0.0, times[0], times[0]
@@ -119,3 +119,21 @@ def compute(db: Session, program_ids: Optional[List[int]] = None, now: Optional[
                         "avg_author_minutes": round(sum(all_minutes) / len(all_minutes)) if all_minutes else None},
             "notes": {"tat": "Days from the module's kickoff date to the day the Module Owner approved the script. Where a module has no kickoff date, from the day its first script was started.",
                       "author_minutes": f"The author's working time on the script, worked out from the activity log: actions less than {SESSION_GAP_MIN} minutes apart count as one session, plus {TAIL_MIN} minutes after the last one. It is an estimate, not a timer."}}
+
+
+def script_timing(db: Session, script: Script, now: Optional[datetime.datetime] = None) -> Dict[str, Any]:
+    """The clock for one script, from the moment the author started filling in the inputs to the moment the script was submitted to the Module Owner (or now, if it has not been).
+    The start is the "Form Started" event the page records when the author first touches the form (the script's creation time when there is none). Working time is the activity-log
+    estimate up to the submission."""
+    from models import ScriptEvent
+    now = now or datetime.datetime.utcnow()
+    started = db.query(ScriptEvent).filter(ScriptEvent.script_id == script.id, ScriptEvent.event_type == "Form Started").order_by(ScriptEvent.created_at).first()
+    submitted = db.query(ScriptEvent).filter(ScriptEvent.script_id == script.id, ScriptEvent.event_type == "Submitted for MO Review").order_by(ScriptEvent.created_at).first()
+    start = started.created_at if started and started.created_at else script.created_at
+    end = submitted.created_at if submitted and submitted.created_at else None
+    stop = end or now
+    rounds = db.query(ScriptEvent).filter(ScriptEvent.script_id == script.id, ScriptEvent.event_type == "Submitted for MO Review").count()
+    return {"script_id": script.id, "started_at": start.isoformat() if start else None, "start_basis": "form" if started else "created",
+            "submitted_at": end.isoformat() if end else None, "submitted": end is not None,
+            "elapsed_seconds": max(0, int((stop - start).total_seconds())) if start else 0,
+            "working_minutes": author_minutes(db, script, until=end), "submissions": rounds, "server_time": now.isoformat()}

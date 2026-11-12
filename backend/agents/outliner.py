@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from agents.shared_context import CARD_TYPES, LIMITS, TEACHING_CARD_TYPES, cards_for_duration
+from agents.shared_context import CARD_TYPES, LIMITS, TEACHING_CARD_TYPES, break_minutes, cards_for_duration, is_break_card, is_break_text
 
 from agents.llm import call_llm_json, llm_configured
 
@@ -580,8 +580,19 @@ _ORIENT_WORDS = re.compile(r"\b(welcome|agenda|career|careers|expectation|expect
 _LOGISTICS_WORDS = re.compile(r"\b(psp|attendance|contests?|faqs?|dashboard|chat norms|session flow|assignments?\b.*\bnotes|how this program works)\b", re.I)
 
 
+_LOGISTICS_OFF = [False]          # set while a class that is itself about contests or program topics is shaped: its cards are the class, not logistics around it
+
+
+def class_is_about_logistics(class_title: Optional[str]) -> bool:
+    """A class named "Beginner Contest 1" or "Contest discussion" teaches that topic: every one of its cards would look like program logistics, and the 14% cap for
+    logistics would squeeze the whole class."""
+    return bool(class_title and _LOGISTICS_WORDS.search(class_title))
+
+
 def is_logistics(card: Dict[str, Any]) -> bool:
     """A card about how the program runs (PSP, attendance, contests, FAQs, dashboard), judged from its title. It never carries code."""
+    if _LOGISTICS_OFF[0]:
+        return False
     return bool(_LOGISTICS_WORDS.search(card.get("title") or "")) or card.get("card_type") == "faq"
 
 
@@ -676,6 +687,8 @@ def ensure_agenda_taught(outline: Dict[str, Any], agendas: Optional[List[str]], 
     names = lambda item, c: any(covered(item, [str(x)], threshold=0.6) for x in (c.get("agenda_items") or []))      # one listed string at a time: an outcome sharing a few words must not count
     added = []
     for item in agendas:
+        if is_break_text(item):
+            continue                                                                  # a break is one break card, never a worked example
         cards = _cards_in_order(outline)
         if any(c.get("card_type") in teaching and names(item, c) for c in cards):
             continue
@@ -1164,15 +1177,53 @@ def snap_agenda_wording(outline: Dict[str, Any], agendas: Optional[List[str]]) -
     return outline
 
 
+def ensure_kit_card(outline: Dict[str, Any], kit_topics: Optional[List[str]], target_minutes: int) -> Dict[str, Any]:
+    """The first class of a track must cover its opening kit (terms, expectations, FAQs, dashboard). When the model planned no program FAQ card to hold them, plan one right after
+    the agenda: "How This Program Works", 4 minutes, with the kit topics in its plan note. No model call. Safe to run twice."""
+    if not kit_topics or not isinstance(outline, dict) or not outline.get("sections"):
+        return outline
+    cards = _cards_in_order(outline)
+    if any(is_logistics(c) for c in cards):
+        return outline
+    host = next((c for c in cards if c.get("card_type") == "agenda"), cards[0])
+    ids = {str(c.get("card_id")) for c in cards}
+    new_id = "KIT1"
+    while new_id in ids:
+        new_id += "x"
+    card = {"card_id": new_id, "card_type": "faq", "title": "How This Program Works", "duration_sec": 240, "agenda_items": [], "outcomes": [],
+            "teaching_shape_note": "Cover: " + "; ".join(t.rstrip(".") for t in kit_topics)[:560]}
+    for sec in outline["sections"]:
+        if host in sec.get("cards", []):
+            sec["cards"].insert(sec["cards"].index(host) + 1, card)
+            break
+    outline.setdefault("auto_adjustments", []).append("Planned a program FAQ card for the opening kit topics (the outline had none).")
+    return _normalize_outline_duration(outline, target_minutes)
+
+
 def shape_outline(outline: Dict[str, Any], agendas: Optional[List[str]], target_minutes: int, *, program_opening: bool, drop_note: bool, first_of_module: bool,
                   previous_module: Optional[str], earlier_class: Optional[str], beginner_pct: Optional[int], code_ratio: Optional[int],
-                  kit_topics: Optional[List[str]], min_animations: int) -> Dict[str, Any]:
+                  kit_topics: Optional[List[str]], min_animations: int, class_title: Optional[str] = None, outcomes: Optional[str] = None) -> Dict[str, Any]:
+    """See _shape_outline. A class that is itself about contests is shaped without the program-logistics rules."""
+    was = _LOGISTICS_OFF[0]
+    _LOGISTICS_OFF[0] = class_is_about_logistics(class_title)
+    try:
+        shaped = _shape_outline(outline, agendas, target_minutes, program_opening=program_opening, drop_note=drop_note, first_of_module=first_of_module, previous_module=previous_module,
+                                earlier_class=earlier_class, beginner_pct=beginner_pct, code_ratio=code_ratio, kit_topics=kit_topics, min_animations=min_animations)
+        return map_outcomes(shaped, outcomes)
+    finally:
+        _LOGISTICS_OFF[0] = was
+
+
+def _shape_outline(outline: Dict[str, Any], agendas: Optional[List[str]], target_minutes: int, *, program_opening: bool, drop_note: bool, first_of_module: bool,
+                   previous_module: Optional[str], earlier_class: Optional[str], beginner_pct: Optional[int], code_ratio: Optional[int],
+                   kit_topics: Optional[List[str]], min_animations: int) -> Dict[str, Any]:
     """Everything done to an outline after the model drafts it, in one place so a new outline and a regenerated one are treated alike. By code, no model call:
     the opening cards, an own teaching card and a quiz for every agenda item, the card count, animations, the minimum visuals, and the SME's split and code ratio."""
     if not isinstance(outline, dict) or not outline.get("sections"):
         return outline
     outline = merge_opening_cards(outline, target_minutes, program_opening=program_opening, drop_note=drop_note, first_of_module=first_of_module,
                                   previous_module=previous_module, earlier_class=earlier_class)
+    outline = ensure_kit_card(outline, kit_topics, target_minutes)
     outline = snap_agenda_wording(outline, agendas)
     outline = ensure_agenda_taught(outline, agendas, target_minutes)
     outline = tidy_quiz_items(outline, agendas)
@@ -1195,7 +1246,147 @@ def shape_outline(outline: Dict[str, Any], agendas: Optional[List[str]], target_
         outline = ensure_min_visuals(outline)
         outline = ensure_animations(outline, min_animations)
         outline = finalize_plan(outline, beginner_pct, code_ratio, agendas=agendas, target_minutes=target_minutes, kit_topics=kit_topics)
+    outline = settle_break(outline, agendas, target_minutes)
     return outline
+
+
+ADDABLE_CARD_TYPES = ("concept", "problem", "walkthrough", "quiz")
+_OPENING_TYPES = ("instructor_note", "welcome", "agenda", "faq")
+
+
+def card_is_protected(card: Dict[str, Any]) -> bool:
+    """The opening cards and the recap are the class's frame: the SME edits them but cannot delete them. A break can be deleted."""
+    return card.get("card_type") in ("instructor_note", "welcome", "agenda", "recap") and not is_break_card(card)
+
+
+def first_free_position(cards: List[Dict[str, Any]]) -> int:
+    """How many cards at the start are the opening (note, welcome, agenda, program FAQ): a new card goes after them, never before."""
+    n = 0
+    for c in cards:
+        if c.get("card_type") in _OPENING_TYPES and not is_break_card(c):
+            n += 1
+        else:
+            break
+    return n
+
+
+def add_card(outline: Dict[str, Any], after_index: int, title: str, card_type: str, minutes: float, agenda_item: Optional[str] = None) -> Dict[str, Any]:
+    """Put a new teaching or quiz card of the SME's own after card number `after_index` (1 is the first card). Returns the new card; the caller rebalances the minutes.
+    The new card keeps to the opening and the recap: it cannot go before the agenda card or after the recap. Raises ValueError with a sentence the SME can read."""
+    cards = _cards_in_order(outline)
+    title = re.sub(r"\s+", " ", str(title or "")).strip()
+    if not title:
+        raise ValueError("Give the card a title.")
+    if len(title) > 140:
+        raise ValueError("Keep the title under 140 characters.")
+    if card_type not in ADDABLE_CARD_TYPES:
+        raise ValueError("A new card can be a concept, problem, walkthrough or quiz.")
+    lo = first_free_position(cards)
+    hi = len(cards) - (1 if cards and cards[-1].get("card_type") == "recap" else 0)
+    if not lo <= int(after_index) <= hi:
+        raise ValueError("A new card goes after the agenda card and before the recap.")
+    anchor = cards[int(after_index) - 1]
+    ids = {str(c.get("card_id")) for c in cards}
+    n = 1
+    while f"U{n}" in ids:
+        n += 1
+    rng = LIMITS["quiz_card_minutes"] if card_type == "quiz" else LIMITS["teaching_card_minutes"]
+    secs = int(round(max(rng[0], min(rng[1], float(minutes or rng[0]))) * 60))
+    neighbour = next((c for c in (anchor, *cards) if c.get("level")), {})
+    card = {"card_id": f"U{n}", "card_type": card_type, "title": title, "duration_sec": secs, "agenda_items": [agenda_item] if agenda_item else [], "outcomes": [],
+            "teaching_shape_note": f"Added by the SME: {title}. Teach exactly this, in the class's plain style.", "has_code": False, "added_by_sme": True}
+    if neighbour.get("level"):
+        card["level"] = neighbour["level"]
+    for sec in outline["sections"]:
+        if anchor in sec.get("cards", []):
+            sec["cards"].insert(sec["cards"].index(anchor) + 1, card)
+            break
+    outline.setdefault("auto_adjustments", []).append(f'You added the card "{title}".')
+    return card
+
+
+def delete_card(outline: Dict[str, Any], card_index: int) -> Dict[str, Any]:
+    """Take card number `card_index` (1 is the first card) out of the outline, with the visual cards planned for it. Returns the removed card; the caller rebalances the minutes.
+    Raises ValueError for a card the class cannot do without (the opening cards and the recap)."""
+    cards = _cards_in_order(outline)
+    if not 1 <= int(card_index) <= len(cards):
+        raise ValueError("That card is not in the outline.")
+    gone = cards[int(card_index) - 1]
+    if card_is_protected(gone):
+        raise ValueError("The opening cards and the recap stay in every class. Edit this card instead.")
+    for sec in outline["sections"]:
+        if gone in sec.get("cards", []):
+            sec["cards"].remove(gone)
+    outline["sections"] = [s_ for s_ in outline["sections"] if s_.get("cards")]
+    outline["visual_cards"] = [v for v in (outline.get("visual_cards") or []) if v.get("parent_card_id") != gone.get("card_id")]
+    outline.setdefault("auto_adjustments", []).append(f'You deleted the card "{gone.get("title")}".')
+    return gone
+
+
+def refresh_plan(outline: Dict[str, Any]) -> Dict[str, Any]:
+    """Work the plan line out again from the cards as they are now: each card's level (the SME's beginner/advanced split, measured in the cards' current minutes), the minutes at each
+    level, the number of cards and how many carry code. Run it whenever the minutes or the card list change, so the plan the SME reads is the plan of the cards on screen.
+    Which cards carry code is left as it is. No model call. Safe to run twice."""
+    plan = outline.get("plan_summary") if isinstance(outline, dict) else None
+    if not isinstance(plan, dict) or not outline.get("sections"):
+        return outline
+    plan_levels(outline, plan.get("beginner_pct"))
+    cards = _cards_in_order(outline)
+    plan["level_minutes"] = {lv: round(sum(float(c.get("duration_sec") or 0) for c in cards if c.get("level") == lv and c.get("card_type") in LEVEL_CARD_TYPES) / 60.0, 1) for lv in LEVELS}
+    plan["cards"] = len(cards)
+    plan["coded_cards"] = sum(1 for c in cards if c.get("has_code"))
+    return outline
+
+
+def map_outcomes(outline: Dict[str, Any], outcomes: Optional[str]) -> Dict[str, Any]:
+    """Every learning outcome the SME wrote is listed on the teaching card that fits it best (the one sharing the most words with it), so the outline check can see it is covered.
+    An outcome some card already names is left alone. No model call. Safe to run twice."""
+    from agents.rule_checker import _real_outcomes, covered, split_items, words
+    lines = split_items(_real_outcomes(outcomes))
+    cards = _cards_in_order(outline) if isinstance(outline, dict) and outline.get("sections") else []
+    teaching = [c for c in cards if c.get("card_type") in ("concept", "problem", "walkthrough")]
+    if not lines or not teaching:
+        return outline
+    mapped = lambda: [" ".join([c.get("title") or ""] + [str(a) for a in (c.get("agenda_items") or [])] + [str(o) for o in (c.get("outcomes") or [])]) for c in cards]
+    added = 0
+    for line in lines:
+        if covered(line, mapped(), threshold=0.6):
+            continue
+        need = words(line)
+        best = max(teaching, key=lambda c: len(need & words(" ".join([c.get("title") or "", c.get("teaching_shape_note") or ""] + [str(a) for a in (c.get("agenda_items") or [])]))))
+        best["outcomes"] = list(dict.fromkeys(list(best.get("outcomes") or []) + [line]))
+        added += 1
+    if added:
+        outline.setdefault("auto_adjustments", []).append(f"{added} learning outcome{'s were' if added != 1 else ' was'} listed on the card that teaches it, so each one is covered.")
+    return outline
+
+
+def settle_break(outline: Dict[str, Any], agendas: Optional[List[str]], target_minutes: int) -> Dict[str, Any]:
+    """The SME's break ("Break (5 min)") is one break card of exactly those minutes, placed where the agenda puts it, with nothing else made from it: a stray
+    card the break item produced is removed, a second break card is dropped, and the minutes it holds come out of the other cards so the class still adds up. No model call."""
+    items = [str(a) for a in (agendas or []) if is_break_text(a)]
+    sections = outline.get("sections") or []
+    if not items or not sections:
+        return outline
+    minutes = break_minutes(items[0])
+    stray = [c for s_ in sections for c in s_.get("cards", []) if c.get("card_type") != "instructor_note" and is_break_text(re.sub(r"\s*\(worked example\)\s*$", "", c.get("title") or ""))]
+    for s_ in sections:
+        s_["cards"] = [c for c in s_.get("cards", []) if c not in stray]
+    breaks = [c for s_ in sections for c in s_.get("cards", []) if is_break_card(c)]
+    if not breaks:
+        return outline                                                               # the model drew no break card: nothing to place
+    for extra in breaks[1:]:
+        for s_ in sections:
+            if extra in s_.get("cards", []):
+                s_["cards"].remove(extra)
+    keep = breaks[0]
+    keep["is_break"] = True
+    keep["title"] = f"Break ({minutes} Minutes)"
+    keep["duration_sec"] = minutes * 60
+    keep["agenda_items"] = [items[0]]
+    sections[:] = [s_ for s_ in sections if s_.get("cards")]
+    outline.setdefault("auto_adjustments", []).append(f"The break is one {minutes} minute card; no other card was made from it.")
+    return _normalize_outline_duration(outline, target_minutes) if target_minutes else outline
 
 
 def _normalize_outline_duration(outline: Dict[str, Any], target_duration_mins: int) -> Dict[str, Any]:
@@ -1204,7 +1395,7 @@ def _normalize_outline_duration(outline: Dict[str, Any], target_duration_mins: i
     if not all_cards:
         return outline
     from agents.moderator import rebalance_durations
-    rows = [{"pedagogical_phase": c.get("card_type"), "duration_mins": (c.get("duration_sec") or 300) / 60.0} for c in all_cards]
+    rows = [{"pedagogical_phase": c.get("card_type"), "duration_mins": (c.get("duration_sec") or 300) / 60.0, "fixed": is_break_card(c)} for c in all_cards]
     rebalance_durations(rows, target_duration_mins)
     for card, row in zip(all_cards, rows):
         card["duration_sec"] = int(round(row["duration_mins"] * 60))

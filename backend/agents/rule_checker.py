@@ -12,7 +12,7 @@ import json
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
-from agents.shared_context import (CALLOUTS, LIMITS, TEACHING_CARD_TYPES, cards_for_duration, has_opening_welcome, word_budget)
+from agents.shared_context import (CALLOUTS, LIMITS, TEACHING_CARD_TYPES, cards_for_duration, has_opening_welcome, is_break_card, is_break_text, word_budget)
 
 EM_DASH = "—"
 _STOP = {"the", "a", "an", "of", "and", "or", "to", "in", "on", "for", "with", "how", "what", "why", "is", "are", "it",
@@ -283,6 +283,8 @@ def check_script(
         # ---- S1 per-card minutes
         rng = (LIMITS["teaching_card_minutes"] if kind in TEACHING_CARD_TYPES else
                LIMITS["quiz_card_minutes"] if kind == "quiz" else LIMITS["note_card_minutes"])
+        if is_break_card(c):
+            rng = (dur, dur)                                                         # a break is as long as the SME's agenda says
         if not rng[0] - 0.05 <= dur <= rng[1] + 0.05:
             out.append(_finding(cid, "S1", "major" if dur > rng[1] + 2 or dur < rng[0] - 2 else "minor",
                                 f"A {kind or 'card'} runs {rng[0]} to {rng[1]} minutes; this one is {dur}.",
@@ -1317,6 +1319,8 @@ def check_outline(outline: Dict[str, Any], target_minutes: int, agendas: Optiona
         rng = (LIMITS["teaching_card_minutes"] if kind in TEACHING_CARD_TYPES else
                LIMITS["quiz_card_minutes"] if kind == "quiz" else LIMITS["note_card_minutes"])
         mins = round((c.get("duration_sec") or 0) / 60.0, 1)
+        if is_break_card(c):
+            continue                                                                  # a break is as long as the SME's agenda says
         if not rng[0] - 0.05 <= mins <= rng[1] + 0.05:
             out.append({"level": "major", "problem": f"Card \"{c.get('title')}\" ({kind}) is planned at {mins} minutes; the range is {rng[0]} to {rng[1]}."})
 
@@ -1324,6 +1328,8 @@ def check_outline(outline: Dict[str, Any], target_minutes: int, agendas: Optiona
     mapped = [" ".join([c.get("title") or ""] + list(c.get("agenda_items") or []) + list(c.get("outcomes") or [])) for c in cards]
     for label, items in (("agenda item", agendas or []), ("learning outcome", split_items(_real_outcomes(outcomes)))):
         for item in items:
+            if is_break_text(item):
+                continue                                                              # a break is one break card, and the SME may take it out: it is never a topic to map
             if not covered(item, mapped, threshold=0.6):
                 out.append({"level": "blocker", "problem": f"The {label} \"{item[:90]}\" is not mapped to any card."})
 
@@ -1365,7 +1371,7 @@ def check_outline(outline: Dict[str, Any], target_minutes: int, agendas: Optiona
                                                         f"Attach it to an agenda item or take it out."})
 
     # every agenda item is taught by a concept, problem or walkthrough card: a quiz, the agenda card or the recap that names it is not teaching
-    for item in [a for a in (agendas or []) if str(a).strip()]:
+    for item in [a for a in (agendas or []) if str(a).strip() and not is_break_text(a)]:
         if not any(c.get("card_type") in ("concept", "problem", "walkthrough") and any(covered(item, [str(x)], threshold=0.6) for x in (c.get("agenda_items") or [])) for c in cards):
             out.append({"level": "major", "problem": f'The agenda item "{item[:80]}" has no teaching card of its own: only a quiz or the recap names it. Plan a concept, problem or walkthrough card for it.'})
 
@@ -1387,7 +1393,8 @@ def check_outline(outline: Dict[str, Any], target_minutes: int, agendas: Optiona
         if re.search(r"q\s*&\s*a|questions", it, re.I) and not any(re.search(r"q\s*&\s*a|questions", f"{c.get('title') or ''} {c.get('teaching_shape_note') or ''}", re.I)
                                                                       for c in cards if c.get("card_type") != "quiz"):
             out.append({"level": "major", "problem": f"The agenda item \"{it[:70]}\" asks for Q&A, but no card plans it. Add a card, or time inside the demo card, for open questions."})
-    logistics = [c for c in cards if re.search(r"\b(psp|attendance|contests?|faqs?|dashboard|chat norms|session flow)\b", c.get("title") or "", re.I) or c.get("card_type") == "faq"]
+    from agents.outliner import class_is_about_logistics
+    logistics = [] if class_is_about_logistics(class_title) else [c for c in cards if re.search(r"\b(psp|attendance|contests?|faqs?|dashboard|chat norms|session flow)\b", c.get("title") or "", re.I) or c.get("card_type") == "faq"]
     spent = sum((c.get("duration_sec") or 0) for c in logistics) / 60.0
     if logistics and target_minutes and spent > 0.15 * target_minutes + 0.05:
         out.append({"level": "major", "problem": f"Program logistics cards take {round(spent, 1)} of {target_minutes} minutes ({round(100 * spent / target_minutes)}%); keep them under 15% so the class itself has the time."})

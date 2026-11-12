@@ -79,6 +79,25 @@ def cards_for_duration(duration_minutes: int) -> Tuple[int, int]:
 HOUSEKEEPING_CARDS = ("instructor_note", "welcome", "agenda", "faq", "recap")
 
 
+_BREAK_ITEM = re.compile(r"^\W*(?:(?:a|the|short|quick|\d+\s*[- ]?min(?:ute)?s?)\s+)*(?:(?:stretch|tea|coffee|lunch|snack|comfort)\s+)?break\b", re.I)
+
+
+def is_break_text(text: Any) -> bool:
+    """An agenda item or card title that is a break ("Break (5 min)", "Stretch break"), not a topic that merely has the word in it ("Breaking down a problem")."""
+    t = str(text or "").strip()
+    return bool(t) and len(t.split()) <= 7 and bool(_BREAK_ITEM.match(t))
+
+
+def is_break_card(card: Dict[str, Any]) -> bool:
+    return bool(card.get("is_break")) or (card.get("card_type") == "instructor_note" and is_break_text(card.get("title")))
+
+
+def break_minutes(text: Any, default: int = 5) -> int:
+    """The minutes an agenda item gives its break ("Break (10 min)" is 10); 5 when it names none."""
+    m = re.search(r"(\d{1,2})\s*(?:min|minute)", str(text or ""), re.I)
+    return max(2, min(30, int(m.group(1)))) if m else default
+
+
 def housekeeping_minutes(cards: List[Dict[str, Any]]) -> float:
     """The least time the fixed cards of a class can take: a note, welcome or agenda card at its minimum, a program FAQ or recap at the teaching minimum."""
     total = 0.0

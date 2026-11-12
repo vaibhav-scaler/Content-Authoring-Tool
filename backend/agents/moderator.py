@@ -193,6 +193,8 @@ def rebalance_durations(cards: List[Dict[str, Any]], target_mins: float) -> None
         return
 
     def limits(c):
+        if c.get("fixed"):
+            return (float(c.get("duration_mins") or 0), float(c.get("duration_mins") or 0))     # a break keeps the minutes the SME gave it
         k = _kind(c)
         return (LIMITS["teaching_card_minutes"] if k in TEACHING_CARD_TYPES else
                 LIMITS["quiz_card_minutes"] if k == "quiz" else LIMITS["note_card_minutes"])

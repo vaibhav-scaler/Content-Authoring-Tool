@@ -14,10 +14,11 @@ from sqlalchemy import select, or_, func
 
 from database import Base, sync_engine, SyncSessionLocal
 from models import Program, Track, Module, Class, Script, ScriptCard, ReviewAudit, MemoryLedger, VisualAsset, User, UserActivity, ScriptEvent, APIUsageLog
+import agents.card_history  # noqa: F401  (registers the hook that saves a card's earlier words for Undo)
 from schemas import (
     LoginRequest, QuizEditRequest, QuizRegenerateRequest, CodeTryRequest,
     ProgramOut, TrackOut, ModuleOut, ClassOut,
-    ScriptCreateRequest, OutlineResponse, OutlineApprovalRequest,
+    ScriptCreateRequest, OutlineResponse, OutlineApprovalRequest, OutlineCardAddRequest,
     MultiAgentReviewResponse, ScriptDetailResponse, RequestChangesBody, SourceReviewRequest, ScriptCardOut,
     CardUpdateRequest, ChatAssistRequest, AssignmentResponse,
     ClassUpdate, ClassCreate, ModuleUpdate,
@@ -2031,6 +2032,47 @@ def lock_module_plan(module_id: int, payload: Optional[dict] = None, user_id: Op
                  description=f"Reviewed and locked module '{mod.name}' ({report['class_count']} classes)")
     return report
 
+def _parse_form_start(text_value: Optional[str], created_at) -> Optional[datetime.datetime]:
+    """The time the page says the author first touched the form, as a naive UTC time, or None when it is missing, unreadable, after the script was created, or more than a day earlier
+    (a form left open overnight is not working time)."""
+    if not text_value or created_at is None:
+        return None
+    try:
+        t = datetime.datetime.fromisoformat(str(text_value).strip().replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if t.tzinfo is not None:
+        t = t.astimezone(datetime.timezone.utc).replace(tzinfo=None)
+    if t > created_at or (created_at - t) > datetime.timedelta(hours=24):
+        return None
+    return t
+
+
+@app.get("/api/scripts/{script_id}/timing")
+def get_script_timing(script_id: int, _actor: User = Depends(script_guard(False)), db: Session = Depends(get_db)):
+    """The script's clock: from the moment the author first touched the form to the moment it was submitted to the Module Owner (or now), with the author's working time."""
+    script = db.query(Script).filter(Script.id == script_id).first()
+    if not script:
+        raise HTTPException(status_code=404, detail="Script not found")
+    import tat
+    return tat.script_timing(db, script)
+
+
+@app.get("/api/tours/seen")
+def get_tours_seen(user_id: Optional[int] = None, db: Session = Depends(get_db)):
+    """The walkthroughs this person has already finished, from the activity log, so a walkthrough shows once for every person on whatever browser they use."""
+    actor = _require_actor(db, user_id)
+    import tat
+    mine = tat._plain(actor.name)
+    seen = []
+    for name, description in db.query(UserActivity.user_name, UserActivity.description).filter(UserActivity.action_type == "Tour Seen").all():
+        if tat._plain(name) == mine and ":" in (description or ""):
+            key = description.split(":", 1)[1].strip()
+            if key and key not in seen:
+                seen.append(key)
+    return {"seen": seen}
+
+
 @app.post("/api/scripts/init")
 def initialize_script(payload: ScriptCreateRequest, user_id: Optional[int] = None, db: Session = Depends(get_db)):
     """Accepts the 10 Canonical Inputs and creates a WIP script record."""
@@ -2104,6 +2146,10 @@ def initialize_script(payload: ScriptCreateRequest, user_id: Optional[int] = Non
     db.add(script)
     db.commit()
     db.refresh(script)
+    started = _parse_form_start(payload.form_started_at, script.created_at)
+    if started is not None:                                          # the clock starts when the author first touched the form, not when they pressed Create
+        db.add(ScriptEvent(script_id=script.id, user_id=author_user.id if author_user else None, user_name=sme_author_name, user_role="sme", event_type="Form Started", created_at=started))
+        db.commit()
 
     log_activity(
         db,
@@ -2217,7 +2263,7 @@ def create_script_outline(script_id: int, _actor: User = Depends(script_guard(Tr
         outline_data = shape_outline(outline_data, _script_scope(script)[1], int(script.duration_minutes), program_opening=_program_opening(script),
                                      drop_note=not _program_opening(script), first_of_module=_first, previous_module=_prev_mod, earlier_class=_earlier_title(script, db),
                                      beginner_pct=script.content_mix_beginner, code_ratio=script.code_ratio, kit_topics=_opening_kit_topics(script),
-                                     min_animations=min_animations_for(trk_name))
+                                     min_animations=min_animations_for(trk_name), class_title=_script_scope(script)[0], outcomes=_script_scope(script)[2])
 
     # Save outline JSON to database (stores sections, cards, and running example)
     script.outline_json = json.dumps(outline_data)
@@ -2265,6 +2311,7 @@ def create_script_outline(script_id: int, _actor: User = Depends(script_guard(Tr
         checks=_outline_checks(script, outline_data),
         overlap_flags=_outline_overlaps(script, outline_data),
         plan_summary=outline_data.get("plan_summary") if isinstance(outline_data, dict) else None,
+        agenda_items=[a for a in _script_scope(script)[1] if str(a).strip()],
         continuity=_continuity_summary(script, db),
         running_example=outline_data.get("running_example"),
         assumptions=outline_data.get("assumptions"),
@@ -2679,9 +2726,72 @@ def repair_script_outline(script_id: int, _actor: User = Depends(script_guard(Tr
         outline = shape_outline(outline, _script_scope(script)[1], int(script.duration_minutes), program_opening=_program_opening(script),
                                 drop_note=not _program_opening(script), first_of_module=first, previous_module=prev, earlier_class=_earlier_title(script, db),
                                 beginner_pct=script.content_mix_beginner, code_ratio=script.code_ratio, kit_topics=_opening_kit_topics(script),
-                                min_animations=min_animations_for(_track_name(script)))
+                                min_animations=min_animations_for(_track_name(script)), class_title=_script_scope(script)[0], outcomes=_script_scope(script)[2])
         script.outline_json = json.dumps(outline)
         db.commit()
+    return get_script_outline(script_id, _actor, db)
+
+
+def _refresh_saved_plan(script) -> None:
+    """After the SME's edits are saved: the levels (which the Writer is told per card) and the plan line are worked out again from the saved cards."""
+    try:
+        outline = json.loads(script.outline_json) if script.outline_json else None
+        if isinstance(outline, dict) and outline.get("sections"):
+            from agents.outliner import refresh_plan
+            script.outline_json = json.dumps(refresh_plan(outline))
+    except Exception as err:
+        print(f"Plan line not refreshed ({str(err)[:100]})")
+
+
+def _outline_for_edit(script_id: int, actor_db):
+    """The saved outline of a script whose cards are not written yet, for the Add and Delete card routes."""
+    script = actor_db.query(Script).filter(Script.id == script_id).first()
+    if not script:
+        raise HTTPException(status_code=404, detail="Script not found")
+    if not script.outline_json:
+        raise HTTPException(status_code=404, detail="No outline found for this script")
+    if actor_db.query(ScriptCard).filter(ScriptCard.script_id == script_id).count():
+        raise HTTPException(status_code=409, detail="The cards are already written, so cards can no longer be added or deleted here. Edit the cards instead.")
+    outline = json.loads(script.outline_json)
+    if not (isinstance(outline, dict) and outline.get("sections")):
+        raise HTTPException(status_code=409, detail="This outline cannot be changed card by card.")
+    return script, outline
+
+
+def _finish_card_edit(script, outline: dict, pinned: list, db) -> None:
+    """Keep the class at its length, refresh the plan's counts, and save."""
+    _rebalance_total(outline, int(script.duration_minutes), pinned=pinned)
+    script.outline_json = json.dumps(outline)
+    db.commit()
+
+
+@app.post("/api/scripts/{script_id}/outline/cards", response_model=OutlineResponse)
+def add_outline_card(script_id: int, payload: OutlineCardAddRequest, _actor: User = Depends(script_guard(True)), db: Session = Depends(get_db)):
+    """The SME adds a card of their own to the outline, where they want it. No AI call: the minutes of the other cards give way so the class still adds up."""
+    script, outline = _outline_for_edit(script_id, db)
+    from agents.outliner import add_card
+    agendas = [a for a in _script_scope(script)[1] if str(a).strip()]
+    item = (payload.agenda_item or "").strip() or None
+    if item and item not in agendas:
+        raise HTTPException(status_code=422, detail="Pick one of this class's agenda items, or none.")
+    try:
+        card = add_card(outline, payload.after_card_index, payload.title, payload.card_type, payload.minutes, item)
+    except ValueError as err:
+        raise HTTPException(status_code=422, detail=str(err))
+    _finish_card_edit(script, outline, [card], db)
+    return get_script_outline(script_id, _actor, db)
+
+
+@app.delete("/api/scripts/{script_id}/outline/cards/{card_index}", response_model=OutlineResponse)
+def delete_outline_card(script_id: int, card_index: int, _actor: User = Depends(script_guard(True)), db: Session = Depends(get_db)):
+    """The SME deletes a card from the outline. No AI call: its minutes go to the other cards, and the checks say if an agenda item or outcome is left without a card."""
+    script, outline = _outline_for_edit(script_id, db)
+    from agents.outliner import delete_card
+    try:
+        delete_card(outline, card_index)
+    except ValueError as err:
+        raise HTTPException(status_code=422, detail=str(err))
+    _finish_card_edit(script, outline, [], db)
     return get_script_outline(script_id, _actor, db)
 
 
@@ -2695,6 +2805,9 @@ def get_script_outline(script_id: int, _actor: User = Depends(script_guard(False
         raise HTTPException(status_code=404, detail="No outline found for this script")
 
     outline_data = json.loads(script.outline_json)
+    if isinstance(outline_data, dict):
+        from agents.outliner import refresh_plan
+        refresh_plan(outline_data)                                      # what is shown is the plan of the cards as they are now
     sections = outline_data.get("sections", []) if isinstance(outline_data, dict) else []
     cls = script.class_entity
     effective_title = script.custom_class_title or (cls.title if cls else "Lecture Script")
@@ -2742,6 +2855,7 @@ def get_script_outline(script_id: int, _actor: User = Depends(script_guard(False
         checks=_outline_checks(script, outline_data),
         overlap_flags=_outline_overlaps(script, outline_data),
         plan_summary=outline_data.get("plan_summary") if isinstance(outline_data, dict) else None,
+        agenda_items=[a for a in _script_scope(script)[1] if str(a).strip()],
         continuity=_continuity_summary(script, db),
         running_example=outline_data.get("running_example") if isinstance(outline_data, dict) else None,
         assumptions=outline_data.get("assumptions") if isinstance(outline_data, dict) else None,
@@ -2808,6 +2922,7 @@ def handle_outline_action(script_id: int, payload: OutlineApprovalRequest, _acto
                 print(f"Edited sections not saved ({str(e)[:100]})")
         elif payload.modified_cards:
             _save_flat_edits(script, payload.modified_cards)
+        _refresh_saved_plan(script)
         db.commit()
         return {"status": "SUCCESS", "message": "Outline locked as GTG. Section-by-section generation unlocked."}
 
@@ -2819,6 +2934,7 @@ def handle_outline_action(script_id: int, payload: OutlineApprovalRequest, _acto
                 print(f"Edited sections not saved ({str(e)[:100]})")
         elif payload.modified_cards:
             _save_flat_edits(script, payload.modified_cards)
+        _refresh_saved_plan(script)
         db.commit()
         return {"status": "SUCCESS", "message": "Outline modifications saved."}
 
@@ -2885,7 +3001,7 @@ def handle_outline_action(script_id: int, payload: OutlineApprovalRequest, _acto
             outline_data = shape_outline(outline_data, _script_scope(script)[1], int(script.duration_minutes), program_opening=_program_opening(script),
                                          drop_note=not _program_opening(script), first_of_module=_first, previous_module=_prev_mod, earlier_class=_earlier_title(script, db),
                                          beginner_pct=script.content_mix_beginner, code_ratio=script.code_ratio, kit_topics=_opening_kit_topics(script),
-                                         min_animations=min_animations_for(trk_name))
+                                         min_animations=min_animations_for(trk_name), class_title=_script_scope(script)[0], outcomes=_script_scope(script)[2])
             if (payload.revision_feedback or "").strip():             # remembered, so the next ReThink keeps honouring what was already asked
                 outline_data["sme_feedback"] = (((_old_outline or {}).get("sme_feedback") if isinstance(_old_outline, dict) else None) or [])[-4:] + [payload.revision_feedback.strip()]
         script.outline_json = json.dumps(outline_data)
@@ -3029,8 +3145,8 @@ RULES:
     info = []
     if asked_minutes is not None:
         got = round(int(target_card.get("duration_sec") or 0) / 60.0, 1)
-        info.append(f"This card now takes {got} minutes; the other cards took the difference, so the class is still {script.duration_minutes} minutes." if abs(got - asked_minutes) < 0.05
-                    else f"{asked_minutes} minutes is outside what this kind of card can take, so it was set to {got}; the other cards took the difference.")
+        info.append(f"This card now takes {_fmt_minutes(got)}; the other cards took the difference, so the class is still {_fmt_minutes(script.duration_minutes)}." if abs(got - asked_minutes) < 0.05
+                    else f"{_fmt_minutes(asked_minutes)} is outside what this kind of card can take, so it was set to {_fmt_minutes(got)}; the other cards took the difference.")
     return {"status": "SUCCESS", "message": "Card updated successfully", "updated_card": target_card, "info": info}
 
 
@@ -3071,7 +3187,11 @@ def _rebalance_total(outline_data: dict, target_minutes: int, pinned: list = ())
         return
     teaching_kinds = set(TEACHING_CARD_TYPES)
 
+    from agents.shared_context import is_break_card
+
     def span(c):
+        if is_break_card(c):
+            return secs(c), secs(c)                                                      # a break keeps the minutes the agenda gave it
         k = str(c.get("card_type") or "")
         lo, hi = LIMITS["teaching_card_minutes"] if k in teaching_kinds else LIMITS["quiz_card_minutes"] if k == "quiz" else LIMITS["note_card_minutes"]
         return int(lo * 60), int(hi * 60)
@@ -3079,7 +3199,7 @@ def _rebalance_total(outline_data: dict, target_minutes: int, pinned: list = ())
     for c in pinned:
         lo, hi = span(c)
         c["duration_sec"] = max(lo, min(hi, secs(c) or lo))
-    pinned_ids = {id(c) for c in pinned}
+    pinned_ids = {id(c) for c in pinned} | {id(c) for c in cards if c.get("added_by_sme")}      # a card the SME added keeps the minutes the SME gave it
     free = [c for c in cards if id(c) not in pinned_ids]
     tiers = [[c for c in free if str(c.get("card_type")) in teaching_kinds | {"quiz"}],
              [c for c in free if str(c.get("card_type")) in ("welcome", "agenda", "instructor_note")],
@@ -3096,6 +3216,8 @@ def _rebalance_total(outline_data: dict, target_minutes: int, pinned: list = ())
             best = max(range(len(tier)), key=lambda k: room[k])
             tier[best]["duration_sec"] = secs(tier[best]) + (6 if up else -6)
     outline_data["total_duration_sec"] = sum(secs(c) for c in cards)
+    from agents.outliner import refresh_plan
+    refresh_plan(outline_data)                                                  # the plan line follows the minutes
 
 
 def _changed_minutes(before_outline, after_outline) -> list:
@@ -4668,6 +4790,8 @@ def _build_script_detail(script_id: int, db: Session):
     from agents.timeline import build_timeline
     from agents.rule_checker import spoken_words as _spoken_words
     from agents.shared_context import word_budget as _word_budget
+    from agents.card_history import counts as _history_counts
+    history_counts = _history_counts(db, [c.id for c in script.cards])
     clock_by_card = {t["card_index"]: t for t in build_timeline([{"card_index": c.card_index, "duration_mins": c.duration_mins} for c in script.cards])}
     cards_out = []
     for c in sorted(script.cards, key=lambda card: card.card_index):
@@ -4715,6 +4839,7 @@ def _build_script_detail(script_id: int, db: Session):
                         if visual_data else None,
             sources=_with_link_sources(c.content_script, json.loads(c.sources_json) if c.sources_json else None, approved_urls),
             is_approved=c.is_approved,
+            undo_count=history_counts.get(c.id, {}).get("undo", 0), redo_count=history_counts.get(c.id, {}).get("redo", 0),
             starts_at_sec=clock_by_card[c.card_index]["start_sec"], ends_at_sec=clock_by_card[c.card_index]["end_sec"],
             spoken_words=(_spoken_words(c.content_script) if (c.pedagogical_phase or "").lower() not in ("instructor_note", "instructor note") else None),
             word_budget=_word_budget(c.duration_mins)[0], words_max=_word_budget(c.duration_mins)[1]
@@ -5170,6 +5295,31 @@ def _minutes_in(instruction: str) -> Optional[float]:
     return round(float(m.group(1)), 1) if m.group(1) else round(int(m.group(2)) / 60.0, 1)
 
 
+def _fmt_minutes(x: float) -> str:
+    """1.0 -> "1 minute", 2.5 -> "2.5 minutes"."""
+    x = round(float(x), 1)
+    text = f"{int(x)}" if x == int(x) else f"{x}"
+    return f"{text} minute" + ("" if x == 1 else "s")
+
+
+def _refresh_agenda_card(db: Session, script) -> bool:
+    """The agenda card reads the class's times aloud. When a card's time changes, the written agenda card's list is rebuilt from the plan so it never states old minutes.
+    Returns True when the card's text changed."""
+    try:
+        outline = json.loads(script.outline_json) if script.outline_json else None
+        card = db.query(ScriptCard).filter(ScriptCard.script_id == script.id, ScriptCard.pedagogical_phase.ilike("agenda")).first()
+        if not isinstance(outline, dict) or card is None or not (card.content_script or "").strip():
+            return False
+        from agents.timeline import ensure_agenda_block
+        new = ensure_agenda_block(card.content_script, _agenda_timing_for(script, outline, whole_class=True), force=True)
+        if new != card.content_script:
+            card.content_script = new
+            return True
+    except Exception as e:
+        print(f"Agenda card not refreshed: {str(e)[:100]}")
+    return False
+
+
 def _apply_card_minutes(db: Session, script, card, minutes: float) -> dict:
     """Give a written card the time the SME chose: held inside the range for its type, the other cards take up the difference (teaching and quiz cards first, then the opening
     cards) so the class still adds up to its length, and the outline's planned times follow. Returns what happened: the minutes the card got, whether the request had to be limited,
@@ -5183,19 +5333,22 @@ def _apply_card_minutes(db: Session, script, card, minutes: float) -> dict:
     planned = [c for _sid, c in _outline_card_list(outline)] if isinstance(outline, dict) else []
     if planned and len(planned) >= len(rows) and 1 <= card.card_index <= len(planned):
         pinned = planned[card.card_index - 1]
+        was = [int(c.get("duration_sec") or 0) for c in planned]
         pinned["duration_sec"] = int(round(minutes * 60))
         _rebalance_total(outline, int(script.duration_minutes), pinned=[pinned])
+        shifted = [(n + 1, round((c["duration_sec"] - w) / 60.0, 1)) for n, (c, w) in enumerate(zip(planned, was)) if n + 1 != card.card_index and abs(c["duration_sec"] - w) >= 6]
         for r in rows:
             if 1 <= r.card_index <= len(planned):
                 r.duration_mins = round(planned[r.card_index - 1]["duration_sec"] / 60.0, 1)
         script.outline_json = json.dumps(outline)
+        _refresh_agenda_card(db, script)                              # the written agenda card states the new times
         got = round(pinned["duration_sec"] / 60.0, 1)
         from agents.rule_checker import spoken_text as _spoken
         words = len(_spoken(card.content_script or "").split())
         k_ = str(card.pedagogical_phase or "").lower().replace(" ", "_")
         lo_, hi_ = (LIMITS["teaching_card_minutes"] if k_ in set(TEACHING_CARD_TYPES) else LIMITS["quiz_card_minutes"] if k_ == "quiz" else LIMITS["note_card_minutes"])
         return {"minutes": got, "limited": abs(got - minutes) > 0.05, "range": (lo_, hi_), "words": words, "fits": min_words(got) <= words <= word_budget(got)[1],
-                "words_wanted": word_budget(got)[0], "total": round(sum(c["duration_sec"] for c in planned) / 60.0, 1)}
+                "words_wanted": word_budget(got)[0], "total": round(sum(c["duration_sec"] for c in planned) / 60.0, 1), "shifted": shifted}
 
     def kind(r):
         k = str(r.pedagogical_phase or "").lower().replace(" ", "_")
@@ -5231,6 +5384,7 @@ def _apply_card_minutes(db: Session, script, card, minutes: float) -> dict:
             script.outline_json = json.dumps(outline)
     except ValueError:
         pass
+    _refresh_agenda_card(db, script)
     from agents.rule_checker import spoken_text
     words = len(spoken_text(card.content_script or "").split())
     return {"minutes": got, "limited": abs(got - minutes) > 0.05, "range": (lo, hi), "words": words, "fits": min_words(got) <= words <= word_budget(got)[1],
@@ -5256,20 +5410,22 @@ def chat_assist_card(script_id: int, payload: ChatAssistRequest, _actor: User = 
         done = _apply_card_minutes(db, script_, card, asked_minutes)
         _reopen_if_approved(db, script_id, _actor)
         db.commit()
-        chat_notes_time.append(f"Card {card.card_index} now takes {done['minutes']} minutes; the other cards took the difference, so the class is still {done['total']} minutes.")
+        moved = ", ".join(f"card {n} ({'+' if d > 0 else ''}{d:g})" for n, d in (done.get("shifted") or [])[:6])
+        chat_notes_time.append(f"Card {card.card_index} now takes {_fmt_minutes(done['minutes'])}. " + (f"The difference went to {moved} minutes, " if moved else "The other cards took the difference, ") +
+                               f"so the class is still {_fmt_minutes(done['total'])}.")
         if done["limited"]:
             lo_, hi_ = done["range"]
-            chat_notes_time.append(f"{asked_minutes} minutes is outside what this kind of card can take ({lo_} to {hi_}), so it was set to {done['minutes']}.")
+            chat_notes_time.append(f"{_fmt_minutes(asked_minutes)} is outside what this kind of card can take ({lo_:g} to {hi_:g}), so it was set to {_fmt_minutes(done['minutes'])}.")
         wants_text = bool(_REWRITE_WORDS.search(re.sub(_MINUTES_ASK, " ", payload.user_prompt or "")))
         if done["fits"] and not wants_text:
             db.refresh(card)
             return {"status": "REVISED", "card_index": card.card_index, "new_content_script": card.content_script, "code_changed": False, "code_snippet": card.code_snippet,
                     "code_language": card.code_language, "code_run": None, "stage_directions": card.stage_directions, "duration_mins": card.duration_mins,
-                    "notes": [], "info": chat_notes_time, "message": f"Card {card.card_index} set to {done['minutes']} minutes."}
+                    "notes": [], "info": chat_notes_time, "message": f"Card {card.card_index} set to {_fmt_minutes(done['minutes'])}."}
         # the text no longer fits the time (or the SME also asked for a rewrite): the AI rewrites it to about the words that fit
         payload = ChatAssistRequest(card_index=payload.card_index,
                                     user_prompt=f"{payload.user_prompt}. The card now takes {done['minutes']} minutes to say, so rewrite the text to about {done['words_wanted']} words, keeping the meaning.")
-        chat_notes_time.append(f"The text had {done['words']} words, but {done['minutes']} minutes holds about {done['words_wanted']}, so it was rewritten to fit.")
+        chat_notes_time.append(f"The text had {done['words']} words, but {_fmt_minutes(done['minutes'])} holds about {done['words_wanted']}, so it was rewritten to fit.")
 
     execution_mode = os.getenv("EXECUTION_MODE", "hybrid")
     if not (llm_configured() and execution_mode != "mock"):
@@ -5534,6 +5690,45 @@ def fill_sme_item(script_id: int, payload: SmeFillRequest, _actor: User = Depend
     card.is_approved = False
     db.commit()
     return {"remaining": len(collect_sme_items(_review_cards_dicts(db, script_id)))}
+
+
+# ==============================================================================
+# UNDO AND REDO FOR A CARD (agents/card_history.py)
+# ==============================================================================
+
+def _card_for_history(script_id: int, card_id: int, db: Session):
+    card = db.query(ScriptCard).filter(ScriptCard.script_id == script_id, ScriptCard.id == card_id).first()
+    if card is None:
+        raise HTTPException(status_code=404, detail="Card not found")
+    return card
+
+
+def _history_answer(db: Session, card: ScriptCard) -> dict:
+    from agents.card_history import counts
+    c = counts(db, [card.id]).get(card.id, {"undo": 0, "redo": 0})
+    return {"status": "OK", "card_id": card.id, "undo_count": c["undo"], "redo_count": c["redo"]}
+
+
+@app.post("/api/scripts/{script_id}/cards/{card_id}/undo")
+def undo_card_change(script_id: int, card_id: int, _actor: User = Depends(script_guard(True)), db: Session = Depends(get_db)):
+    """Put back what the card said before its last change. No AI call. The card is a draft again."""
+    from agents.card_history import undo
+    card = _card_for_history(script_id, card_id, db)
+    if not undo(db, card):
+        raise HTTPException(status_code=409, detail="There is nothing to undo on this card.")
+    db.commit()
+    return _history_answer(db, card)
+
+
+@app.post("/api/scripts/{script_id}/cards/{card_id}/redo")
+def redo_card_change(script_id: int, card_id: int, _actor: User = Depends(script_guard(True)), db: Session = Depends(get_db)):
+    """Put back the change that Undo took away. No AI call. The card is a draft again."""
+    from agents.card_history import redo
+    card = _card_for_history(script_id, card_id, db)
+    if not redo(db, card):
+        raise HTTPException(status_code=409, detail="There is nothing to redo on this card.")
+    db.commit()
+    return _history_answer(db, card)
 
 
 # ==============================================================================

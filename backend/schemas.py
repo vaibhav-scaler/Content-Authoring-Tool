@@ -147,6 +147,7 @@ class ScriptCreateRequest(BaseModel):
     custom_agendas: Optional[List[str]] = Field(None, description="Optional customized class agendas provided by SME")
     learning_outcomes: Optional[str] = Field(None, description="Learning outcomes provided by SME if not set by MO")
     review_lenses: Optional[List[str]] = Field(None, description="The review lenses the SME chose; empty means all four")
+    form_started_at: Optional[str] = Field(None, description="When the SME first touched the form (ISO time, UTC); starts the script's clock")
 
 # ==============================================================================
 # CARD & OUTLINE SCHEMAS
@@ -181,6 +182,7 @@ class OutlineResponse(BaseModel):
     plan_summary: Optional[Dict[str, Any]] = None      # the SME's beginner/advanced split and code ratio, as planned
     continuity: Optional[Dict[str, Any]] = None        # the class before this one (and whether its script is approved) and the upcoming classes not to teach
     overlap_analysis: Optional[str] = "No overlap detected with previous/subsequent classes in module."
+    agenda_items: Optional[List[str]] = None             # the SME's agenda items, for the Add card form
     overlap_flags: Optional[List[Dict[str, Any]]] = None   # cards that plan something an earlier or a later class of the module teaches (FR-10)
 
 class OutlineApprovalRequest(BaseModel):
@@ -188,6 +190,14 @@ class OutlineApprovalRequest(BaseModel):
     modified_cards: Optional[List[OutlineCardItem]] = None
     modified_sections: Optional[List[Dict[str, Any]]] = None
     revision_feedback: Optional[str] = None
+
+class OutlineCardAddRequest(BaseModel):
+    after_card_index: int = Field(..., description="The new card goes after this card (1 is the first card)")
+    title: str
+    card_type: str = "concept"
+    minutes: float = 6
+    agenda_item: Optional[str] = None
+
 
 class OutlineCardAssistRequest(BaseModel):
     card_id: Optional[str] = None
@@ -225,6 +235,8 @@ class ScriptCardOut(BaseModel):
     visual_note: Optional[str] = None     # why a placeholder was used
     sources: Optional[List[Dict[str, Any]]] = None
     is_approved: bool = False
+    undo_count: int = 0                        # how many earlier versions of this card's words can be put back
+    redo_count: int = 0                        # how many undone versions can be put back again
     starts_at_sec: Optional[float] = None      # where this card starts on the class clock, counted from the first word of the class
     ends_at_sec: Optional[float] = None
     spoken_words: Optional[int] = None         # the words the instructor actually says (code, cues and markers excluded)
