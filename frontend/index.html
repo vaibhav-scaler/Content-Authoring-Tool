@@ -14,7 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <!-- Marked.js for Markdown Rendering -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <link rel="stylesheet" href="styles.css?v=41.3">
+  <link rel="stylesheet" href="styles.css?v=43.1">
   <style>
     .studio-subnav-btn {
       display: inline-flex !important;
@@ -87,15 +87,12 @@
     </div>
 
     <div class="header-right">
-      <button id="apiUsageBtn" class="btn btn-secondary" onclick="openApiUsageModal()" title="View AI API usage and cost" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
-        <span style="font-size: 0.9rem;">⚡</span>
-        <span>API Usage</span>
-        <span id="apiUsageBadge" style="background: rgba(14, 165, 233, 0.15); color: #0284c7; padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">$0.00</span>
+      <span id="scriptTimer" class="hdr-clock hidden" title=""><span id="scriptTimerText"></span></span>
+      <button id="apiUsageBtn" class="btn btn-secondary hdr-btn" onclick="openApiUsageModal()" title="View AI API usage and cost">
+        <span>API usage</span><span id="apiUsageBadge" class="hdr-badge">$0.00</span>
       </button>
-      <button id="signOutBtn" class="btn btn-secondary hidden" onclick="signOutCurrentUser()" title="Sign Out">Sign
-        Out</button>
-      <button id="themeToggleBtn" class="btn btn-secondary theme-toggle-btn" title="Switch Theme">Switch to
-        Dark</button>
+      <button id="signOutBtn" class="btn btn-secondary hdr-btn hidden" onclick="signOutCurrentUser()" title="Sign out">Sign out</button>
+      <button id="themeToggleBtn" class="btn btn-secondary hdr-btn theme-toggle-btn" title="Switch theme">Dark</button>
       <button id="moGtgBtn" class="btn btn-success hidden">Official MO GTG Sign-Off</button>
     </div>
   </header>
@@ -103,48 +100,30 @@
   <!-- 0. HOME PAGE: what the tool is for, and sign in -->
   <div id="homeDashboardView" class="dashboard-view active">
     <main class="hp">
-      <section class="hp-intro" aria-labelledby="hpTitle">
+      <section class="hp-intro" aria-label="Script Studio">
         <div class="hp-brand"><img class="hp-logo" src="assets/scaler-logo.png" alt="Scaler"><span class="hp-brand-name">Script Studio</span></div>
-        <h1 id="hpTitle" class="hp-title">Agenda in. <span>Approved script out.</span></h1>
-        <p class="hp-lead">Write class scripts faster. Build a lecture script for any class, in any module of any program, from its agenda and learning outcomes, then get it reviewed and approved.</p>
-
-        <div class="fl-panel" aria-label="How a script is generated">
-          <div class="fl-head">How a script is generated</div>
-          <ol class="fl-list">
-          <li><span class="fl-n">1</span><div><strong>Pick the class</strong><span>Choose a program, module and class.</span></div></li>
-          <li><span class="fl-n">2</span><div><strong>Approve the outline</strong><span>Cards and timings come from the class agenda and learning outcomes.</span></div></li>
-          <li><span class="fl-n">3</span><div><strong>Script is written card by card</strong><span>Each card gets its code, quiz, diagram or animation.</span></div></li>
-          <li><span class="fl-n">4</span><div><strong>Review and fix</strong><span>The script is checked against the rulebook and issues are fixed.</span></div></li>
-          <li><span class="fl-n">5</span><div><strong>Approve and export</strong><span>The module owner approves. Download as Word, PDF or HTML.</span></div></li>
-          </ol>
-        </div>
       </section>
 
-      <section class="hp-signin" aria-labelledby="hpSignInTitle">
+      <section class="hp-signin" aria-label="Sign in">
         <div class="hp-card">
           <div id="hpSignInState">
-          <h2 id="hpSignInTitle">Sign in</h2>
-          <p class="hp-card-note">Use your Scaler email to open your programs.</p>
-
           <div id="hpGoogleBox" class="hidden">
             <div id="googleBtn" class="hp-google-btn"></div>
             <div id="hpGoogleError" class="hp-error hidden" role="alert"></div>
           </div>
 
           <form id="scalerCompanyLoginForm" onsubmit="event.preventDefault(); submitScalerCompanyLogin();" novalidate>
-            <label for="companyMailInput">Scaler email</label>
+            <label for="companyMailInput" class="hp-sr">Scaler email</label>
             <div class="hp-field">
               <svg class="hp-field-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg>
               <input type="email" id="companyMailInput" class="hp-input" placeholder="name@scaler.com"
-                autocomplete="email" autofocus aria-describedby="companyMailError companyMailHint"
+                autocomplete="email" autofocus aria-describedby="companyMailError"
                 oninput="document.getElementById('companyMailError').classList.add('hidden')">
             </div>
-            <div id="companyMailHint" class="hp-hint">Your @scaler.com address.</div>
             <div id="companyMailError" class="hp-error hidden" role="alert">Enter your Scaler email address.</div>
 
             <button type="submit" id="companyMailSubmitBtn" class="hp-button">Continue</button>
           </form>
-          <p class="hp-secure"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Only Scaler email addresses can sign in.</p>
           </div>
           <div id="hpAccessState" class="hidden">
             <div id="hpRoleStep" class="hidden">
@@ -434,8 +413,7 @@
           </section>
 
           <div class="gen-foot">
-            <span class="gen-foot-note">Next: you review the lesson outline, then the script is written.</span>
-            <button id="initScriptBtn" class="btn btn-primary btn-generate">Generate Lesson Outline</button>
+            <button id="initScriptBtn" class="btn btn-primary btn-generate">Generate lesson outline</button>
           </div>
         </div>
       </div>
@@ -506,6 +484,7 @@
               </div>
             </div>
 
+            <button id="smeItemsBtn" class="btn btn-secondary" onclick="openSmeItems()" title="Facts only you know, such as your name and role, that the script is waiting for">Needs from the SME <span id="smeItemsCount" class="sme-count" style="display: none;">0</span></button>
             <button id="shareLinkBtn" class="btn btn-secondary" onclick="onShareLink()" title="Copy the link to this script">Share link</button>
 
             <!-- Hidden compatibility hooks -->
@@ -1789,7 +1768,7 @@
   </div>
 
   <script src="code_trace.js?v=2.0"></script>
-  <script src="app.js?v=69.8"></script>
+  <script src="app.js?v=71.4"></script>
 </body>
 
 </html>

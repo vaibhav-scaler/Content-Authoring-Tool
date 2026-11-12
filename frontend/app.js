@@ -230,12 +230,18 @@ function initTheme() {
   applyTheme(savedTheme);
 }
 
+function setThemeButton(btn, theme) {                                       // the button names the theme you would switch to
+  btn.textContent = theme === "dark" ? "Light" : "Dark";
+  btn.title = theme === "dark" ? "Switch to the light theme" : "Switch to the dark theme";
+  btn.setAttribute("aria-label", btn.title);
+}
+
 function applyTheme(theme) {
   const themeBtn = document.getElementById("themeToggleBtn");
   if (theme === "dark") {
     document.body.classList.remove("light-theme");
     document.body.classList.add("dark-theme");
-    if (themeBtn) themeBtn.textContent = "Switch to Light";
+    if (themeBtn) setThemeButton(themeBtn, "dark");
     if (window.mermaid) {
       mermaid.initialize({
         startOnLoad: false,
@@ -248,7 +254,7 @@ function applyTheme(theme) {
   } else {
     document.body.classList.remove("dark-theme");
     document.body.classList.add("light-theme");
-    if (themeBtn) themeBtn.textContent = "Switch to Dark";
+    if (themeBtn) setThemeButton(themeBtn, "light");
     if (window.mermaid) {
       mermaid.initialize({
         startOnLoad: false,
@@ -1240,6 +1246,7 @@ const _smeSwitchRaw = window.switchSmeStudioView;
 window.switchSmeStudioView = function (view) {
   if (!confirmLeaveCreation(view)) return;
   _smeSwitchRaw(view); smeSyncNav(view);
+  if (view === "generator") maybeStartGeneratorTour();                           // the first visit starts the tour once
 };
 
 window.addEventListener("popstate", async (e) => {                       // the browser's Back and Forward buttons move between these screens
@@ -1578,7 +1585,7 @@ function saveGeneratorDraft() {
   try { sessionStorage.setItem(GEN_DRAFT_KEY, JSON.stringify(d)); } catch (e) { /* storage may be off */ }
 }
 function readGeneratorDraft() { try { return JSON.parse(sessionStorage.getItem(GEN_DRAFT_KEY) || "null"); } catch (e) { return null; } }
-function clearGeneratorDraft() { try { sessionStorage.removeItem(GEN_DRAFT_KEY); } catch (e) { /* nothing to clear */ } }
+function clearGeneratorDraft() { try { sessionStorage.removeItem(GEN_DRAFT_KEY); sessionStorage.removeItem(FORM_START_KEY); } catch (e) { /* nothing to clear */ } }
 ["input", "change"].forEach(t => document.addEventListener(t, (e) => { if (e.isTrusted && e.target.closest && e.target.closest("#smeInputsContainer")) saveGeneratorDraft(); }));
 
 async function restoreGeneratorDraft(d, progId) {
@@ -2369,6 +2376,7 @@ async function onInitScript() {
         custom_class_title: customTitle,
         custom_agendas: customAgendas,
         duration_minutes: duration,
+        form_started_at: genFormStartedAt(),
         content_mix_beginner: mixBeg,
         content_mix_advanced: 100 - mixBeg,
         code_ratio: codeRatio,
@@ -2524,6 +2532,8 @@ function renderOutlineGate(outlineData) {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
             Chat
           </button>
+          <button type="button" class="btn btn-edit" onclick="openAddOutlineCard(${c.card_index})" title="Add a card of your own after Card ${c.card_index}">+ Add below</button>
+          ${outlineCardIsProtected(c) ? "" : `<button type="button" class="btn btn-edit btn-delete-card" onclick="deleteOutlineCard(${c.card_index})" title="Delete Card ${c.card_index}">Delete</button>`}
         </div>
       </div>
     `;
@@ -2779,6 +2789,89 @@ async function fixOverlap(cardIndex, topic, classTitle) {
   }
 }
 window.fixOverlap = fixOverlap;
+
+// The opening cards and the recap stay in every class (the server enforces it too); a break can be deleted.
+function outlineCardIsProtected(c) {
+  const phase = String(c.pedagogical_phase || "").toLowerCase();
+  if (/^break\b/i.test(String(c.title || ""))) return false;
+  return ["instructor_note", "welcome", "agenda", "recap"].includes(phase);
+}
+
+function showOutlineAfterEdit(data) {
+  currentOutlineCards = data.cards || [];
+  renderOutlineGate(data);
+}
+
+async function deleteOutlineCard(cardIndex) {
+  const card = (currentOutlineCards || []).find(c => c.card_index === cardIndex);
+  if (!confirm(`Delete Card ${cardIndex}${card ? ` "${card.title}"` : ""}? Its minutes go to the other cards so the class keeps its length.`)) return;
+  try {
+    showLoader(`Deleting Card ${cardIndex}...`);
+    const res = await fetch(`${API_BASE}/scripts/${currentScriptId}/outline/cards/${cardIndex}`, { method: "DELETE" });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.detail || "Could not delete the card");
+    showOutlineAfterEdit(data);
+  } catch (err) {
+    alert("Could not delete the card: " + (err.message || err));
+  } finally {
+    hideLoader();
+  }
+}
+window.deleteOutlineCard = deleteOutlineCard;
+
+// A small form: title, kind of card, which agenda item it is for, and its minutes. The card goes right after the card whose button was clicked.
+async function openAddOutlineCard(afterIndex) {
+  let agendaItems = [];
+  try {
+    const r = await fetch(`${API_BASE}/scripts/${currentScriptId}/outline`);
+    if (r.ok) agendaItems = (await r.json()).agenda_items || [];
+  } catch (e) { /* the form still works without the list */ }
+  const wrap = document.createElement("div");
+  wrap.className = "ask-overlay";
+  wrap.innerHTML = `<div class="ask-box" role="dialog" aria-modal="true" aria-label="Add a card">
+    <h3>Add a card after Card ${afterIndex}</h3>
+    <p>The other cards give up a little time so the class keeps its length.</p>
+    <label class="ask-label">Title</label>
+    <input type="text" class="ask-input" data-f="title" maxlength="140" placeholder="For example: Build a pizza order in JSON">
+    <label class="ask-label">Kind of card</label>
+    <select class="ask-input" data-f="type"><option value="concept">Concept</option><option value="walkthrough">Walkthrough</option><option value="problem">Problem</option><option value="quiz">Quiz</option></select>
+    <label class="ask-label">Agenda item it is for</label>
+    <select class="ask-input" data-f="item"><option value="">None</option>${agendaItems.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a.length > 90 ? a.slice(0, 87) + "..." : a)}</option>`).join("")}</select>
+    <label class="ask-label">Minutes</label>
+    <input type="number" class="ask-input" data-f="minutes" min="2" max="10" step="0.5" value="6">
+    <div class="ask-error hidden" role="alert"></div>
+    <div class="ask-actions"><button type="button" class="btn btn-secondary" data-act="cancel">Cancel</button><button type="button" class="btn btn-primary" data-act="ok">Add card</button></div>
+  </div>`;
+  document.body.appendChild(wrap);
+  const f = (k) => wrap.querySelector(`[data-f="${k}"]`);
+  const err = wrap.querySelector(".ask-error");
+  const close = () => wrap.remove();
+  wrap.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+  wrap.addEventListener("click", async (e) => {
+    const act = e.target.dataset && e.target.dataset.act;
+    if (act === "cancel" || e.target === wrap) return close();
+    if (act !== "ok") return;
+    const title = f("title").value.trim();
+    if (!title) { err.textContent = "Give the card a title."; err.classList.remove("hidden"); f("title").focus(); return; }
+    close();
+    try {
+      showLoader("Adding the card...");
+      const res = await fetch(`${API_BASE}/scripts/${currentScriptId}/outline/cards`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ after_card_index: afterIndex, title, card_type: f("type").value, minutes: parseFloat(f("minutes").value) || 6, agenda_item: f("item").value || null })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : "Could not add the card");
+      showOutlineAfterEdit(data);
+    } catch (e2) {
+      alert("Could not add the card: " + (e2.message || e2));
+    } finally {
+      hideLoader();
+    }
+  });
+  f("title").focus();
+}
+window.openAddOutlineCard = openAddOutlineCard;
 
 // A box with room to write: the browser's one-line prompt() is too small for instructions to the Outliner.
 function askForText({ title, hint, placeholder, okLabel = "Apply" }) {
@@ -4015,6 +4108,12 @@ function renderCardsStream(cards) {
           <button type="button" class="script-card-action-btn script-card-chat-btn" onclick="openChatAssistModal(${c.card_index}, '${escapeHtml(c.title).replace(/'/g, "\\'")}')">
             Chat
           </button>
+          <button type="button" class="script-card-action-btn script-card-undo-btn" ${c.undo_count ? "" : "disabled"} onclick="undoCardChange(${c.id})" title="${c.undo_count ? `Put back what this card said before its last change (${c.undo_count} saved)` : "Nothing to undo yet"}">
+            Undo
+          </button>
+          <button type="button" class="script-card-action-btn script-card-redo-btn" ${c.redo_count ? "" : "disabled"} onclick="redoCardChange(${c.id})" title="${c.redo_count ? "Put back the change you just undid" : "Nothing to redo"}">
+            Redo
+          </button>
         </div>
       </section>
     `;
@@ -4713,6 +4812,23 @@ async function onSaveCardEdit() {
   }
 }
 
+// Undo and Redo for a card: the server puts back the card's earlier (or later) words, and the script page is drawn again.
+async function stepCardHistory(cardId, which) {
+  try {
+    showLoader(which === "undo" ? "Undoing..." : "Redoing...");
+    const res = await fetch(`${API_BASE}/scripts/${currentScriptId}/cards/${cardId}/${which}`, { method: "POST" });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : `Could not ${which}`);
+    await loadScriptStudioView();
+  } catch (err) {
+    alert(err.message || String(err));
+  } finally {
+    hideLoader();
+  }
+}
+window.undoCardChange = (cardId) => stepCardHistory(cardId, "undo");
+window.redoCardChange = (cardId) => stepCardHistory(cardId, "redo");
+
 // AI Chat Co-Pilot Handler (PRD FR-11 & FR-21)
 window.openChatAssistModal = function (cardIndex, cardTitle) {
   document.getElementById("chatCardIndex").value = cardIndex;
@@ -5037,7 +5153,8 @@ window.submitScriptToMo = async function () {
       throw new Error(err.detail || "Failed to submit script for review");
     }
     const data = await res.json();
-    alert("Script successfully submitted to Module Owner for review!");
+    scriptClock.fetchedAt = 0; await refreshScriptClock();                         // the clock stops at the moment of submission
+    alert("Script successfully submitted to Module Owner for review!" + (scriptClock.data && scriptClock.data.submitted ? `\n\nTime from the first input to submitting: ${clockText(scriptClock.data.elapsed_seconds)} (hours:minutes:seconds)` + (scriptClock.data.working_minutes ? ` (about ${scriptClock.data.working_minutes} minutes of work)` : "") : ""));
     await loadScriptStudioView();
   } catch (err) {
     alert("Error submitting script: " + err.message);
@@ -9329,6 +9446,13 @@ async function loadApiUsageData() {
     usageSetText("usageCompletionTokens", usageNum(summary.total_completion_tokens));
     usageSetText("usageTotalCost", usageMoney(summary.total_cost_usd, 4));
     usageSetText("apiUsageBadge", usageMoney(summary.total_cost_usd, 2));
+    const hdrBadge = document.getElementById("apiUsageBadge");
+    if (hdrBadge && summary.budget && summary.budget.limit_usd) {                // green, amber or red with how much of the budget is used
+      const b_ = summary.budget;
+      hdrBadge.classList.remove("ok", "warn", "bad");
+      hdrBadge.classList.add(b_.exceeded ? "bad" : (b_.warning ? "warn" : "ok"));
+      hdrBadge.title = `${usageMoney(b_.spent_usd, 2)} of ${usageMoney(b_.limit_usd, 2)} budget used (${(Number(b_.used_fraction || 0) * 100).toFixed(0)}%)`;
+    }
 
     const periodText = days ? `the last ${days === 1 ? "24 hours" : days + " days"}` : "all time";
     usageSetText("usageSubtitle", `Token use and estimated cost of every model call, ${periodText}. Average ${Number(summary.avg_latency_seconds || 0).toFixed(1)}s per call.`);
@@ -9476,3 +9600,200 @@ setTimeout(loadApiUsageData, 1500);
   new MutationObserver(sync).observe(home, { attributes: true, attributeFilter: ["class"] });
   sync();
 })();
+
+
+// ---- the script clock (header) ------------------------------------------------------------------------------------------------------------------
+// It starts when the author first touches the inputs, runs through outline, cards and review, and stops when the script is submitted to the Module Owner.
+const FORM_START_KEY = "gen_form_started_at";
+function genFormStartedAt() { try { return sessionStorage.getItem(FORM_START_KEY); } catch (e) { return null; } }
+document.addEventListener("input", (e) => {
+  if (!e.isTrusted || !e.target.closest || !e.target.closest("#smeInputsContainer")) return;
+  try { if (!sessionStorage.getItem(FORM_START_KEY)) sessionStorage.setItem(FORM_START_KEY, new Date().toISOString()); } catch (err) { /* storage may be off */ }
+});
+document.addEventListener("change", (e) => {
+  if (!e.isTrusted || !e.target.closest || !e.target.closest("#smeInputsContainer")) return;
+  try { if (!sessionStorage.getItem(FORM_START_KEY)) sessionStorage.setItem(FORM_START_KEY, new Date().toISOString()); } catch (err) { /* storage may be off */ }
+});
+
+const scriptClock = { id: null, data: null, fetchedAt: 0, fetching: false };
+function clockText(totalSeconds) {                                           // 01:12:05
+  const s = Math.max(0, Math.floor(totalSeconds));
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+}
+async function refreshScriptClockFor(sid) {
+  if (!sid || scriptClock.fetching) return;
+  scriptClock.fetching = true;
+  try {
+    const res = await fetch(`${API_BASE}/scripts/${sid}/timing`);
+    if (res.ok) { scriptClock.id = sid; scriptClock.data = await res.json(); }
+  } catch (e) { /* the clock keeps its last reading */ } finally { scriptClock.fetchedAt = Date.now(); scriptClock.fetching = false; }
+}
+function refreshScriptClock() { return refreshScriptClockFor(currentScriptId || (currentLoadedScript && currentLoadedScript.id)); }
+function renderScriptClock() {                                               // the real clock: the time of day now. How long the script has taken is in the hover text.
+  const box = document.getElementById("scriptTimer"), text = document.getElementById("scriptTimerText");
+  if (!box || !text) return;
+  const now = new Date();
+  text.textContent = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit", hour12: true });
+  const today = now.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  box.classList.remove("hidden", "done");
+  const role = (typeof currentUser !== "undefined" && currentUser) ? currentUser.role : null;
+  const sid = currentScriptId || (currentLoadedScript && currentLoadedScript.id) || null;
+  let detail = "";
+  if (!sid) {
+    const started = role === "sme" ? genFormStartedAt() : null;
+    if (started) detail = ` Time since you first touched the inputs: ${clockText((Date.now() - new Date(started).getTime()) / 1000)}.`;
+  } else {
+    if (scriptClock.id !== sid || !scriptClock.data) {
+      if (Date.now() - scriptClock.fetchedAt > 3000) { scriptClock.id = null; refreshScriptClockFor(sid); }
+    } else {
+      const d = scriptClock.data;
+      const elapsed = d.elapsed_seconds + (d.submitted ? 0 : (Date.now() - scriptClock.fetchedAt) / 1000);
+      detail = (d.submitted ? ` Time from the first input to submitting for review: ${clockText(elapsed)}` : ` Time on this script since you first touched the inputs: ${clockText(elapsed)}`)
+        + (d.working_minutes ? ` (about ${d.working_minutes} minutes of active work).` : ".");
+      if (!d.submitted && Date.now() - scriptClock.fetchedAt > 60000) refreshScriptClock();
+    }
+  }
+  box.title = today + "." + detail;
+}
+setInterval(renderScriptClock, 1000);
+window.addEventListener("focus", () => { scriptClock.fetchedAt = 0; refreshScriptClock(); });
+
+
+// ---- Create a class script: which steps are done, and how many required fields are left ------------------------------------------------------------
+function updateGeneratorProgress() {
+  const box = document.getElementById("smeInputsContainer");
+  if (!box) return;
+  const val = (id) => (document.getElementById(id)?.value || "").trim();
+  const isSet = (id) => document.getElementById(id) && !document.getElementById(id).classList.contains("gen-unset");
+  const required = [val("trackSelect"), val("moduleSelect"), val("classSelect"), val("classAgendasInput"), val("durationSelect"), isSet("mixSlider") ? "x" : "", isSet("codeRatioSlider") ? "x" : ""];
+  const done = required.filter(Boolean).length;
+  const steps = [!!(required[0] && required[1] && required[2]), !!required[3], !!(required[4] && required[5] && required[6]), !!val("referenceUrls")];
+  box.querySelectorAll(".gen-sec .gen-n").forEach((n, i) => n.classList.toggle("done", !!steps[i]));
+  const note = document.getElementById("genProgress");
+  if (note) {
+    note.textContent = done === required.length ? "All required fields complete" : `${done} of ${required.length} required fields complete`;
+    note.classList.toggle("complete", done === required.length);
+  }
+}
+["input", "change"].forEach(t => document.addEventListener(t, (e) => { if (e.target.closest && e.target.closest("#smeInputsContainer")) updateGeneratorProgress(); }));
+setInterval(() => { updateGeneratorProgress(); maybeStartGeneratorTour(); }, 800);                // also follows fields filled by code; and starts the walkthrough for anyone who has not seen it
+
+
+// ---- guided tour: a spotlight and a short note for each part of a screen -------------------------------------------------------------------------
+const TOUR_STORE = "script_studio_tour_seen";
+const tourServer = { uid: null, seen: new Set(), loaded: false, loading: false };
+function tourStoreKey() { return `${TOUR_STORE}_${currentUser ? currentUser.id : "anon"}`; }          // per person, so a new person on the same browser sees the walkthrough too
+function tourSeen(key) {
+  if (tourServer.uid === (currentUser && currentUser.id) && tourServer.seen.has(key)) return true;
+  try { return (localStorage.getItem(tourStoreKey()) || "").split(",").includes(key); } catch (e) { return false; }
+}
+function tourMarkSeen(key) {
+  try { const seen = (localStorage.getItem(tourStoreKey()) || "").split(",").filter(Boolean); if (!seen.includes(key)) seen.push(key); localStorage.setItem(tourStoreKey(), seen.join(",")); } catch (e) { /* storage may be off */ }
+  tourServer.seen.add(key);
+  recordClientActivity("Tour Seen", `Finished the walkthrough: ${key}`);                                  // the server keeps it, so it follows the person to another browser
+}
+async function tourLoadSeen() {                                                                              // what this person has already finished, from the server
+  if (!currentUser || tourServer.loading) return;
+  if (tourServer.loaded && tourServer.uid === currentUser.id) return;
+  tourServer.loading = true;
+  try {
+    const res = await fetch(`${API_BASE}/tours/seen?user_id=${currentUser.id}`);
+    if (res.ok) { const d = await res.json(); tourServer.seen = new Set(d.seen || []); tourServer.uid = currentUser.id; tourServer.loaded = true; }
+  } catch (e) { /* offline: the browser's own record is used */ } finally { tourServer.loading = false; }
+}
+
+let tourState = null;
+function startTour(key, steps) {
+  endTour(false);
+  const layer = document.createElement("div");
+  layer.className = "tour-layer";
+  layer.innerHTML = `<div class="tour-spot none"></div>
+    <div class="tour-pop" role="dialog" aria-modal="true" aria-labelledby="tourTitle">
+      <div class="tour-count"></div><h3 class="tour-title" id="tourTitle"></h3><div class="tour-body"></div>
+      <div class="tour-actions"><button type="button" class="tour-skip">Skip tour</button>
+        <div class="tour-nav"><button type="button" class="tour-btn tour-back">Back</button><button type="button" class="tour-btn primary tour-next">Next</button></div></div>
+    </div>`;
+  document.body.appendChild(layer);
+  tourState = { key, steps, i: 0, layer, onKey: null, onResize: null };
+  layer.querySelector(".tour-skip").onclick = () => endTour(true);
+  layer.querySelector(".tour-back").onclick = () => tourGo(tourState.i - 1);
+  layer.querySelector(".tour-next").onclick = () => (tourState.i === steps.length - 1 ? endTour(true) : tourGo(tourState.i + 1));
+  tourState.onKey = (e) => {
+    if (e.key === "Escape") endTour(true);
+    else if (e.key === "ArrowRight") { e.preventDefault(); if (tourState.i < steps.length - 1) tourGo(tourState.i + 1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); if (tourState.i > 0) tourGo(tourState.i - 1); }
+  };
+  tourState.onResize = () => tourPlace();
+  document.addEventListener("keydown", tourState.onKey, true);
+  window.addEventListener("resize", tourState.onResize);
+  window.addEventListener("scroll", tourState.onResize, true);
+  tourGo(0);
+}
+function endTour(markSeen) {
+  if (!tourState) return;
+  if (markSeen) tourMarkSeen(tourState.key);
+  document.removeEventListener("keydown", tourState.onKey, true);
+  window.removeEventListener("resize", tourState.onResize);
+  window.removeEventListener("scroll", tourState.onResize, true);
+  tourState.layer.remove();
+  tourState = null;
+}
+function tourGo(i) {
+  if (!tourState) return;
+  const { steps, layer } = tourState;
+  tourState.i = Math.max(0, Math.min(steps.length - 1, i));
+  const st = steps[tourState.i];
+  layer.querySelector(".tour-count").textContent = `Step ${tourState.i + 1} of ${steps.length}`;
+  layer.querySelector(".tour-title").textContent = st.title;
+  layer.querySelector(".tour-body").innerHTML = st.body;
+  layer.querySelector(".tour-back").disabled = tourState.i === 0;
+  layer.querySelector(".tour-next").textContent = tourState.i === steps.length - 1 ? "Done" : "Next";
+  const target = st.target ? document.querySelector(st.target) : null;
+  if (target && target.scrollIntoView) target.scrollIntoView({ block: "center", behavior: "auto" });
+  tourPlace();
+  setTimeout(tourPlace, 60);
+  layer.querySelector(".tour-next").focus({ preventScroll: true });
+}
+function tourPlace() {
+  if (!tourState) return;
+  const st = tourState.steps[tourState.i], layer = tourState.layer;
+  const spot = layer.querySelector(".tour-spot"), pop = layer.querySelector(".tour-pop");
+  const target = st.target ? document.querySelector(st.target) : null;
+  const vw = window.innerWidth, vh = window.innerHeight, pw = pop.offsetWidth, ph = pop.offsetHeight, gap = 14;
+  if (!target || target.offsetParent === null) {                              // a step with no part of the screen to point at: the note sits in the middle
+    spot.classList.add("none"); spot.style.cssText = "top:50%;left:50%;width:0;height:0;";
+    pop.style.top = `${Math.max(12, (vh - ph) / 2)}px`; pop.style.left = `${Math.max(12, (vw - pw) / 2)}px`;
+    return;
+  }
+  const r = target.getBoundingClientRect(), pad = 6;
+  spot.classList.remove("none");
+  spot.style.top = `${r.top - pad}px`; spot.style.left = `${r.left - pad}px`; spot.style.width = `${r.width + pad * 2}px`; spot.style.height = `${r.height + pad * 2}px`;
+  let top, left;
+  if (r.bottom + gap + ph <= vh - 8) { top = r.bottom + pad + gap; left = r.left; }                       // below the part
+  else if (r.top - gap - ph >= 8) { top = r.top - pad - gap - ph; left = r.left; }                       // above it
+  else { top = Math.max(8, Math.min(vh - ph - 8, r.top)); left = r.right + pad + gap; if (left + pw > vw - 8) left = Math.max(8, r.left - pw - gap); }   // beside it
+  pop.style.top = `${Math.max(8, Math.min(vh - ph - 8, top))}px`;
+  pop.style.left = `${Math.max(8, Math.min(vw - pw - 8, left))}px`;
+}
+
+function startGeneratorTour(manual) {
+  const view = document.getElementById("smeInputsView");
+  if (!view || view.classList.contains("hidden") || view.offsetParent === null) return;
+  const sec = (n) => `#smeInputsContainer > section.gen-sec:nth-of-type(${n})`;
+  startTour("generator", [
+    { target: null, title: "Create a class script", body: "This screen turns a class's details into a lesson outline. <b>You review and approve the outline before any script is written</b>, so nothing is generated behind your back. It takes about three minutes." },
+    { target: sec(1), title: "Pick the class", body: "Choose the track, then the module, then the class. The class decides which classes came before it and which come after, so the script follows on from the right one and doesn't teach what a later class covers." },
+    { target: sec(2), title: "Say what it should cover", body: "<b>Agenda items:</b> one topic per line. The outline is built from these, so write what the class must teach, in your own words.<ul><li>Learning outcomes are optional. If the Module Owner wrote some, they are filled in for you.</li></ul>" },
+    { target: sec(3), title: "Set how the script is written", body: "<ul><li><b>Class duration:</b> sets how many cards the class has, about one for every five to six minutes.</li><li><b>Previous class script:</b> optional. Add a file only if the Module Owner hasn't attached one.</li><li><b>Difficulty mix</b> and <b>Code share:</b> move both sliders. They start unset on purpose, so you choose them.</li></ul>" },
+    { target: sec(4), title: "Add reference material", body: "Optional. Paste links, API documentation or notes the script should use. <b>If something is mandatory</b>, such as a required setup or a source to follow, put it here and the AI will work from it." },
+    { target: "#initScriptBtn", title: "Generate the outline", body: "This builds the lesson outline: every card, its type, its minutes and the agenda item it covers. You can change any card, or ask the Chat to change it, then approve it. The cards are written only after you approve." }
+  ]);
+}
+function maybeStartGeneratorTour() {
+  const view = document.getElementById("smeInputsView");
+  if (!currentUser || currentUser.role !== "sme" || tourState || smeRevising || !view || view.classList.contains("hidden") || view.offsetParent === null) return;
+  if (!tourServer.loaded || tourServer.uid !== currentUser.id) { tourLoadSeen(); return; }                // wait until the server has said what this person has seen
+  if (tourSeen("generator") || tourState) return;
+  setTimeout(() => { const v = document.getElementById("smeInputsView"); if (!tourSeen("generator") && !tourState && v && v.offsetParent !== null) startGeneratorTour(false); }, 700);
+}
